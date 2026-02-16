@@ -8,6 +8,7 @@ public class GuiMachineSpecifier extends JPanel{
     private EdeGenField title;
     private EdeGenField ramBytes;
     private EdeGenField ramBytesPerRow;
+    private JComboBox<String> registerFormatDropdown;
     
     public GuiMachineSpecifier(double width, double height){
         //First Set this Panel to be a vertical Panel
@@ -51,9 +52,21 @@ public class GuiMachineSpecifier extends JPanel{
 
         
         
+        JPanel registerFormatPanel = new JPanel();
+        registerFormatPanel.setLayout(new BoxLayout(registerFormatPanel, BoxLayout.X_AXIS));
+        registerFormatPanel.setAlignmentX(LEFT_ALIGNMENT);
+        JLabel registerFormatLabel = new JLabel("Register Format: ");
+        String[] formats = {"Binary", "Hexadecimal", "Decimal", "Octal"};
+        this.registerFormatDropdown = new JComboBox<>(formats);
+        this.registerFormatDropdown.setMaximumSize(new Dimension((int)width, 30));
+        registerFormatPanel.add(registerFormatLabel);
+        registerFormatPanel.add(this.registerFormatDropdown);
+        registerFormatPanel.setMaximumSize(new Dimension((int)width, 30));
+
         this.add(toolBar);
         this.add(title);
         this.add(ramBytes);
         this.add(ramBytesPerRow);
+        this.add(registerFormatPanel);
     }
 }
