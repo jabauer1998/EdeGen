@@ -13,6 +13,9 @@ public class GuiJobSpecifier extends JPanel {
     private TitledBorder border;
     private String jobTitle;
     private JComboBox<String> jobTypeDropdown;
+    private JPanel verilogPanel;
+    private JPanel textAreaPanel;
+    private JTextField pathField;
 
     public GuiJobSpecifier(String title, Runnable onRemove) {
         this.jobTitle = title;
@@ -30,6 +33,11 @@ public class GuiJobSpecifier extends JPanel {
 
         jobTypeDropdown = new JComboBox<String>(JOB_TYPES);
         jobTypeDropdown.setToolTipText("Select job type");
+        jobTypeDropdown.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                updateContentForJobType();
+            }
+        });
 
         JButton collapseBtn = new JButton("-");
         collapseBtn.setMargin(new Insets(0, 4, 0, 4));
@@ -57,18 +65,59 @@ public class GuiJobSpecifier extends JPanel {
         headerBar.add(collapseBtn);
         headerBar.add(removeBtn);
 
-        contentPanel = new JPanel(new BorderLayout());
+        contentPanel = new JPanel(new CardLayout());
+
+        textAreaPanel = new JPanel(new BorderLayout());
         textArea = new JTextArea(6, 40);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         JScrollPane scrollPane = new JScrollPane(textArea);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        textAreaPanel.add(scrollPane, BorderLayout.CENTER);
+
+        verilogPanel = new JPanel(new BorderLayout());
+        JPanel pathRow = new JPanel(new BorderLayout(4, 0));
+        pathRow.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        JLabel pathLabel = new JLabel("Schematic Root Path: ");
+        pathField = new JTextField();
+        JButton browseBtn = new JButton("Browse...");
+        browseBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setDialogTitle("Verilog Root Schematic Path");
+                chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                int result = chooser.showOpenDialog(GuiJobSpecifier.this);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    pathField.setText(chooser.getSelectedFile().getAbsolutePath());
+                }
+            }
+        });
+        pathRow.add(pathLabel, BorderLayout.WEST);
+        pathRow.add(pathField, BorderLayout.CENTER);
+        pathRow.add(browseBtn, BorderLayout.EAST);
+        verilogPanel.add(pathRow, BorderLayout.NORTH);
+
+        contentPanel.add(verilogPanel, "Verilog Job");
+        contentPanel.add(textAreaPanel, "TextArea");
+
+        updateContentForJobType();
 
         add(headerBar, BorderLayout.NORTH);
         add(contentPanel, BorderLayout.CENTER);
 
         setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
+    }
+
+    private void updateContentForJobType() {
+        CardLayout cl = (CardLayout) contentPanel.getLayout();
+        String selected = (String) jobTypeDropdown.getSelectedItem();
+        if ("Verilog Job".equals(selected)) {
+            cl.show(contentPanel, "Verilog Job");
+        } else {
+            cl.show(contentPanel, "TextArea");
+        }
+        revalidate();
+        repaint();
     }
 
     public void toggleCollapsed() {
