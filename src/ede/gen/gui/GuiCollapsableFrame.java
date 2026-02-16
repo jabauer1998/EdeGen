@@ -6,91 +6,92 @@ import java.awt.*;
 import java.util.LinkedList;
 import java.awt.event.*;
 
+public class GuiCollapsableFrame<ElemType extends Component> extends JPanel {
+    private TitledBorder border;
+    private boolean collapsed;
+    private JPanel contentPanel;
+    private LinkedList<ElemType> elems;
+    private Cursor normalCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+    private Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
 
-    public class GuiCollapsableFrame<ElemType> extends JPanel {
-        private TitledBorder border;
-        private Dimension collapsedSize;
-        private boolean collapsible;
-	private boolean collapsed;
-        final String collapsedKey;
-        private JPanel placeholderPanel = new JPanel();
-        private Cursor normalCursor = new Cursor(Cursor.DEFAULT_CURSOR),
-                uncollapseCursor = new Cursor(Cursor.N_RESIZE_CURSOR),
-                collapseCursor = new Cursor(Cursor.S_RESIZE_CURSOR);
-	private LinkedList<ElemType> elems;
+    private String storedTitle;
 
-        public GuiCollapsableFrame(String title) {
-	    elems = new LinkedList<ElemType>();
-            setName(title);
-            collapsedKey = "GroupPanel." + getName() + "." + "collapsed";
-            border = new TitledBorder(getName());
-            border.setTitleColor(Color.black);
-            setToolTipText(String.format("Group %s (click title to collapse or expand)", title));
-	    JPanel thisPanel = this;
+    public GuiCollapsableFrame(String title) {
+        elems = new LinkedList<ElemType>();
+        collapsed = false;
+        storedTitle = title;
 
-            setAlignmentX(LEFT_ALIGNMENT);
-            setAlignmentY(TOP_ALIGNMENT);
-            // because TitledBorder has no access to the Label we fake the size data ;)
-            final JLabel l = new JLabel(title);
-            Dimension d = l.getPreferredSize(); // size of title text of TitledBorder
-            collapsedSize = new Dimension(getMaximumSize().width, d.height + 2); // l.getPreferredSize(); // size of title text of TitledBorder
+        setLayout(new BorderLayout());
+        setName(title);
+        border = new TitledBorder(title);
+        border.setTitleColor(Color.BLACK);
+        setBorder(border);
 
-	    collapsible = false;
-	    collapsed = true;
-            setTitle(title);
+        JPanel headerBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        headerBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
+        headerBar.setOpaque(false);
+        headerBar.setCursor(handCursor);
+        headerBar.setToolTipText("Click to collapse or expand");
 
-            addMouseMotionListener(new MouseMotionAdapter() {
-                public void mouseMoved(MouseEvent e) {
-                    if (ifMouseInHotArea(e)) {
-                        if (collapsed) {
-                            setCursor(uncollapseCursor);
-                        } else {
-                            setCursor(collapseCursor);
-                        }
-                    } else {
-                        setCursor(normalCursor);
-                    }
-                }
-            });
-            addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
-                    if (!collapsible) {
-                        return;
-                    }
+        headerBar.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                toggleCollapsed();
+            }
+        });
 
-                    if (getBorder() != null && getBorder().getBorderInsets(thisPanel) != null) {
-                        Insets i = getBorder().getBorderInsets(thisPanel);
-		    }
-		}
-	    });
+        contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
-	    setBorder(border);
-	}
+        add(headerBar, BorderLayout.NORTH);
+        add(contentPanel, BorderLayout.CENTER);
+    }
 
-	public boolean ifMouseInHotArea(MouseEvent e){
-	    Insets i = getBorder().getBorderInsets(this);
-	    if(e.getX() >= i.left && e.getX() <= i.right)
-		if(e.getY() <= i.bottom && e.getY() >= i.top)
-		    return true;
-	    return false;
-	}
-
-        public void setCollapsible(boolean collapsible) {
-            this.collapsible = collapsible;
+    public void toggleCollapsed() {
+        collapsed = !collapsed;
+        contentPanel.setVisible(!collapsed);
+        if (collapsed) {
+            border.setTitle(storedTitle + " [+]");
+        } else {
+            border.setTitle(storedTitle + " [-]");
         }
+        revalidate();
+        repaint();
+    }
 
-        public boolean isCollapsible() {
-            return this.collapsible;
-        }
-
-        public void setTitle(String title) {
-            border.setTitle(title);
-        }
-
-        /**
-         * @return the collapsed
-         */
-        public boolean isCollapsed() {
-            return collapsed;
+    public void setTitle(String title) {
+        storedTitle = title;
+        setName(title);
+        if (collapsed) {
+            border.setTitle(title + " [+]");
+        } else {
+            border.setTitle(title + " [-]");
         }
     }
+
+    public JPanel getContentPanel() {
+        return contentPanel;
+    }
+
+    public void addElement(ElemType elem) {
+        elems.add(elem);
+        contentPanel.add(elem);
+        contentPanel.add(Box.createRigidArea(new Dimension(0, 4)));
+        revalidate();
+        repaint();
+    }
+
+    public void removeElement(ElemType elem) {
+        elems.remove(elem);
+        contentPanel.remove(elem);
+        revalidate();
+        repaint();
+    }
+
+    public LinkedList<ElemType> getElements() {
+        return elems;
+    }
+
+    public boolean isCollapsed() {
+        return collapsed;
+    }
+}
