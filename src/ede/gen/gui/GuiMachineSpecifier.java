@@ -14,10 +14,14 @@ public class GuiMachineSpecifier extends JPanel{
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         this.title = new EdeGenField("Title of Ede Environment: ", width, 30);
+        this.title.setAlignmentX(LEFT_ALIGNMENT);
         this.ramBytes = new EdeGenField("Number of Bytes in Ram: ", width, 30);
+        this.ramBytes.setAlignmentX(LEFT_ALIGNMENT);
         this.ramBytesPerRow = new EdeGenField("Number of Bytes per Row in Ram: ", width, 30);
+        this.ramBytesPerRow.setAlignmentX(LEFT_ALIGNMENT);
         JPanel toolBar = new JPanel();
         toolBar.setLayout(new BoxLayout(toolBar, BoxLayout.X_AXIS));
+        toolBar.setAlignmentX(LEFT_ALIGNMENT);
 
         JButton testEde = new JButton("Test Ede Environment");
         testEde.setPreferredSize(new Dimension((int)(width/3), (int)(height/12)));
