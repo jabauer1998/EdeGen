@@ -8,12 +8,6 @@ javaExists=$(java -version 2>&1 | head -1)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/.."
 
-OPENJFX_DIR="/nix/store/frrwkgpk8srrqfhz0wccnklsyb3pbvrq-openjfx-modular-sdk-17.0.11+3"
-
-if [ ! -d "$OPENJFX_DIR" ]; then
-    OPENJFX_DIR=$(dirname "$(echo /nix/store/*openjfx-modular-sdk-17*/modules 2>/dev/null | tr ' ' '\n' | head -1)")
-fi
-
 if [ -n "$javaExists" ]; then
     echo "Java Found..."
     echo "Searching for Command..."
@@ -36,25 +30,22 @@ if [ -n "$javaExists" ]; then
                 fi
             done
             cat "build/BuildList.txt"
-            JAVAFX_CP=""
-            for mod in "$OPENJFX_DIR/modules"/javafx.*; do
-                if [ -d "$mod" ]; then
-                    if [ -n "$JAVAFX_CP" ]; then
-                        JAVAFX_CP="$JAVAFX_CP:"
-                    fi
-                    JAVAFX_CP="$JAVAFX_CP$mod"
-                fi
-            done
+            javac "@build/BuildList.txt" -d "./tmp" -sourcepath "./src" -cp "./lib/*" -encoding "UTF-8"
             for jar in lib/*.jar; do
                 if [ -f "$jar" ]; then
-                    JAVAFX_CP="$JAVAFX_CP:$jar"
+                    jar xf "$jar" -C "./tmp"
+                    if [ -f "./tmp/META-INF/MANIFEST.MF" ]; then
+                        rm -f "./tmp/META-INF/MANIFEST.MF"
+                    fi
                 fi
             done
-            javac "@build/BuildList.txt" -sourcepath "./src" -classpath "$JAVAFX_CP" -encoding "UTF-8"
+            jar cfe "./bin/EdeGen.jar" "ede.gen.driver.EdeGenerator" -C "./tmp" "."
+            rm -rf ./tmp/*
         elif [ "$command" = "clean" ]; then
-            rm -rf bin/*
-        elif [ "$command" = "publish" ]; then
-            :
+            find ./src -name "*.class" -type f -delete
+            find ./bin -name "*.class" -type f -delete
+            find . -name "*~" -type f -delete
+            find . -name "*#" -type f -delete
         else
             echo "Unknown command '$command'"
         fi
