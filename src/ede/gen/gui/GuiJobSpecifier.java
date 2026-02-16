@@ -14,8 +14,10 @@ public class GuiJobSpecifier extends JPanel {
     private String jobTitle;
     private JComboBox<String> jobTypeDropdown;
     private JPanel verilogPanel;
+    private JPanel exePanel;
     private JPanel textAreaPanel;
     private JTextField pathField;
+    private JTextField exePathField;
 
     public GuiJobSpecifier(String title, Runnable onRemove) {
         this.jobTitle = title;
@@ -97,7 +99,30 @@ public class GuiJobSpecifier extends JPanel {
         pathRow.add(browseBtn, BorderLayout.EAST);
         verilogPanel.add(pathRow, BorderLayout.NORTH);
 
+        exePanel = new JPanel(new BorderLayout());
+        JPanel exePathRow = new JPanel(new BorderLayout(4, 0));
+        exePathRow.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        JLabel exePathLabel = new JLabel("Exe Path: ");
+        exePathField = new JTextField();
+        JButton exeBrowseBtn = new JButton("Browse...");
+        exeBrowseBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setDialogTitle("Exe Path");
+                chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                int result = chooser.showOpenDialog(GuiJobSpecifier.this);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    exePathField.setText(chooser.getSelectedFile().getAbsolutePath());
+                }
+            }
+        });
+        exePathRow.add(exePathLabel, BorderLayout.WEST);
+        exePathRow.add(exePathField, BorderLayout.CENTER);
+        exePathRow.add(exeBrowseBtn, BorderLayout.EAST);
+        exePanel.add(exePathRow, BorderLayout.NORTH);
+
         contentPanel.add(verilogPanel, "Verilog Job");
+        contentPanel.add(exePanel, "Exe Job");
         contentPanel.add(textAreaPanel, "TextArea");
 
         updateContentForJobType();
@@ -113,6 +138,8 @@ public class GuiJobSpecifier extends JPanel {
         String selected = (String) jobTypeDropdown.getSelectedItem();
         if ("Verilog Job".equals(selected)) {
             cl.show(contentPanel, "Verilog Job");
+        } else if ("Exe Job".equals(selected)) {
+            cl.show(contentPanel, "Exe Job");
         } else {
             cl.show(contentPanel, "TextArea");
         }
