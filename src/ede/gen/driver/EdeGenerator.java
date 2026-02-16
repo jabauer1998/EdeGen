@@ -1,6 +1,9 @@
 package ede.gen.driver;
 
 import javax.swing.*;
+import ede.gen.gui.*;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 
 public class EdeGenerator{
     /**
@@ -10,15 +13,23 @@ public class EdeGenerator{
      */
     private static void createAndShowGUI() {
         // Create and set up the window (JFrame).
-        JFrame frame = new JFrame("HelloWorldSwing");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Set the default close operation.
+	// Get the default toolkit
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        Dimension screenSize = toolkit.getScreenSize();
+        
+        // Extract the width and height
+        int screenWidth = screenSize.width;
+        int screenHeight = screenSize.height;
 
-        // Add the "Hello World" label (JLabel).
-        JLabel label = new JLabel("Hello World", SwingConstants.CENTER);
-        frame.getContentPane().add(label);
-
-        // Display the window.
-        frame.pack(); // Size the frame.
+	
+	JFrame frame = new JFrame("Emulator Development Environment Generator Tool");
+	GuiGenPanel panel = new GuiGenPanel(screenWidth, screenHeight);
+	frame.setPreferredSize(screenSize);
+	
+        
+	frame.add(panel);
+	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	frame.pack();
         frame.setVisible(true);
     }
 

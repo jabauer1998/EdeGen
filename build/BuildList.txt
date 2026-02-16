@@ -1,1 +1,7 @@
 C:\Users\jabau\Source\Repos\EdeGen\src\ede\gen\driver\EdeGenerator.java
+C:\Users\jabau\Source\Repos\EdeGen\src\ede\gen\gui\EdeGenField.java
+C:\Users\jabau\Source\Repos\EdeGen\src\ede\gen\gui\GuiCollapsableFrame.java
+C:\Users\jabau\Source\Repos\EdeGen\src\ede\gen\gui\GuiGenPanel.java
+C:\Users\jabau\Source\Repos\EdeGen\src\ede\gen\gui\GuiJobSpecifier.java
+C:\Users\jabau\Source\Repos\EdeGen\src\ede\gen\gui\GuiJobSpecifierList.java
+C:\Users\jabau\Source\Repos\EdeGen\src\ede\gen\gui\GuiMachineSpecifier.java
