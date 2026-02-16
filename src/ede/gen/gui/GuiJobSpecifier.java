@@ -169,6 +169,16 @@ public class GuiJobSpecifier extends JPanel {
         return jobTitle;
     }
 
+    public void setJobTitle(String title) {
+        this.jobTitle = title;
+        if (collapsed) {
+            border.setTitle(title + " [+]");
+        } else {
+            border.setTitle(title + " [-]");
+        }
+        repaint();
+    }
+
     public String getText() {
         return textArea.getText();
     }

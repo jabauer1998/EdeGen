@@ -93,8 +93,16 @@ public class GuiJobSpecifierList extends JPanel {
     public void removeJobSpecifier(GuiJobSpecifier spec) {
         jobSpecifiers.remove(spec);
         listPanel.remove(spec);
+        renumberJobs();
         listPanel.revalidate();
         listPanel.repaint();
+    }
+
+    private void renumberJobs() {
+        for (int i = 0; i < jobSpecifiers.size(); i++) {
+            jobSpecifiers.get(i).setJobTitle("Job " + (i + 1));
+        }
+        jobCounter = jobSpecifiers.size();
     }
 
     public ArrayList<GuiJobSpecifier> getJobSpecifiers() {
