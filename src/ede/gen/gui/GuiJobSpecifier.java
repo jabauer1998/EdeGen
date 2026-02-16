@@ -6,11 +6,13 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class GuiJobSpecifier extends JPanel {
+    private static final String[] JOB_TYPES = {"VerilogJob", "JavaJob", "ExeJob"};
     private JTextArea textArea;
     private JPanel contentPanel;
     private boolean collapsed;
     private TitledBorder border;
     private String jobTitle;
+    private JComboBox<String> jobTypeDropdown;
 
     public GuiJobSpecifier(String title, Runnable onRemove) {
         this.jobTitle = title;
@@ -25,6 +27,9 @@ public class GuiJobSpecifier extends JPanel {
 
         JPanel headerBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
         headerBar.setOpaque(false);
+
+        jobTypeDropdown = new JComboBox<String>(JOB_TYPES);
+        jobTypeDropdown.setToolTipText("Select job type");
 
         JButton collapseBtn = new JButton("-");
         collapseBtn.setMargin(new Insets(0, 4, 0, 4));
@@ -48,6 +53,7 @@ public class GuiJobSpecifier extends JPanel {
             }
         });
 
+        headerBar.add(jobTypeDropdown);
         headerBar.add(collapseBtn);
         headerBar.add(removeBtn);
 
