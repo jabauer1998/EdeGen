@@ -6,7 +6,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class GuiJobSpecifier extends JPanel {
-    private static final String[] JOB_TYPES = {"VerilogJob", "JavaJob", "ExeJob"};
+    private static final String[] JOB_TYPES = {"Verilog Job", "Java Job", "Exe Job"};
     private JTextArea textArea;
     private JPanel contentPanel;
     private boolean collapsed;
