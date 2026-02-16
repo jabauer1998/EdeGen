@@ -10,6 +10,7 @@ public class GuiMachineSpecifier extends JPanel{
     private EdeGenField ramBytesPerRow;
     private JComboBox<String> registerFormatDropdown;
     private JComboBox<String> ramAddressFormatDropdown;
+    private JComboBox<String> ramFormatDropdown;
     
     public GuiMachineSpecifier(double width, double height){
         //First Set this Panel to be a vertical Panel
@@ -74,11 +75,23 @@ public class GuiMachineSpecifier extends JPanel{
         ramAddressFormatPanel.add(this.ramAddressFormatDropdown);
         ramAddressFormatPanel.setMaximumSize(new Dimension((int)width, 30));
 
+        JPanel ramFormatPanel = new JPanel();
+        ramFormatPanel.setLayout(new BoxLayout(ramFormatPanel, BoxLayout.X_AXIS));
+        ramFormatPanel.setAlignmentX(LEFT_ALIGNMENT);
+        JLabel ramFormatLabel = new JLabel("Ram Format: ");
+        String[] ramFormats = {"Binary", "Hexadecimal"};
+        this.ramFormatDropdown = new JComboBox<>(ramFormats);
+        this.ramFormatDropdown.setMaximumSize(new Dimension((int)width, 30));
+        ramFormatPanel.add(ramFormatLabel);
+        ramFormatPanel.add(this.ramFormatDropdown);
+        ramFormatPanel.setMaximumSize(new Dimension((int)width, 30));
+
         this.add(toolBar);
         this.add(title);
         this.add(ramBytes);
         this.add(ramBytesPerRow);
         this.add(registerFormatPanel);
         this.add(ramAddressFormatPanel);
+        this.add(ramFormatPanel);
     }
 }
