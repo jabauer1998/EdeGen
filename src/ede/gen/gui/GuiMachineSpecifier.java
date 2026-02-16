@@ -13,9 +13,9 @@ public class GuiMachineSpecifier extends JPanel{
         //First Set this Panel to be a vertical Panel
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        this.title = new EdeGenField("Title of Ede Environment: ", width, 10);
-        this.ramBytes = new EdeGenField("Number of Bytes in Ram: ", width, 10);
-        this.ramBytesPerRow = new EdeGenField("Number of Bytes per Row in Ram: ", width, 10);
+        this.title = new EdeGenField("Title of Ede Environment: ", width, 30);
+        this.ramBytes = new EdeGenField("Number of Bytes in Ram: ", width, 30);
+        this.ramBytesPerRow = new EdeGenField("Number of Bytes per Row in Ram: ", width, 30);
         JPanel toolBar = new JPanel();
         toolBar.setLayout(new BoxLayout(toolBar, BoxLayout.X_AXIS));
 
