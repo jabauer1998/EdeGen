@@ -19,8 +19,7 @@ public class GuiMachineSpecifier extends JPanel{
         this.ramBytes.setAlignmentX(LEFT_ALIGNMENT);
         this.ramBytesPerRow = new EdeGenField("Number of Bytes per Row in Ram: ", width, 30);
         this.ramBytesPerRow.setAlignmentX(LEFT_ALIGNMENT);
-        JPanel toolBar = new JPanel();
-        toolBar.setLayout(new BoxLayout(toolBar, BoxLayout.X_AXIS));
+        JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 4));
         toolBar.setAlignmentX(LEFT_ALIGNMENT);
 
         JButton testEde = new JButton("Test Ede Environment");
