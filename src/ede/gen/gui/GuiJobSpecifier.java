@@ -2,12 +2,13 @@ package ede.gen.gui;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 
 public class GuiJobSpecifier extends JPanel {
     private static final String[] JOB_TYPES = {"Verilog Job", "Java Job", "Exe Job"};
-    private JTextArea textArea;
+    private JTextPane textPane;
     private JPanel contentPanel;
     private boolean collapsed;
     private TitledBorder border;
@@ -70,10 +71,16 @@ public class GuiJobSpecifier extends JPanel {
         contentPanel = new JPanel(new CardLayout());
 
         textAreaPanel = new JPanel(new BorderLayout());
-        textArea = new JTextArea(6, 40);
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-        JScrollPane scrollPane = new JScrollPane(textArea);
+        textPane = new JTextPane() {
+            @Override
+            public boolean getScrollableTracksViewportWidth() {
+                return true;
+            }
+        };
+        textPane.setPreferredSize(new Dimension(400, 100));
+        JavaSyntaxHighlighter highlighter = new JavaSyntaxHighlighter(textPane);
+        textPane.getDocument().addDocumentListener(highlighter);
+        JScrollPane scrollPane = new JScrollPane(textPane);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         textAreaPanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -180,14 +187,26 @@ public class GuiJobSpecifier extends JPanel {
     }
 
     public String getText() {
-        return textArea.getText();
+        return textPane.getText();
     }
 
     public void setText(String text) {
-        textArea.setText(text);
+        textPane.setText(text);
     }
 
     public boolean isCollapsed() {
         return collapsed;
+    }
+
+    public String getSelectedJobType() {
+        return (String) jobTypeDropdown.getSelectedItem();
+    }
+
+    public String getVerilogPath() {
+        return pathField.getText();
+    }
+
+    public String getExePath() {
+        return exePathField.getText();
     }
 }

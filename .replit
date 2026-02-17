@@ -27,4 +27,4 @@ outputType = "vnc"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd /home/runner/workspace && mkdir -p bin && find src -type f -name \"*.java\" ! -name \"#*\" ! -name \"*~\" > build/BuildList.txt && javac @build/BuildList.txt -sourcepath \"./src\" -d \"./bin\" -encoding \"UTF-8\" && java -Dsun.awt.fontconfig=/home/runner/workspace/fontconfig.properties -cp bin ede.gen.driver.EdeGenerator"
+args = "cd /home/runner/workspace && export JAVA_HOME=/tmp/jdk-25.0.2 && export PATH=$JAVA_HOME/bin:$PATH && mkdir -p bin && find src -type f -name \"*.java\" ! -name \"#*\" ! -name \"*~\" > build/BuildList.txt && javac -cp \"lib/EdeStl.jar\" @build/BuildList.txt -sourcepath \"./src\" -d \"./bin\" -encoding \"UTF-8\" && java -Dsun.awt.fontconfig=/home/runner/workspace/fontconfig.properties -cp \"bin:lib/EdeStl.jar\" ede.gen.driver.EdeGenerator"

@@ -3,10 +3,10 @@ package ede.gen.gui;
 import javax.swing.*;
 import java.awt.Dimension;
 
-public class EdeGenField extends JPanel{
+public class GuiEdeGenField extends JPanel{
     private JTextField field;
     
-    public EdeGenField(String title, double length, double height){
+    public GuiEdeGenField(String title, double length, double height){
         this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         this.setPreferredSize(new Dimension((int)length, (int)height));
         this.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int)height));
