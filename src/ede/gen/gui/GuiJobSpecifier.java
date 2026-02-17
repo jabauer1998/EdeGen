@@ -2,6 +2,7 @@ package ede.gen.gui;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -73,6 +74,20 @@ public class GuiJobSpecifier extends JPanel {
         textArea = new JTextArea(6, 40);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
+        ((AbstractDocument) textArea.getDocument()).setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                super.insertString(fb, offset, string, attr);
+            }
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                super.replace(fb, offset, length, text, attrs);
+            }
+            @Override
+            public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
+                super.remove(fb, offset, length);
+            }
+        });
         JScrollPane scrollPane = new JScrollPane(textArea);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         textAreaPanel.add(scrollPane, BorderLayout.CENTER);
