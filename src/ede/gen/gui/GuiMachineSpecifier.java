@@ -17,9 +17,11 @@ public class GuiMachineSpecifier extends JPanel{
     private JComboBox<String> ramAddressFormatDropdown;
     private JComboBox<String> ramFormatDropdown;
     private GuiJobSpecifierList jobList;
+    private GuiEdeLog log;
     
-    public GuiMachineSpecifier(double width, double height, GuiJobSpecifierList jobList){
+    public GuiMachineSpecifier(double width, double height, GuiJobSpecifierList jobList, GuiEdeLog log){
         this.jobList = jobList;
+        this.log = log;
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         this.title = new GuiEdeGenField("Title of Ede Environment: ", width, 30);
@@ -112,7 +114,53 @@ public class GuiMachineSpecifier extends JPanel{
         return GuiRam.MemoryFormat.BINARY;
     }
 
+    private boolean validateJobs() {
+        ArrayList<GuiJobSpecifier> specs = jobList.getJobSpecifiers();
+
+        if (specs.isEmpty()) {
+            log.log("[ERROR] No jobs defined. At least one job is required.");
+            return false;
+        }
+
+        log.log("[CHECK] Validating job list (" + specs.size() + " jobs)...");
+
+        int lastIndex = specs.size() - 1;
+        GuiJobSpecifier lastJob = specs.get(lastIndex);
+        String lastJobType = lastJob.getSelectedJobType();
+        String lastJobName = lastJob.getJobTitle();
+
+        log.log("[CHECK] Checking last job: " + lastJobName + " (type: " + lastJobType + ")");
+        if (!"Verilog Job".equals(lastJobType)) {
+            log.log("[ERROR] Last job \"" + lastJobName + "\" must be a Verilog Job, but is " + lastJobType + ".");
+            return false;
+        }
+        log.log("[PASS] Last job \"" + lastJobName + "\" is a Verilog Job.");
+
+        for (int i = 0; i < lastIndex; i++) {
+            GuiJobSpecifier spec = specs.get(i);
+            String jobType = spec.getSelectedJobType();
+            String jobName = spec.getJobTitle();
+
+            log.log("[CHECK] Checking " + jobName + " (type: " + jobType + ")");
+            if ("Verilog Job".equals(jobType)) {
+                log.log("[ERROR] " + jobName + " is a Verilog Job. Only Java or Exe Jobs are allowed before the last job.");
+                return false;
+            }
+            log.log("[PASS] " + jobName + " is a valid " + jobType + ".");
+        }
+
+        log.log("[PASS] All job validations passed.");
+        return true;
+    }
+
     private void launchEdeEnvironment() {
+        log.log("--- Test Ede Environment ---");
+
+        if (!validateJobs()) {
+            log.log("[ABORTED] Ede Environment generation aborted due to validation errors.");
+            return;
+        }
+
         String edeTitle = title.getInputText();
         if (edeTitle == null || edeTitle.trim().isEmpty()) {
             edeTitle = "Ede Environment";
@@ -138,6 +186,8 @@ public class GuiMachineSpecifier extends JPanel{
         GuiRam.AddressFormat addrFmt = getSelectedAddressFormat();
         GuiRam.MemoryFormat memFmt = getSelectedMemoryFormat();
 
+        log.log("[INFO] Creating GuiEde: title=\"" + edeTitle + "\", ramBytes=" + ramBytesVal + ", bytesPerRow=" + ramBytesPerRowVal);
+
         GuiEde guiEde = new GuiEde(edeWidth, edeHeight, ramBytesVal, addrFmt, memFmt);
         guiEde.setUpMemory(ramBytesPerRowVal);
 
@@ -149,10 +199,13 @@ public class GuiMachineSpecifier extends JPanel{
 
             if ("Java Job".equals(jobType)) {
                 String code = spec.getText();
+                log.log("[INFO] Compiling Java Job: " + jobName);
                 try {
                     Callable<Void> callable = JavaJobCompiler.compile(code);
                     guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, "", "", "");
+                    log.log("[PASS] " + jobName + " compiled and added successfully.");
                 } catch (Exception e) {
+                    log.log("[ERROR] Failed to compile " + jobName + ": " + e.getMessage());
                     JOptionPane.showMessageDialog(this,
                         "Failed to compile " + jobName + ":\n" + e.getMessage(),
                         "Compilation Error", JOptionPane.ERROR_MESSAGE);
@@ -160,12 +213,16 @@ public class GuiMachineSpecifier extends JPanel{
                 }
             } else if ("Verilog Job".equals(jobType)) {
                 String path = spec.getVerilogPath();
+                log.log("[INFO] Adding Verilog Job: " + jobName + " (path: " + path + ")");
                 guiEde.AddVerilogJob(jobName, path, "", "", "", "");
             } else if ("Exe Job".equals(jobType)) {
                 String path = spec.getExePath();
+                log.log("[INFO] Adding Exe Job: " + jobName + " (path: " + path + ")");
                 guiEde.AddExeJob(jobName, GuiJob.TextAreaType.DEFAULT, path, "", "", "", "");
             }
         }
+
+        log.log("[INFO] Opening Ede Environment window: " + edeTitle);
 
         final String frameTitle = edeTitle;
         SwingUtilities.invokeLater(new Runnable() {

@@ -10,4 +10,9 @@ public class GuiEdeLog extends JTextArea{
         this.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int)height));
         this.setMinimumSize(new Dimension((int)width, (int)height));
     }
+
+    public void log(String message) {
+        this.append(message + "\n");
+        this.setCaretPosition(this.getDocument().getLength());
+    }
 }

@@ -1,10 +1,10 @@
 src/ede/gen/driver/EdeGenerator.java
 src/ede/gen/gui/GuiCollapsableFrame.java
 src/ede/gen/gui/GuiJobSpecifierList.java
-src/ede/gen/gui/GuiEdeLog.java
 src/ede/gen/gui/JavaSyntaxHighlighter.java
 src/ede/gen/gui/GuiEdeGenField.java
 src/ede/gen/gui/GuiJobSpecifier.java
 src/ede/gen/gui/JavaJobCompiler.java
-src/ede/gen/gui/GuiMachineSpecifier.java
+src/ede/gen/gui/GuiEdeLog.java
 src/ede/gen/gui/GuiGenPanel.java
+src/ede/gen/gui/GuiMachineSpecifier.java
