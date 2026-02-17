@@ -5,4 +5,5 @@ src/ede/gen/gui/EdeGenField.java
 src/ede/gen/gui/GuiMachineSpecifier.java
 src/ede/gen/gui/GuiEdeLog.java
 src/ede/gen/gui/GuiGenPanel.java
+src/ede/gen/gui/JavaSyntaxHighlighter.java
 src/ede/gen/gui/GuiJobSpecifier.java
