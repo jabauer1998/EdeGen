@@ -21,7 +21,12 @@ public class GuiGenPanel extends JPanel{
         
         panel.add(this.jobs);
         panel.add(this.machine);
+        JPanel logPanel = new JPanel(new BorderLayout());
+        JLabel logTitle = new JLabel("Ede Generator Tool Log", SwingConstants.CENTER);
+        logPanel.add(logTitle, BorderLayout.NORTH);
+        logPanel.add(this.log, BorderLayout.CENTER);
+
         this.add(panel, BorderLayout.CENTER);
-        this.add(this.log, BorderLayout.SOUTH);
+        this.add(logPanel, BorderLayout.SOUTH);
     }
 }
