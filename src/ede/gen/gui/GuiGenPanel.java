@@ -16,7 +16,7 @@ public class GuiGenPanel extends JPanel{
         panel.setLayout(new GridLayout(1, 2));
         
         this.jobs = new GuiJobSpecifierList(width/2, 5 * height / 6);
-        this.machine = new GuiMachineSpecifier(width/2, 5 * height / 6);
+        this.machine = new GuiMachineSpecifier(width/2, 5 * height / 6, this.jobs);
         this.log = new GuiEdeLog(width, height / 6);
         
         panel.add(this.jobs);

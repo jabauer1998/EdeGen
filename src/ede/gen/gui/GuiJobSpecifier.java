@@ -197,4 +197,16 @@ public class GuiJobSpecifier extends JPanel {
     public boolean isCollapsed() {
         return collapsed;
     }
+
+    public String getSelectedJobType() {
+        return (String) jobTypeDropdown.getSelectedItem();
+    }
+
+    public String getVerilogPath() {
+        return pathField.getText();
+    }
+
+    public String getExePath() {
+        return exePathField.getText();
+    }
 }
