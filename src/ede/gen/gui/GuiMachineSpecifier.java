@@ -191,6 +191,8 @@ public class GuiMachineSpecifier extends JPanel{
         GuiEde guiEde = new GuiEde(edeWidth, edeHeight, ramBytesVal, addrFmt, memFmt);
         guiEde.setUpMemory(ramBytesPerRowVal);
 
+        guiEde.gatherMetaDataFromVerilogFile(spec.getVerilogPath(), );
+
         ArrayList<GuiJobSpecifier> specs = jobList.getJobSpecifiers();
         for (int i = 0; i < specs.size(); i++) {
             GuiJobSpecifier spec = specs.get(i);
