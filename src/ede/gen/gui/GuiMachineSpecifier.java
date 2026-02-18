@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 import ede.stl.gui.GuiEde;
 import ede.stl.gui.GuiRam;
 import ede.stl.gui.GuiJob;
+import ede.stl.gui.GuiRegister;
 
 public class GuiMachineSpecifier extends JPanel{
     private GuiEdeGenField title;
@@ -107,11 +108,20 @@ public class GuiMachineSpecifier extends JPanel{
     }
 
     private GuiRam.MemoryFormat getSelectedMemoryFormat() {
-        String selected = (String) ramFormatDropdown.getSelectedItem();
+        String selected = (String)ramFormatDropdown.getSelectedItem();
         if ("Hexadecimal".equals(selected)) {
             return GuiRam.MemoryFormat.HEXADECIMAL;
         }
         return GuiRam.MemoryFormat.BINARY;
+    }
+
+    private GuiRegister.Format getSelectedRegisterFormat() {
+	String selected = (String)registerFormatDropdown.getSelectedItem();
+	if(selected.equals("Hexidecimal")){
+	    return GuiRegister.Format.HEXIDECIMAL;
+	} else {
+	    return GuiRegister.Format.BINARY;
+	}
     }
 
     private boolean validateJobs() {
@@ -185,6 +195,7 @@ public class GuiMachineSpecifier extends JPanel{
 
         GuiRam.AddressFormat addrFmt = getSelectedAddressFormat();
         GuiRam.MemoryFormat memFmt = getSelectedMemoryFormat();
+	GuiRegister.Format regFmt = getSelectedRegisterFormat();
 
         log.log("[INFO] Creating GuiEde: title=\"" + edeTitle + "\", ramBytes=" + ramBytesVal + ", bytesPerRow=" + ramBytesPerRowVal);
 
@@ -213,6 +224,7 @@ public class GuiMachineSpecifier extends JPanel{
                 }
             } else if ("Verilog Job".equals(jobType)) {
                 String path = spec.getVerilogPath();
+		guiEde.gatherMetaDataFromVerilogFile(path, regFmt);
                 log.log("[INFO] Adding Verilog Job: " + jobName + " (path: " + path + ")");
                 guiEde.AddVerilogJob(jobName, path, "", "", "", "");
             } else if ("Exe Job".equals(jobType)) {
