@@ -8,7 +8,6 @@ import java.util.concurrent.Callable;
 import ede.stl.gui.GuiEde;
 import ede.stl.gui.GuiRam;
 import ede.stl.gui.GuiJob;
-import ede.stl.gui.GuiRegister;
 
 public class GuiMachineSpecifier extends JPanel{
     private GuiEdeGenField title;
@@ -115,14 +114,6 @@ public class GuiMachineSpecifier extends JPanel{
         return GuiRam.MemoryFormat.BINARY;
     }
 
-    private GuiRegister.Format getSelectedRegisterFormat() {
-        String selected = (String) registerFormatDropdown.getSelectedItem();
-        if ("Hexadecimal".equals(selected)) {
-            return GuiRegister.Format.HEXIDECIMAL;
-        }
-        return GuiRegister.Format.BINARY;
-    }
-
     private boolean validateJobs() {
         ArrayList<GuiJobSpecifier> specs = jobList.getJobSpecifiers();
 
@@ -201,10 +192,6 @@ public class GuiMachineSpecifier extends JPanel{
         guiEde.setUpMemory(ramBytesPerRowVal);
 
         ArrayList<GuiJobSpecifier> specs = jobList.getJobSpecifiers();
-        GuiJobSpecifier lastSpec = specs.get(specs.size() - 1);
-        GuiRegister.Format regFmt = getSelectedRegisterFormat();
-        guiEde.gatherMetaDataFromVerilogFile(lastSpec.getVerilogPath(), regFmt);
-
         for (int i = 0; i < specs.size(); i++) {
             GuiJobSpecifier spec = specs.get(i);
             String jobType = spec.getSelectedJobType();
