@@ -1,4 +1,4 @@
-package ede.gen.gui;
+package ede.gen.utils;
 
 import javax.tools.*;
 import java.io.*;

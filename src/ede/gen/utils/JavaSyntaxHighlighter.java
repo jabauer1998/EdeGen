@@ -1,4 +1,4 @@
-package ede.gen.gui;
+package ede.gen.utils;
 
 import javax.swing.*;
 import javax.swing.text.*;
