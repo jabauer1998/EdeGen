@@ -5,6 +5,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuiJobSpecifier extends JPanel {
     private static final String[] JOB_TYPES = {"Verilog Job", "Java Job", "Exe Job"};
@@ -19,6 +21,8 @@ public class GuiJobSpecifier extends JPanel {
     private JPanel textAreaPanel;
     private JTextField pathField;
     private JTextField exePathField;
+    private DefaultListModel<String> jarListModel;
+    private JList<String> jarList;
 
     public GuiJobSpecifier(String title, Runnable onRemove) {
         this.jobTitle = title;
@@ -84,6 +88,48 @@ public class GuiJobSpecifier extends JPanel {
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         textAreaPanel.add(scrollPane, BorderLayout.CENTER);
 
+        JPanel jarPanel = new JPanel(new BorderLayout(4, 4));
+        jarPanel.setBorder(BorderFactory.createTitledBorder("Classpath JARs"));
+        jarListModel = new DefaultListModel<>();
+        jarList = new JList<>(jarListModel);
+        jarList.setVisibleRowCount(3);
+        JScrollPane jarScrollPane = new JScrollPane(jarList);
+        jarScrollPane.setPreferredSize(new Dimension(400, 60));
+        JPanel jarBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+        JButton addJarBtn = new JButton("Add JAR...");
+        addJarBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setDialogTitle("Select JAR File");
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("JAR Files", "jar"));
+                chooser.setMultiSelectionEnabled(true);
+                int result = chooser.showOpenDialog(GuiJobSpecifier.this);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    for (java.io.File f : chooser.getSelectedFiles()) {
+                        String path = f.getAbsolutePath();
+                        if (!jarListModel.contains(path)) {
+                            jarListModel.addElement(path);
+                        }
+                    }
+                }
+            }
+        });
+        JButton removeJarBtn = new JButton("Remove");
+        removeJarBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int idx = jarList.getSelectedIndex();
+                if (idx >= 0) {
+                    jarListModel.remove(idx);
+                }
+            }
+        });
+        jarBtnPanel.add(addJarBtn);
+        jarBtnPanel.add(removeJarBtn);
+        jarPanel.add(jarScrollPane, BorderLayout.CENTER);
+        jarPanel.add(jarBtnPanel, BorderLayout.SOUTH);
+        textAreaPanel.add(jarPanel, BorderLayout.SOUTH);
+
         verilogPanel = new JPanel(new BorderLayout());
         JPanel pathRow = new JPanel(new BorderLayout(4, 0));
         pathRow.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
@@ -137,7 +183,7 @@ public class GuiJobSpecifier extends JPanel {
         add(headerBar, BorderLayout.NORTH);
         add(contentPanel, BorderLayout.CENTER);
 
-        setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, 300));
     }
 
     private void updateContentForJobType() {
@@ -162,7 +208,7 @@ public class GuiJobSpecifier extends JPanel {
             setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         } else {
             border.setTitle(jobTitle + " [-]");
-            setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
+            setMaximumSize(new Dimension(Integer.MAX_VALUE, 300));
         }
         revalidate();
         repaint();
@@ -208,5 +254,13 @@ public class GuiJobSpecifier extends JPanel {
 
     public String getExePath() {
         return exePathField.getText();
+    }
+
+    public List<String> getJarPaths() {
+        List<String> paths = new ArrayList<>();
+        for (int i = 0; i < jarListModel.size(); i++) {
+            paths.add(jarListModel.getElementAt(i));
+        }
+        return paths;
     }
 }

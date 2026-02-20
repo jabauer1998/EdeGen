@@ -18,13 +18,15 @@ A Java Swing desktop GUI application for generating emulator development environ
 ## Key Features
 - **Test Ede Environment**: Collects form parameters and opens a new JFrame with GuiEde from EdeStl.jar
 - **Java Job Compilation**: Typed Java code is compiled at runtime into Callable<Void> using javax.tools.JavaCompiler
+- **JAR Classpath Management**: Java Jobs have a UI to browse/add/remove JAR files; JARs are added to classpath and their packages are auto-imported
 - **Syntax Highlighting**: Java code editor with color-coded keywords, types, strings, comments, numbers, annotations
-- **Job Types**: Verilog (file selector), Java (code editor), Exe (file selector)
+- **Job Types**: Verilog (file selector), Java (code editor + JAR classpath), Exe (file selector)
 
 ## Running
 The workflow compiles all Java sources with JDK 25 and runs `ede.gen.driver.EdeGenerator` via VNC display.
 
 ## Recent Changes
+- 2026-02-20: Added JAR classpath management UI to Java Jobs (browse/add/remove JARs, auto-import packages, classpath integration)
 - 2026-02-17: Upgraded to JDK 25 to match EdeStl.jar class version requirement
 - 2026-02-17: Wired Test Ede Environment button to create GuiEde from EdeStl.jar with form parameters
 - 2026-02-17: Created JavaJobCompiler for runtime compilation of Java code into Callable objects

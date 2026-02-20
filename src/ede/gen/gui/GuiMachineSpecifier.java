@@ -199,9 +199,10 @@ public class GuiMachineSpecifier extends JPanel{
 
             if ("Java Job".equals(jobType)) {
                 String code = spec.getText();
-                log.log("[INFO] Compiling Java Job: " + jobName);
+                java.util.List<String> jarPaths = spec.getJarPaths();
+                log.log("[INFO] Compiling Java Job: " + jobName + " (classpath JARs: " + jarPaths.size() + ")");
                 try {
-                    Callable<Void> callable = JavaJobCompiler.compile(code);
+                    Callable<Void> callable = JavaJobCompiler.compile(code, jarPaths);
                     guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, "", "", "");
                     log.log("[PASS] " + jobName + " compiled and added successfully.");
                 } catch (Exception e) {
