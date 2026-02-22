@@ -5,6 +5,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
+import ede.gen.utils.JavaSyntaxHighlighter;
 
 public class GuiJobSpecifier extends JPanel {
     private static final String[] JOB_TYPES = {"Verilog Job", "Java Job", "Exe Job"};

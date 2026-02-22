@@ -9,6 +9,8 @@ import ede.stl.gui.GuiEde;
 import ede.stl.gui.GuiRam;
 import ede.stl.gui.GuiJob;
 import ede.stl.gui.GuiRegister;
+import ede.gen.utils.JavaJobCompiler;
+import ede.gen.utils.JavaSyntaxHighlighter;
 
 public class GuiMachineSpecifier extends JPanel{
     private GuiEdeGenField title;
