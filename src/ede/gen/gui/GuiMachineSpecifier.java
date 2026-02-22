@@ -9,6 +9,8 @@ import ede.stl.gui.GuiEde;
 import ede.stl.gui.GuiRam;
 import ede.stl.gui.GuiJob;
 import ede.stl.gui.GuiRegister;
+import ede.gen.utils.JavaJobCompiler;
+import ede.gen.utils.JavaSyntaxHighlighter;
 
 public class GuiMachineSpecifier extends JPanel{
     private GuiEdeGenField title;
@@ -210,10 +212,9 @@ public class GuiMachineSpecifier extends JPanel{
 
             if ("Java Job".equals(jobType)) {
                 String code = spec.getText();
-                java.util.List<String> jarPaths = spec.getJarPaths();
-                log.log("[INFO] Compiling Java Job: " + jobName + " (classpath JARs: " + jarPaths.size() + ")");
+                log.log("[INFO] Compiling Java Job: " + jobName);
                 try {
-                    Callable<Void> callable = JavaJobCompiler.compile(code, jarPaths);
+                    Callable<Void> callable = JavaJobCompiler.compile(code);
                     guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, "", "", "");
                     log.log("[PASS] " + jobName + " compiled and added successfully.");
                 } catch (Exception e) {
