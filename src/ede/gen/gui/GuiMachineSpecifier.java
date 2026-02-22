@@ -118,12 +118,12 @@ public class GuiMachineSpecifier extends JPanel{
     }
 
     private GuiRegister.Format getSelectedRegisterFormat() {
-	String selected = (String)registerFormatDropdown.getSelectedItem();
-	if(selected.equals("Hexidecimal")){
-	    return GuiRegister.Format.HEXIDECIMAL;
-	} else {
-	    return GuiRegister.Format.BINARY;
-	}
+        String selected = (String)registerFormatDropdown.getSelectedItem();
+        if(selected.equals("Hexidecimal")){
+            return GuiRegister.Format.HEXIDECIMAL;
+        } else {
+            return GuiRegister.Format.BINARY;
+        }
     }
 
     private boolean validateJobs() {
@@ -197,7 +197,7 @@ public class GuiMachineSpecifier extends JPanel{
 
         GuiRam.AddressFormat addrFmt = getSelectedAddressFormat();
         GuiRam.MemoryFormat memFmt = getSelectedMemoryFormat();
-	GuiRegister.Format regFmt = getSelectedRegisterFormat();
+        GuiRegister.Format regFmt = getSelectedRegisterFormat();
 
         log.log("[INFO] Creating GuiEde: title=\"" + edeTitle + "\", ramBytes=" + ramBytesVal + ", bytesPerRow=" + ramBytesPerRowVal);
 
@@ -214,7 +214,8 @@ public class GuiMachineSpecifier extends JPanel{
                 String code = spec.getText();
                 log.log("[INFO] Compiling Java Job: " + jobName);
                 try {
-                    Callable<Void> callable = JavaJobCompiler.compile(code);
+                    java.util.List<String> jarPaths = spec.getJarPaths();
+                    Callable<Void> callable = JavaJobCompiler.compile(code, jarPaths);
                     guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, "", "", "");
                     log.log("[PASS] " + jobName + " compiled and added successfully.");
                 } catch (Exception e) {
@@ -226,7 +227,7 @@ public class GuiMachineSpecifier extends JPanel{
                 }
             } else if ("Verilog Job".equals(jobType)) {
                 String path = spec.getVerilogPath();
-		guiEde.gatherMetaDataFromVerilogFile(path, regFmt);
+                guiEde.gatherMetaDataFromVerilogFile(path, regFmt);
                 log.log("[INFO] Adding Verilog Job: " + jobName + " (path: " + path + ")");
                 guiEde.AddVerilogJob(jobName, path, "", "", "", "");
             } else if ("Exe Job".equals(jobType)) {
