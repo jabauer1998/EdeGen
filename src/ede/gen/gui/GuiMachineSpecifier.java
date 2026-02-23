@@ -286,10 +286,9 @@ public class GuiMachineSpecifier extends JPanel{
         GuiRam.MemoryFormat memFmt = getSelectedMemoryFormat();
         GuiRegister.Format regFmt = getSelectedRegisterFormat();
 
-        log.log("[INFO] Creating GuiEde: title=\"" + edeTitle + "\", ramBytes=" + ramBytesVal + ", bytesPerRow=" + ramBytesPerRowVal);
+        log.log("[INFO] Creating GuiEde: title=\"" + edeTitle + "\", bytesPerRow=" + ramBytesPerRowVal);
 
-        GuiEde guiEde = new GuiEde(edeWidth, edeHeight, ramBytesVal, addrFmt, memFmt);
-        guiEde.setUpMemory(ramBytesPerRowVal);
+        GuiEde guiEde = new GuiEde(edeWidth, edeHeight, ramBytesPerRowVal, addrFmt, memFmt);
 
         for (IoSectionEntry entry : ioSections) {
             String tabName = entry.tabNameField.getText().trim();
