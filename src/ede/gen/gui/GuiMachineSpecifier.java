@@ -41,17 +41,17 @@ public class GuiMachineSpecifier extends JPanel{
     public GuiMachineSpecifier(double width, double height, GuiJobSpecifierList jobList, GuiEdeLog log){
         this.jobList = jobList;
         this.log = log;
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setLayout(new BorderLayout());
 
-        this.title = new GuiEdeGenField("Title of Ede Environment: ", width, 30);
-        this.title.setAlignmentX(LEFT_ALIGNMENT);
-        this.ramBytesPerRow = new GuiEdeGenField("Number of Bytes per Row in Ram: ", width, 30);
-        this.ramBytesPerRow.setAlignmentX(LEFT_ALIGNMENT);
+        JPanel topSection = new JPanel();
+        topSection.setLayout(new BoxLayout(topSection, BoxLayout.Y_AXIS));
+
         JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 4));
         toolBar.setAlignmentX(LEFT_ALIGNMENT);
+        toolBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
 
         JButton testEde = new JButton("Test Ede Environment");
-        testEde.setPreferredSize(new Dimension((int)(width/3), (int)(height/12)));
+        testEde.setPreferredSize(new Dimension((int)(width/3), 40));
         testEde.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event){
@@ -59,39 +59,44 @@ public class GuiMachineSpecifier extends JPanel{
             }
         });
         toolBar.add(testEde);
-        
+
         JButton saveEde = new JButton("Save Ede Environment");
-        saveEde.setPreferredSize(new Dimension((int)(width/3), (int)(height/12)));
+        saveEde.setPreferredSize(new Dimension((int)(width/3), 40));
         saveEde.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event){
-                
+
             }
         });
         toolBar.add(saveEde);
 
-        
-        
+        this.title = new GuiEdeGenField("Title of Ede Environment: ", width, 30);
+        this.title.setAlignmentX(LEFT_ALIGNMENT);
+        this.title.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        this.ramBytesPerRow = new GuiEdeGenField("Number of Bytes per Row in Ram: ", width, 30);
+        this.ramBytesPerRow.setAlignmentX(LEFT_ALIGNMENT);
+        this.ramBytesPerRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+
         JPanel registerFormatPanel = new JPanel();
         registerFormatPanel.setLayout(new BoxLayout(registerFormatPanel, BoxLayout.X_AXIS));
         registerFormatPanel.setAlignmentX(LEFT_ALIGNMENT);
         JLabel registerFormatLabel = new JLabel("Register Format: ");
         String[] formats = {"Binary", "Hexadecimal", "Decimal", "Octal"};
         this.registerFormatDropdown = new JComboBox<>(formats);
-        this.registerFormatDropdown.setMaximumSize(new Dimension((int)width, 30));
+        this.registerFormatDropdown.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         registerFormatPanel.add(registerFormatLabel);
         registerFormatPanel.add(this.registerFormatDropdown);
-        registerFormatPanel.setMaximumSize(new Dimension((int)width, 30));
+        registerFormatPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
 
         JPanel ramAddressFormatPanel = new JPanel();
         ramAddressFormatPanel.setLayout(new BoxLayout(ramAddressFormatPanel, BoxLayout.X_AXIS));
         ramAddressFormatPanel.setAlignmentX(LEFT_ALIGNMENT);
         JLabel ramAddressFormatLabel = new JLabel("Ram Address Format: ");
         this.ramAddressFormatDropdown = new JComboBox<>(formats);
-        this.ramAddressFormatDropdown.setMaximumSize(new Dimension((int)width, 30));
+        this.ramAddressFormatDropdown.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         ramAddressFormatPanel.add(ramAddressFormatLabel);
         ramAddressFormatPanel.add(this.ramAddressFormatDropdown);
-        ramAddressFormatPanel.setMaximumSize(new Dimension((int)width, 30));
+        ramAddressFormatPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
 
         JPanel ramFormatPanel = new JPanel();
         ramFormatPanel.setLayout(new BoxLayout(ramFormatPanel, BoxLayout.X_AXIS));
@@ -99,62 +104,64 @@ public class GuiMachineSpecifier extends JPanel{
         JLabel ramFormatLabel = new JLabel("Ram Format: ");
         String[] ramFormats = {"Binary", "Hexadecimal"};
         this.ramFormatDropdown = new JComboBox<>(ramFormats);
-        this.ramFormatDropdown.setMaximumSize(new Dimension((int)width, 30));
+        this.ramFormatDropdown.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         ramFormatPanel.add(ramFormatLabel);
         ramFormatPanel.add(this.ramFormatDropdown);
-        ramFormatPanel.setMaximumSize(new Dimension((int)width, 30));
+        ramFormatPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+
+        topSection.add(toolBar);
+        topSection.add(title);
+        topSection.add(ramBytesPerRow);
+        topSection.add(registerFormatPanel);
+        topSection.add(ramAddressFormatPanel);
+        topSection.add(ramFormatPanel);
 
         this.ioSections = new ArrayList<>();
 
         JPanel ioHeaderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
         ioHeaderPanel.setAlignmentX(LEFT_ALIGNMENT);
+        ioHeaderPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
         JLabel ioLabel = new JLabel("IO Sections:");
         ioLabel.setFont(ioLabel.getFont().deriveFont(Font.BOLD));
         JButton addIoBtn = new JButton("+ Add IO Section");
         addIoBtn.addActionListener(e -> addIoSectionRow(width));
         ioHeaderPanel.add(ioLabel);
         ioHeaderPanel.add(addIoBtn);
-        ioHeaderPanel.setMaximumSize(new Dimension((int)width, 35));
 
         this.ioListPanel = new JPanel();
         this.ioListPanel.setLayout(new BoxLayout(this.ioListPanel, BoxLayout.Y_AXIS));
         this.ioListPanel.setAlignmentX(LEFT_ALIGNMENT);
 
         JScrollPane ioScroll = new JScrollPane(this.ioListPanel);
-        ioScroll.setAlignmentX(LEFT_ALIGNMENT);
-        ioScroll.setMaximumSize(new Dimension((int)width, 150));
-        ioScroll.setPreferredSize(new Dimension((int)width, 100));
         ioScroll.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-        this.add(toolBar);
-        this.add(ioHeaderPanel);
-        this.add(ioScroll);
-        this.add(title);
-        this.add(ramBytesPerRow);
-        this.add(registerFormatPanel);
-        this.add(ramAddressFormatPanel);
-        this.add(ramFormatPanel);
+        JPanel ioContainer = new JPanel(new BorderLayout());
+        ioContainer.add(ioHeaderPanel, BorderLayout.NORTH);
+        ioContainer.add(ioScroll, BorderLayout.CENTER);
+
+        this.add(topSection, BorderLayout.NORTH);
+        this.add(ioContainer, BorderLayout.CENTER);
     }
 
     private void addIoSectionRow(double width) {
         JPanel row = new JPanel();
         row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
         row.setAlignmentX(LEFT_ALIGNMENT);
-        row.setMaximumSize(new Dimension((int)width, 30));
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         row.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
 
         JLabel tabLabel = new JLabel("Tab: ");
         JTextField tabField = new JTextField(10);
-        tabField.setMaximumSize(new Dimension(150, 25));
+        tabField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
 
         JLabel sectionLabel = new JLabel(" Section Title: ");
         JTextField sectionField = new JTextField(10);
-        sectionField.setMaximumSize(new Dimension(150, 25));
+        sectionField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
 
         JLabel editLabel = new JLabel(" ");
         String[] editOptions = {"Editable", "Read Only"};
         JComboBox<String> editDropdown = new JComboBox<>(editOptions);
-        editDropdown.setMaximumSize(new Dimension(100, 25));
+        editDropdown.setMaximumSize(new Dimension(120, 25));
 
         JButton removeBtn = new JButton("X");
         removeBtn.setMargin(new Insets(0, 4, 0, 4));
