@@ -20,6 +20,7 @@ public class JavaJobCompiler {
 
         StringBuilder importBlock = new StringBuilder();
         importBlock.append("import java.util.concurrent.Callable;\n");
+        importBlock.append("import ede.stl.gui.GuiEde;\n");
         if (userImports != null && !userImports.trim().isEmpty()) {
             for (String line : userImports.split("\\n")) {
                 String trimmed = line.trim();
@@ -39,8 +40,8 @@ public class JavaJobCompiler {
             importBlock.toString() +
             "public class " + className + " implements Callable<Void> {\n" +
             "    private GuiEde EdeInstance;\n" +
-            "    public " + className + "(GuiEde EdeInstance){\n"+
-            "        this.EdeInstance = EdeInstance;\n" +
+            "    public " + className + "(GuiEde edeInstance){\n"+
+            "        this.EdeInstance = edeInstance;\n" +
             "    }\n" +
             "    public Void call() throws Exception {\n" +
             "        " + userCode + "\n" +
@@ -107,6 +108,6 @@ public class JavaJobCompiler {
         @SuppressWarnings("unchecked")
         Class<Callable<Void>> clazz =
             (Class<Callable<Void>>) classLoader.loadClass(className);
-        return clazz.getDeclaredConstructor().newInstance(new Object[]{edeInstance});
+        return clazz.getDeclaredConstructor(GuiEde.class).newInstance(edeInstance);
     }
 }
