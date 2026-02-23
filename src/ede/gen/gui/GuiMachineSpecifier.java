@@ -328,7 +328,23 @@ public class GuiMachineSpecifier extends JPanel{
                     String imports = spec.getImportsText();
                     java.util.List<String> jarPaths = spec.getJarPaths();
                     Callable<Void> callable = JavaJobCompiler.compile(code, imports, jarPaths, guiEde);
-                    guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, "", "", "");
+                    String errorPaneName = jobName + "_Errors";
+                    boolean hasErrorPane = false;
+                    for (IoSectionEntry ioEntry : ioSections) {
+                        if (errorPaneName.equals(ioEntry.sectionTitleField.getText().trim())) {
+                            hasErrorPane = true;
+                            break;
+                        }
+                    }
+                    if (!hasErrorPane) {
+                        guiEde.AddIoSection("Errors", errorPaneName, GuiIO.Editable.READ_ONLY);
+                        log.log("[INFO] Auto-created IO section for errors: " + errorPaneName);
+                    }
+                    java.io.File tmpInput = java.io.File.createTempFile("edegen_input_" + i + "_", ".tmp");
+                    java.io.File tmpOutput = java.io.File.createTempFile("edegen_output_" + i + "_", ".tmp");
+                    tmpInput.deleteOnExit();
+                    tmpOutput.deleteOnExit();
+                    guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, tmpInput.getAbsolutePath(), tmpOutput.getAbsolutePath(), errorPaneName);
                     log.log("[PASS] " + jobName + " compiled and added successfully.");
                 } catch (Exception e) {
                     log.log("[ERROR] Failed to compile " + jobName + ": " + e.getMessage());
