@@ -324,27 +324,14 @@ public class GuiMachineSpecifier extends JPanel{
             if ("Java Job".equals(jobType)) {
                 String code = spec.getText();
                 log.log("[INFO] Compiling Java Job: " + jobName);
-                log.log("[DEBUG] Code length: " + code.length() + " chars");
-                log.log("[DEBUG] Code content: " + code.substring(0, Math.min(code.length(), 200)));
                 try {
                     String imports = spec.getImportsText();
                     java.util.List<String> jarPaths = spec.getJarPaths();
-                    log.log("[DEBUG] Imports: " + imports);
-                    log.log("[DEBUG] JAR paths: " + jarPaths);
                     Callable<Void> callable = JavaJobCompiler.compile(code, imports, jarPaths, guiEde);
                     guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, "", "", "");
                     log.log("[PASS] " + jobName + " compiled and added successfully.");
-                    try {
-                        log.log("[DEBUG] Testing callable.call()...");
-                        callable.call();
-                        log.log("[DEBUG] callable.call() completed without error.");
-                    } catch (Exception ex) {
-                        log.log("[WARN] callable.call() test threw: " + ex.getMessage());
-                        ex.printStackTrace();
-                    }
                 } catch (Exception e) {
                     log.log("[ERROR] Failed to compile " + jobName + ": " + e.getMessage());
-                    e.printStackTrace();
                     JOptionPane.showMessageDialog(this,
                         "Failed to compile " + jobName + ":\n" + e.getMessage(),
                         "Compilation Error", JOptionPane.ERROR_MESSAGE);
@@ -352,11 +339,33 @@ public class GuiMachineSpecifier extends JPanel{
                 }
             } else if ("Verilog Job".equals(jobType)) {
                 String path = spec.getVerilogPath();
+                if (path == null || path.trim().isEmpty()) {
+                    log.log("[ERROR] Verilog Job \"" + jobName + "\" has no file path specified.");
+                    JOptionPane.showMessageDialog(this,
+                        "Verilog Job \"" + jobName + "\" requires a file path.",
+                        "Missing Verilog Path", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                java.io.File verilogFile = new java.io.File(path);
+                if (!verilogFile.exists()) {
+                    log.log("[ERROR] Verilog file not found: " + path);
+                    JOptionPane.showMessageDialog(this,
+                        "Verilog file not found:\n" + path,
+                        "File Not Found", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
                 guiEde.gatherMetaDataFromVerilogFile(path, regFmt);
                 log.log("[INFO] Adding Verilog Job: " + jobName + " (path: " + path + ")");
                 guiEde.AddVerilogJob(jobName, path, "", "", "", "");
             } else if ("Exe Job".equals(jobType)) {
                 String path = spec.getExePath();
+                if (path == null || path.trim().isEmpty()) {
+                    log.log("[ERROR] Exe Job \"" + jobName + "\" has no file path specified.");
+                    JOptionPane.showMessageDialog(this,
+                        "Exe Job \"" + jobName + "\" requires a file path.",
+                        "Missing Exe Path", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
                 log.log("[INFO] Adding Exe Job: " + jobName + " (path: " + path + ")");
                 guiEde.AddExeJob(jobName, GuiJob.TextAreaType.DEFAULT, path, "", "", "", "");
             }
