@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import ede.gen.utils.JavaSyntaxHighlighter;
+import javax.swing.border.Border;
 
 public class GuiJobSpecifier extends JPanel {
     private static final String[] JOB_TYPES = {"Verilog Job", "Java Job", "Exe Job"};
@@ -26,6 +27,7 @@ public class GuiJobSpecifier extends JPanel {
     private JTextField exePathField;
     private DefaultListModel<String> jarListModel;
     private JList<String> jarList;
+    private int currentHeight = 300;
 
     public GuiJobSpecifier(String title, Runnable onRemove) {
         this.jobTitle = title;
@@ -213,10 +215,43 @@ public class GuiJobSpecifier extends JPanel {
 
         updateContentForJobType();
 
+        JPanel resizeHandle = new JPanel();
+        resizeHandle.setPreferredSize(new Dimension(0, 6));
+        resizeHandle.setBackground(new Color(180, 180, 180));
+        resizeHandle.setCursor(Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR));
+        resizeHandle.setToolTipText("Drag to resize");
+        final GuiJobSpecifier self = this;
+        resizeHandle.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                resizeHandle.setBackground(new Color(130, 130, 130));
+            }
+            public void mouseExited(MouseEvent e) {
+                resizeHandle.setBackground(new Color(180, 180, 180));
+            }
+        });
+        resizeHandle.addMouseMotionListener(new MouseMotionAdapter() {
+            public void mouseDragged(MouseEvent e) {
+                if (collapsed) return;
+                Point p = SwingUtilities.convertPoint(resizeHandle, e.getPoint(), self.getParent());
+                int newHeight = p.y - self.getY();
+                if (newHeight < 80) newHeight = 80;
+                currentHeight = newHeight;
+                setPreferredSize(new Dimension(getWidth(), currentHeight));
+                setMaximumSize(new Dimension(Integer.MAX_VALUE, currentHeight));
+                revalidate();
+                if (getParent() != null) {
+                    getParent().revalidate();
+                    getParent().repaint();
+                }
+            }
+        });
+
         add(headerBar, BorderLayout.NORTH);
         add(contentPanel, BorderLayout.CENTER);
+        add(resizeHandle, BorderLayout.SOUTH);
 
-        setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+        setPreferredSize(new Dimension(Integer.MAX_VALUE, currentHeight));
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, currentHeight));
     }
 
     private void updateContentForJobType() {
@@ -236,12 +271,16 @@ public class GuiJobSpecifier extends JPanel {
     public void toggleCollapsed() {
         collapsed = !collapsed;
         contentPanel.setVisible(!collapsed);
+        Component south = ((BorderLayout) getLayout()).getLayoutComponent(BorderLayout.SOUTH);
+        if (south != null) south.setVisible(!collapsed);
         if (collapsed) {
             border.setTitle(jobTitle + " [+]");
+            setPreferredSize(new Dimension(getWidth(), 50));
             setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         } else {
             border.setTitle(jobTitle + " [-]");
-            setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+            setPreferredSize(new Dimension(getWidth(), currentHeight));
+            setMaximumSize(new Dimension(Integer.MAX_VALUE, currentHeight));
         }
         revalidate();
         repaint();
