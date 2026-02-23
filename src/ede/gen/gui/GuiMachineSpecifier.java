@@ -376,7 +376,7 @@ public class GuiMachineSpecifier extends JPanel{
                     return;
                 }
                 log.log("[INFO] Adding Exe Job: " + jobName + " (path: " + path + ")");
-                guiEde.AddExeJob(jobName, GuiJob.TextAreaType.DEFAULT, path, "", "", "", "");
+                guiEde.AddExeJob(jobName, GuiJob.TextAreaType.DEFAULT, path, "default", "StandardInput", "StandardOutput", "StandardError");
             }
         }
 
