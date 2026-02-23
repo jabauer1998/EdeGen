@@ -5,6 +5,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.Callable;
+import ede.stl.gui.GuiEde;
 
 public class JavaJobCompiler {
     private static int classCounter = 0;
@@ -13,7 +14,7 @@ public class JavaJobCompiler {
         return compile(userCode, "", Collections.emptyList());
     }
 
-    public static Callable<Void> compile(String userCode, String userImports, List<String> jarPaths) throws Exception {
+    public static Callable<Void> compile(String userCode, String userImports, List<String> jarPaths, GuiEde edeInstance) throws Exception {
         classCounter++;
         String className = "DynamicJob_" + classCounter;
 
@@ -37,6 +38,10 @@ public class JavaJobCompiler {
         String fullSource =
             importBlock.toString() +
             "public class " + className + " implements Callable<Void> {\n" +
+            "    private GuiEde EdeInstance;\n" +
+            "    public " + className + "(GuiEde EdeInstance){\n"+
+            "        this.EdeInstance = EdeInstance;\n" +
+            "    }\n" +
             "    public Void call() throws Exception {\n" +
             "        " + userCode + "\n" +
             "        return null;\n" +
@@ -102,6 +107,6 @@ public class JavaJobCompiler {
         @SuppressWarnings("unchecked")
         Class<Callable<Void>> clazz =
             (Class<Callable<Void>>) classLoader.loadClass(className);
-        return clazz.getDeclaredConstructor().newInstance();
+        return clazz.getDeclaredConstructor().newInstance(new Object[]{edeInstance});
     }
 }
