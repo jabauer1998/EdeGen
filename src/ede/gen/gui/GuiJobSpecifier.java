@@ -119,7 +119,6 @@ public class GuiJobSpecifier extends JPanel {
         editorSplitPane.setResizeWeight(0.3);
         editorSplitPane.setDividerLocation(80);
         editorSplitPane.setContinuousLayout(true);
-        textAreaPanel.add(editorSplitPane, BorderLayout.CENTER);
 
         JPanel jarPanel = new JPanel(new BorderLayout(4, 4));
         jarPanel.setBorder(BorderFactory.createTitledBorder("Classpath JARs"));
@@ -128,6 +127,7 @@ public class GuiJobSpecifier extends JPanel {
         jarList.setVisibleRowCount(3);
         JScrollPane jarScrollPane = new JScrollPane(jarList);
         jarScrollPane.setPreferredSize(new Dimension(400, 60));
+        jarScrollPane.setMinimumSize(new Dimension(100, 30));
         JPanel jarButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         JButton addJarBtn = new JButton("Add JAR...");
         addJarBtn.addActionListener(new ActionListener() {
@@ -163,7 +163,12 @@ public class GuiJobSpecifier extends JPanel {
         jarButtonPanel.add(removeJarBtn);
         jarPanel.add(jarScrollPane, BorderLayout.CENTER);
         jarPanel.add(jarButtonPanel, BorderLayout.SOUTH);
-        textAreaPanel.add(jarPanel, BorderLayout.SOUTH);
+        jarPanel.setMinimumSize(new Dimension(100, 60));
+
+        JSplitPane codeJarSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, editorSplitPane, jarPanel);
+        codeJarSplitPane.setResizeWeight(0.75);
+        codeJarSplitPane.setContinuousLayout(true);
+        textAreaPanel.add(codeJarSplitPane, BorderLayout.CENTER);
 
         verilogPanel = new JPanel(new BorderLayout());
         JPanel pathRow = new JPanel(new BorderLayout(4, 0));
