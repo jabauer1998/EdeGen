@@ -88,12 +88,13 @@ public class GuiJobSpecifier extends JPanel {
             }
         };
         importsPane.setPreferredSize(new Dimension(400, 50));
+        importsPane.setMinimumSize(new Dimension(100, 30));
         JavaSyntaxHighlighter importsHighlighter = new JavaSyntaxHighlighter(importsPane);
         importsPane.getDocument().addDocumentListener(importsHighlighter);
         JScrollPane importsScrollPane = new JScrollPane(importsPane);
         importsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        importsScrollPane.setMinimumSize(new Dimension(100, 30));
         importsPanel.add(importsScrollPane, BorderLayout.CENTER);
-        textAreaPanel.add(importsPanel, BorderLayout.NORTH);
 
         JPanel codePanel = new JPanel(new BorderLayout());
         codePanel.setBorder(BorderFactory.createTitledBorder("Code"));
@@ -104,12 +105,19 @@ public class GuiJobSpecifier extends JPanel {
             }
         };
         textPane.setPreferredSize(new Dimension(400, 100));
+        textPane.setMinimumSize(new Dimension(100, 30));
         JavaSyntaxHighlighter highlighter = new JavaSyntaxHighlighter(textPane);
         textPane.getDocument().addDocumentListener(highlighter);
         JScrollPane scrollPane = new JScrollPane(textPane);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setMinimumSize(new Dimension(100, 30));
         codePanel.add(scrollPane, BorderLayout.CENTER);
-        textAreaPanel.add(codePanel, BorderLayout.CENTER);
+
+        JSplitPane editorSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, importsPanel, codePanel);
+        editorSplitPane.setResizeWeight(0.3);
+        editorSplitPane.setDividerLocation(80);
+        editorSplitPane.setContinuousLayout(true);
+        textAreaPanel.add(editorSplitPane, BorderLayout.CENTER);
 
         JPanel jarPanel = new JPanel(new BorderLayout(4, 4));
         jarPanel.setBorder(BorderFactory.createTitledBorder("Classpath JARs"));
@@ -208,7 +216,7 @@ public class GuiJobSpecifier extends JPanel {
         add(headerBar, BorderLayout.NORTH);
         add(contentPanel, BorderLayout.CENTER);
 
-        setMaximumSize(new Dimension(Integer.MAX_VALUE, 300));
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
     }
 
     private void updateContentForJobType() {
@@ -233,7 +241,7 @@ public class GuiJobSpecifier extends JPanel {
             setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         } else {
             border.setTitle(jobTitle + " [-]");
-            setMaximumSize(new Dimension(Integer.MAX_VALUE, 300));
+            setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         }
         revalidate();
         repaint();
