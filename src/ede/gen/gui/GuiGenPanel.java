@@ -23,8 +23,9 @@ public class GuiGenPanel extends JPanel{
 
         JPanel logPanel = new JPanel(new BorderLayout());
         JLabel logTitle = new JLabel("Ede Generator Tool Log", SwingConstants.CENTER);
+        JScrollPane logScroll = new JScrollPane(this.log);
         logPanel.add(logTitle, BorderLayout.NORTH);
-        logPanel.add(this.log, BorderLayout.CENTER);
+        logPanel.add(logScroll, BorderLayout.CENTER);
 
         JSplitPane verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, horizontalSplit, logPanel);
         verticalSplit.setResizeWeight(0.85);
