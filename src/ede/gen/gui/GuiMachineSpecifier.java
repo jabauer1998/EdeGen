@@ -300,6 +300,10 @@ public class GuiMachineSpecifier extends JPanel{
 
         GuiEde guiEde = new GuiEde(edeWidth, edeHeight, ramBytesPerRowVal, addrFmt, memFmt);
 
+        guiEde.AddIoSection("IO", "StandardOutput", GuiIO.Editable.READ_ONLY);
+        guiEde.AddIoSection("IO", "StandardInput", GuiIO.Editable.EDITABLE);
+        guiEde.AddIoSection("Errors", "StandardError", GuiIO.Editable.READ_ONLY);
+
         for (IoSectionEntry entry : ioSections) {
             String tabName = entry.tabNameField.getText().trim();
             String sectionTitle = entry.sectionTitleField.getText().trim();
@@ -316,11 +320,13 @@ public class GuiMachineSpecifier extends JPanel{
         }
 
         ArrayList<GuiJobSpecifier> specs = jobList.getJobSpecifiers();
+        
         for (int i = 0; i < specs.size(); i++) {
             GuiJobSpecifier spec = specs.get(i);
             String jobType = spec.getSelectedJobType();
             String jobName = spec.getJobTitle();
-
+            java.io.File tmpInput = java.io.File.createTempFile("edegen_input_" + i + "_", ".tmp");
+            java.io.File tmpOutput = java.io.File.createTempFile("edegen_output_" + i + "_", ".tmp");
             if ("Java Job".equals(jobType)) {
                 String code = spec.getText();
                 log.log("[INFO] Compiling Java Job: " + jobName);
@@ -336,15 +342,8 @@ public class GuiMachineSpecifier extends JPanel{
                             break;
                         }
                     }
-                    if (!hasErrorPane) {
-                        guiEde.AddIoSection("Errors", errorPaneName, GuiIO.Editable.READ_ONLY);
-                        log.log("[INFO] Auto-created IO section for errors: " + errorPaneName);
-                    }
-                    java.io.File tmpInput = java.io.File.createTempFile("edegen_input_" + i + "_", ".tmp");
-                    java.io.File tmpOutput = java.io.File.createTempFile("edegen_output_" + i + "_", ".tmp");
-                    tmpInput.deleteOnExit();
-                    tmpOutput.deleteOnExit();
-                    guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, tmpInput.getAbsolutePath(), tmpOutput.getAbsolutePath(), errorPaneName);
+                    
+                    guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, tmpInput.getAbsolutePath(), tmpOutput.getAbsolutePath(), "StandardError");
                     log.log("[PASS] " + jobName + " compiled and added successfully.");
                 } catch (Exception e) {
                     log.log("[ERROR] Failed to compile " + jobName + ": " + e.getMessage());
@@ -372,7 +371,7 @@ public class GuiMachineSpecifier extends JPanel{
                 }
                 guiEde.gatherMetaDataFromVerilogFile(path, regFmt);
                 log.log("[INFO] Adding Verilog Job: " + jobName + " (path: " + path + ")");
-                guiEde.AddVerilogJob(jobName, path, "", "", "", "");
+                guiEde.AddVerilogJob(jobName, path, "default", "StandardInput", "StandardOutput", "StandardError");
             } else if ("Exe Job".equals(jobType)) {
                 String path = spec.getExePath();
                 if (path == null || path.trim().isEmpty()) {
