@@ -325,8 +325,7 @@ public class GuiMachineSpecifier extends JPanel{
             GuiJobSpecifier spec = specs.get(i);
             String jobType = spec.getSelectedJobType();
             String jobName = spec.getJobTitle();
-            java.io.File tmpInput = java.io.File.createTempFile("edegen_input_" + i + "_", ".tmp");
-            java.io.File tmpOutput = java.io.File.createTempFile("edegen_output_" + i + "_", ".tmp");
+
             if ("Java Job".equals(jobType)) {
                 String code = spec.getText();
                 log.log("[INFO] Compiling Java Job: " + jobName);
@@ -334,15 +333,10 @@ public class GuiMachineSpecifier extends JPanel{
                     String imports = spec.getImportsText();
                     java.util.List<String> jarPaths = spec.getJarPaths();
                     Callable<Void> callable = JavaJobCompiler.compile(code, imports, jarPaths, guiEde);
-                    String errorPaneName = jobName + "_Errors";
-                    boolean hasErrorPane = false;
-                    for (IoSectionEntry ioEntry : ioSections) {
-                        if (errorPaneName.equals(ioEntry.sectionTitleField.getText().trim())) {
-                            hasErrorPane = true;
-                            break;
-                        }
-                    }
-                    
+                    java.io.File tmpInput = java.io.File.createTempFile("edegen_input_" + i + "_", ".tmp");
+                    java.io.File tmpOutput = java.io.File.createTempFile("edegen_output_" + i + "_", ".tmp");
+                    tmpInput.deleteOnExit();
+                    tmpOutput.deleteOnExit();
                     guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, tmpInput.getAbsolutePath(), tmpOutput.getAbsolutePath(), "StandardError");
                     log.log("[PASS] " + jobName + " compiled and added successfully.");
                 } catch (Exception e) {
