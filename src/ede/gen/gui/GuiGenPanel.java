@@ -16,16 +16,21 @@ public class GuiGenPanel extends JPanel{
         this.log = new GuiEdeLog(width, height / 6);
         this.machine = new GuiMachineSpecifier(width/2, 5 * height / 6, this.jobs, this.log);
         
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, this.jobs, this.machine);
-        splitPane.setResizeWeight(0.5);
-        splitPane.setDividerLocation((int)(width / 2));
-        splitPane.setContinuousLayout(true);
+        JSplitPane horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, this.jobs, this.machine);
+        horizontalSplit.setResizeWeight(0.5);
+        horizontalSplit.setDividerLocation((int)(width / 2));
+        horizontalSplit.setContinuousLayout(true);
+
         JPanel logPanel = new JPanel(new BorderLayout());
         JLabel logTitle = new JLabel("Ede Generator Tool Log", SwingConstants.CENTER);
         logPanel.add(logTitle, BorderLayout.NORTH);
         logPanel.add(this.log, BorderLayout.CENTER);
 
-        this.add(splitPane, BorderLayout.CENTER);
-        this.add(logPanel, BorderLayout.SOUTH);
+        JSplitPane verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, horizontalSplit, logPanel);
+        verticalSplit.setResizeWeight(0.85);
+        verticalSplit.setDividerLocation((int)(5 * height / 6));
+        verticalSplit.setContinuousLayout(true);
+
+        this.add(verticalSplit, BorderLayout.CENTER);
     }
 }
