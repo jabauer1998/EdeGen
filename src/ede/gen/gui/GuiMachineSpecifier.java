@@ -14,7 +14,6 @@ import ede.gen.utils.JavaSyntaxHighlighter;
 
 public class GuiMachineSpecifier extends JPanel{
     private GuiEdeGenField title;
-    private GuiEdeGenField ramBytes;
     private GuiEdeGenField ramBytesPerRow;
     private JComboBox<String> registerFormatDropdown;
     private JComboBox<String> ramAddressFormatDropdown;
@@ -29,8 +28,6 @@ public class GuiMachineSpecifier extends JPanel{
 
         this.title = new GuiEdeGenField("Title of Ede Environment: ", width, 30);
         this.title.setAlignmentX(LEFT_ALIGNMENT);
-        this.ramBytes = new GuiEdeGenField("Number of Bytes in Ram: ", width, 30);
-        this.ramBytes.setAlignmentX(LEFT_ALIGNMENT);
         this.ramBytesPerRow = new GuiEdeGenField("Number of Bytes per Row in Ram: ", width, 30);
         this.ramBytesPerRow.setAlignmentX(LEFT_ALIGNMENT);
         JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 4));
@@ -92,7 +89,6 @@ public class GuiMachineSpecifier extends JPanel{
 
         this.add(toolBar);
         this.add(title);
-        this.add(ramBytes);
         this.add(ramBytesPerRow);
         this.add(registerFormatPanel);
         this.add(ramAddressFormatPanel);
@@ -179,10 +175,6 @@ public class GuiMachineSpecifier extends JPanel{
         }
 
         int ramBytesVal = 256;
-        try {
-            ramBytesVal = Integer.parseInt(ramBytes.getInputText().trim());
-        } catch (NumberFormatException e) {
-        }
 
         int ramBytesPerRowVal = 16;
         try {
