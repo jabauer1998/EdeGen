@@ -17,7 +17,8 @@ A Java Swing desktop GUI application for generating emulator development environ
 
 ## Key Features
 - **Test Ede Environment**: Collects form parameters and opens a new JFrame with GuiEde from EdeStl.jar
-- **Java Job Compilation**: Typed Java code is compiled at runtime into Callable<Void> using javax.tools.JavaCompiler
+- **IO Sections**: Dynamic add/remove list in Machine Specifier to configure GuiEde IO sections (tab name, section title, editable/read-only)
+- **Java Job Compilation**: Typed Java code is compiled at runtime into Callable<Void> using javax.tools.JavaCompiler; compiled classes receive GuiEde instance
 - **Syntax Highlighting**: Java code editor with color-coded keywords, types, strings, comments, numbers, annotations
 - **Job Types**: Verilog (file selector), Java (code editor), Exe (file selector)
 

@@ -9,6 +9,7 @@ import ede.stl.gui.GuiEde;
 import ede.stl.gui.GuiRam;
 import ede.stl.gui.GuiJob;
 import ede.stl.gui.GuiRegister;
+import ede.stl.gui.GuiIO;
 import ede.gen.utils.JavaJobCompiler;
 import ede.gen.utils.JavaSyntaxHighlighter;
 
@@ -20,6 +21,22 @@ public class GuiMachineSpecifier extends JPanel{
     private JComboBox<String> ramFormatDropdown;
     private GuiJobSpecifierList jobList;
     private GuiEdeLog log;
+    private JPanel ioListPanel;
+    private ArrayList<IoSectionEntry> ioSections;
+
+    private static class IoSectionEntry {
+        JTextField tabNameField;
+        JTextField sectionTitleField;
+        JComboBox<String> editableDropdown;
+        JPanel panel;
+
+        IoSectionEntry(JTextField tab, JTextField section, JComboBox<String> editable, JPanel panel) {
+            this.tabNameField = tab;
+            this.sectionTitleField = section;
+            this.editableDropdown = editable;
+            this.panel = panel;
+        }
+    }
     
     public GuiMachineSpecifier(double width, double height, GuiJobSpecifierList jobList, GuiEdeLog log){
         this.jobList = jobList;
@@ -87,12 +104,83 @@ public class GuiMachineSpecifier extends JPanel{
         ramFormatPanel.add(this.ramFormatDropdown);
         ramFormatPanel.setMaximumSize(new Dimension((int)width, 30));
 
+        this.ioSections = new ArrayList<>();
+
+        JPanel ioHeaderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+        ioHeaderPanel.setAlignmentX(LEFT_ALIGNMENT);
+        JLabel ioLabel = new JLabel("IO Sections:");
+        ioLabel.setFont(ioLabel.getFont().deriveFont(Font.BOLD));
+        JButton addIoBtn = new JButton("+ Add IO Section");
+        addIoBtn.addActionListener(e -> addIoSectionRow(width));
+        ioHeaderPanel.add(ioLabel);
+        ioHeaderPanel.add(addIoBtn);
+        ioHeaderPanel.setMaximumSize(new Dimension((int)width, 35));
+
+        this.ioListPanel = new JPanel();
+        this.ioListPanel.setLayout(new BoxLayout(this.ioListPanel, BoxLayout.Y_AXIS));
+        this.ioListPanel.setAlignmentX(LEFT_ALIGNMENT);
+
+        JScrollPane ioScroll = new JScrollPane(this.ioListPanel);
+        ioScroll.setAlignmentX(LEFT_ALIGNMENT);
+        ioScroll.setMaximumSize(new Dimension((int)width, 150));
+        ioScroll.setPreferredSize(new Dimension((int)width, 100));
+        ioScroll.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
         this.add(toolBar);
+        this.add(ioHeaderPanel);
+        this.add(ioScroll);
         this.add(title);
         this.add(ramBytesPerRow);
         this.add(registerFormatPanel);
         this.add(ramAddressFormatPanel);
         this.add(ramFormatPanel);
+    }
+
+    private void addIoSectionRow(double width) {
+        JPanel row = new JPanel();
+        row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+        row.setAlignmentX(LEFT_ALIGNMENT);
+        row.setMaximumSize(new Dimension((int)width, 30));
+        row.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
+
+        JLabel tabLabel = new JLabel("Tab: ");
+        JTextField tabField = new JTextField(10);
+        tabField.setMaximumSize(new Dimension(150, 25));
+
+        JLabel sectionLabel = new JLabel(" Section Title: ");
+        JTextField sectionField = new JTextField(10);
+        sectionField.setMaximumSize(new Dimension(150, 25));
+
+        JLabel editLabel = new JLabel(" ");
+        String[] editOptions = {"Editable", "Read Only"};
+        JComboBox<String> editDropdown = new JComboBox<>(editOptions);
+        editDropdown.setMaximumSize(new Dimension(100, 25));
+
+        JButton removeBtn = new JButton("X");
+        removeBtn.setMargin(new Insets(0, 4, 0, 4));
+
+        IoSectionEntry entry = new IoSectionEntry(tabField, sectionField, editDropdown, row);
+
+        removeBtn.addActionListener(e -> {
+            ioSections.remove(entry);
+            ioListPanel.remove(row);
+            ioListPanel.revalidate();
+            ioListPanel.repaint();
+        });
+
+        row.add(tabLabel);
+        row.add(tabField);
+        row.add(sectionLabel);
+        row.add(sectionField);
+        row.add(editLabel);
+        row.add(editDropdown);
+        row.add(Box.createHorizontalStrut(4));
+        row.add(removeBtn);
+
+        ioSections.add(entry);
+        ioListPanel.add(row);
+        ioListPanel.revalidate();
+        ioListPanel.repaint();
     }
 
     private GuiRam.AddressFormat getSelectedAddressFormat() {
@@ -196,6 +284,21 @@ public class GuiMachineSpecifier extends JPanel{
         GuiEde guiEde = new GuiEde(edeWidth, edeHeight, ramBytesVal, addrFmt, memFmt);
         guiEde.setUpMemory(ramBytesPerRowVal);
 
+        for (IoSectionEntry entry : ioSections) {
+            String tabName = entry.tabNameField.getText().trim();
+            String sectionTitle = entry.sectionTitleField.getText().trim();
+            if (tabName.isEmpty() || sectionTitle.isEmpty()) {
+                log.log("[WARN] Skipping IO section with empty tab name or section title.");
+                continue;
+            }
+            String editChoice = (String) entry.editableDropdown.getSelectedItem();
+            GuiIO.Editable editable = "Read Only".equals(editChoice)
+                ? GuiIO.Editable.READ_ONLY
+                : GuiIO.Editable.EDITABLE;
+            guiEde.AddIoSection(tabName, sectionTitle, editable);
+            log.log("[INFO] Added IO section: tab=\"" + tabName + "\", title=\"" + sectionTitle + "\", " + editChoice);
+        }
+
         ArrayList<GuiJobSpecifier> specs = jobList.getJobSpecifiers();
         for (int i = 0; i < specs.size(); i++) {
             GuiJobSpecifier spec = specs.get(i);
@@ -208,7 +311,7 @@ public class GuiMachineSpecifier extends JPanel{
                 try {
                     String imports = spec.getImportsText();
                     java.util.List<String> jarPaths = spec.getJarPaths();
-                    Callable<Void> callable = JavaJobCompiler.compile(code, imports, jarPaths);
+                    Callable<Void> callable = JavaJobCompiler.compile(code, imports, jarPaths, guiEde);
                     guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, "", "", "");
                     log.log("[PASS] " + jobName + " compiled and added successfully.");
                 } catch (Exception e) {

@@ -10,8 +10,8 @@ import ede.stl.gui.GuiEde;
 public class JavaJobCompiler {
     private static int classCounter = 0;
 
-    public static Callable<Void> compile(String userCode) throws Exception {
-        return compile(userCode, "", Collections.emptyList());
+    public static Callable<Void> compile(String userCode, GuiEde edeInstance) throws Exception {
+        return compile(userCode, "", Collections.emptyList(), edeInstance);
     }
 
     public static Callable<Void> compile(String userCode, String userImports, List<String> jarPaths, GuiEde edeInstance) throws Exception {
