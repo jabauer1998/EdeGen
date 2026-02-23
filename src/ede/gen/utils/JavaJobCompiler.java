@@ -5,29 +5,33 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.jar.*;
-import java.util.stream.Collectors;
 
 public class JavaJobCompiler {
     private static int classCounter = 0;
 
     public static Callable<Void> compile(String userCode) throws Exception {
-        return compile(userCode, Collections.emptyList());
+        return compile(userCode, "", Collections.emptyList());
     }
 
-    public static Callable<Void> compile(String userCode, List<String> jarPaths) throws Exception {
+    public static Callable<Void> compile(String userCode, String userImports, List<String> jarPaths) throws Exception {
         classCounter++;
         String className = "DynamicJob_" + classCounter;
 
-        Set<String> packages = new TreeSet<>();
-        for (String jarPath : jarPaths) {
-            packages.addAll(scanJarPackages(jarPath));
-        }
-
         StringBuilder importBlock = new StringBuilder();
         importBlock.append("import java.util.concurrent.Callable;\n");
-        for (String pkg : packages) {
-            importBlock.append("import ").append(pkg).append(".*;\n");
+        if (userImports != null && !userImports.trim().isEmpty()) {
+            for (String line : userImports.split("\\n")) {
+                String trimmed = line.trim();
+                if (!trimmed.isEmpty()) {
+                    if (!trimmed.startsWith("import ")) {
+                        trimmed = "import " + trimmed;
+                    }
+                    if (!trimmed.endsWith(";")) {
+                        trimmed = trimmed + ";";
+                    }
+                    importBlock.append(trimmed).append("\n");
+                }
+            }
         }
 
         String fullSource =
@@ -99,26 +103,5 @@ public class JavaJobCompiler {
         Class<Callable<Void>> clazz =
             (Class<Callable<Void>>) classLoader.loadClass(className);
         return clazz.getDeclaredConstructor().newInstance();
-    }
-
-    private static Set<String> scanJarPackages(String jarPath) {
-        Set<String> packages = new TreeSet<>();
-        try (JarFile jar = new JarFile(jarPath)) {
-            Enumeration<JarEntry> entries = jar.entries();
-            while (entries.hasMoreElements()) {
-                JarEntry entry = entries.nextElement();
-                String name = entry.getName();
-                if (name.endsWith(".class") && !name.contains("$")) {
-                    int lastSlash = name.lastIndexOf('/');
-                    if (lastSlash > 0) {
-                        String pkg = name.substring(0, lastSlash).replace('/', '.');
-                        packages.add(pkg);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Warning: Could not scan JAR: " + jarPath + " - " + e.getMessage());
-        }
-        return packages;
     }
 }

@@ -214,8 +214,9 @@ public class GuiMachineSpecifier extends JPanel{
                 String code = spec.getText();
                 log.log("[INFO] Compiling Java Job: " + jobName);
                 try {
+                    String imports = spec.getImportsText();
                     java.util.List<String> jarPaths = spec.getJarPaths();
-                    Callable<Void> callable = JavaJobCompiler.compile(code, jarPaths);
+                    Callable<Void> callable = JavaJobCompiler.compile(code, imports, jarPaths);
                     guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, "", "", "");
                     log.log("[PASS] " + jobName + " compiled and added successfully.");
                 } catch (Exception e) {

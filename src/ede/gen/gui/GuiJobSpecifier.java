@@ -12,6 +12,7 @@ import ede.gen.utils.JavaSyntaxHighlighter;
 
 public class GuiJobSpecifier extends JPanel {
     private static final String[] JOB_TYPES = {"Verilog Job", "Java Job", "Exe Job"};
+    private JTextPane importsPane;
     private JTextPane textPane;
     private JPanel contentPanel;
     private boolean collapsed;
@@ -77,6 +78,25 @@ public class GuiJobSpecifier extends JPanel {
         contentPanel = new JPanel(new CardLayout());
 
         textAreaPanel = new JPanel(new BorderLayout());
+
+        JPanel importsPanel = new JPanel(new BorderLayout());
+        importsPanel.setBorder(BorderFactory.createTitledBorder("Imports"));
+        importsPane = new JTextPane() {
+            @Override
+            public boolean getScrollableTracksViewportWidth() {
+                return true;
+            }
+        };
+        importsPane.setPreferredSize(new Dimension(400, 50));
+        JavaSyntaxHighlighter importsHighlighter = new JavaSyntaxHighlighter(importsPane);
+        importsPane.getDocument().addDocumentListener(importsHighlighter);
+        JScrollPane importsScrollPane = new JScrollPane(importsPane);
+        importsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        importsPanel.add(importsScrollPane, BorderLayout.CENTER);
+        textAreaPanel.add(importsPanel, BorderLayout.NORTH);
+
+        JPanel codePanel = new JPanel(new BorderLayout());
+        codePanel.setBorder(BorderFactory.createTitledBorder("Code"));
         textPane = new JTextPane() {
             @Override
             public boolean getScrollableTracksViewportWidth() {
@@ -88,7 +108,8 @@ public class GuiJobSpecifier extends JPanel {
         textPane.getDocument().addDocumentListener(highlighter);
         JScrollPane scrollPane = new JScrollPane(textPane);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        textAreaPanel.add(scrollPane, BorderLayout.CENTER);
+        codePanel.add(scrollPane, BorderLayout.CENTER);
+        textAreaPanel.add(codePanel, BorderLayout.CENTER);
 
         JPanel jarPanel = new JPanel(new BorderLayout(4, 4));
         jarPanel.setBorder(BorderFactory.createTitledBorder("Classpath JARs"));
@@ -258,6 +279,10 @@ public class GuiJobSpecifier extends JPanel {
 
     public String getExePath() {
         return exePathField.getText();
+    }
+
+    public String getImportsText() {
+        return importsPane.getText();
     }
 
     public List<String> getJarPaths() {
