@@ -249,9 +249,22 @@ public class GuiJobSpecifier extends JPanel {
         add(headerBar, BorderLayout.NORTH);
         add(contentPanel, BorderLayout.CENTER);
         add(resizeHandle, BorderLayout.SOUTH);
+    }
 
-        setPreferredSize(new Dimension(Integer.MAX_VALUE, currentHeight));
-        setMaximumSize(new Dimension(Integer.MAX_VALUE, currentHeight));
+    @Override
+    public Dimension getPreferredSize() {
+        if (collapsed) {
+            return new Dimension(super.getPreferredSize().width, 50);
+        }
+        return new Dimension(super.getPreferredSize().width, currentHeight);
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        if (collapsed) {
+            return new Dimension(Integer.MAX_VALUE, 50);
+        }
+        return new Dimension(Integer.MAX_VALUE, currentHeight);
     }
 
     private void updateContentForJobType() {
@@ -275,12 +288,8 @@ public class GuiJobSpecifier extends JPanel {
         if (south != null) south.setVisible(!collapsed);
         if (collapsed) {
             border.setTitle(jobTitle + " [+]");
-            setPreferredSize(new Dimension(getWidth(), 50));
-            setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         } else {
             border.setTitle(jobTitle + " [-]");
-            setPreferredSize(new Dimension(getWidth(), currentHeight));
-            setMaximumSize(new Dimension(Integer.MAX_VALUE, currentHeight));
         }
         revalidate();
         repaint();
