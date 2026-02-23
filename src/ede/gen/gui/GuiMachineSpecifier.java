@@ -70,6 +70,16 @@ public class GuiMachineSpecifier extends JPanel{
         });
         toolBar.add(saveEde);
 
+        JButton clearLog = new JButton("Clear Log");
+        clearLog.setPreferredSize(new Dimension((int)(width/6), 40));
+        clearLog.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event){
+                log.setText("");
+            }
+        });
+        toolBar.add(clearLog);
+
         this.title = new GuiEdeGenField("Title of Ede Environment: ", width, 30);
         this.title.setAlignmentX(LEFT_ALIGNMENT);
         this.title.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
