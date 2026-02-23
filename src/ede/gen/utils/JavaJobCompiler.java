@@ -49,6 +49,9 @@ public class JavaJobCompiler {
             "    }\n" +
             "}\n";
 
+        System.out.println("[JavaJobCompiler] Generated source for " + className + ":");
+        System.out.println(fullSource);
+
         File tmpDir = new File(System.getProperty("java.io.tmpdir"), "edegen_compile");
         tmpDir.mkdirs();
         File sourceFile = new File(tmpDir, className + ".java");

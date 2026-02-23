@@ -314,14 +314,27 @@ public class GuiMachineSpecifier extends JPanel{
             if ("Java Job".equals(jobType)) {
                 String code = spec.getText();
                 log.log("[INFO] Compiling Java Job: " + jobName);
+                log.log("[DEBUG] Code length: " + code.length() + " chars");
+                log.log("[DEBUG] Code content: " + code.substring(0, Math.min(code.length(), 200)));
                 try {
                     String imports = spec.getImportsText();
                     java.util.List<String> jarPaths = spec.getJarPaths();
+                    log.log("[DEBUG] Imports: " + imports);
+                    log.log("[DEBUG] JAR paths: " + jarPaths);
                     Callable<Void> callable = JavaJobCompiler.compile(code, imports, jarPaths, guiEde);
                     guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, "", "", "");
                     log.log("[PASS] " + jobName + " compiled and added successfully.");
+                    try {
+                        log.log("[DEBUG] Testing callable.call()...");
+                        callable.call();
+                        log.log("[DEBUG] callable.call() completed without error.");
+                    } catch (Exception ex) {
+                        log.log("[WARN] callable.call() test threw: " + ex.getMessage());
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     log.log("[ERROR] Failed to compile " + jobName + ": " + e.getMessage());
+                    e.printStackTrace();
                     JOptionPane.showMessageDialog(this,
                         "Failed to compile " + jobName + ":\n" + e.getMessage(),
                         "Compilation Error", JOptionPane.ERROR_MESSAGE);
