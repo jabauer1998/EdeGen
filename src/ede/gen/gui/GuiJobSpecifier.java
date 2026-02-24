@@ -41,7 +41,7 @@ public class GuiJobSpecifier extends JPanel {
         border.setTitleColor(Color.DARK_GRAY);
         setBorder(border);
 
-        JPanel headerBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
+        JPanel headerBar = new JPanel(new BorderLayout(4, 0));
         headerBar.setOpaque(false);
 
         jobTypeDropdown = new JComboBox<String>(JOB_TYPES);
@@ -74,15 +74,23 @@ public class GuiJobSpecifier extends JPanel {
             }
         });
 
-        JLabel jobNameLabel = new JLabel("Job Name:");
-        jobNameField = new JTextField(12);
+        JLabel jobNameLabel = new JLabel("Job Name: ");
+        jobNameField = new JTextField();
         jobNameField.setToolTipText("Name passed to the job constructor");
 
-        headerBar.add(jobNameLabel);
-        headerBar.add(jobNameField);
-        headerBar.add(jobTypeDropdown);
-        headerBar.add(collapseBtn);
-        headerBar.add(removeBtn);
+        JPanel leftPanel = new JPanel(new BorderLayout(4, 0));
+        leftPanel.setOpaque(false);
+        leftPanel.add(jobNameLabel, BorderLayout.WEST);
+        leftPanel.add(jobNameField, BorderLayout.CENTER);
+
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
+        rightPanel.setOpaque(false);
+        rightPanel.add(jobTypeDropdown);
+        rightPanel.add(collapseBtn);
+        rightPanel.add(removeBtn);
+
+        headerBar.add(leftPanel, BorderLayout.CENTER);
+        headerBar.add(rightPanel, BorderLayout.EAST);
 
         contentPanel = new JPanel(new CardLayout());
 
