@@ -45,7 +45,6 @@ public class JavaJobCompiler {
             "    }\n" +
             "    public String call(String input) throws Exception {\n" +
             "        " + userCode + "\n" +
-            "        return null;\n" +
             "    }\n" +
             "}\n";
 

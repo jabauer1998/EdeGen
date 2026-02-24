@@ -377,6 +377,8 @@ public class GuiMachineSpecifier extends JPanel{
             }
         }
 
+	guiEde.linkJobs();
+	
         log.log("[INFO] Opening Ede Environment window: " + edeTitle);
 
         final String frameTitle = edeTitle;
