@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import ede.gen.utils.JavaSyntaxHighlighter;
+import ede.stl.gui.GuiLineNumberGutter;
 import javax.swing.border.Border;
 
 public class GuiJobSpecifier extends JPanel {
@@ -112,6 +113,7 @@ public class GuiJobSpecifier extends JPanel {
         JScrollPane importsScrollPane = new JScrollPane(importsPane);
         importsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         importsScrollPane.setMinimumSize(new Dimension(100, 30));
+        importsScrollPane.setRowHeaderView(new GuiLineNumberGutter(importsPane));
         importsPanel.add(importsScrollPane, BorderLayout.CENTER);
 
         JPanel codePanel = new JPanel(new BorderLayout());
@@ -129,6 +131,7 @@ public class GuiJobSpecifier extends JPanel {
         JScrollPane scrollPane = new JScrollPane(textPane);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setMinimumSize(new Dimension(100, 30));
+        scrollPane.setRowHeaderView(new GuiLineNumberGutter(textPane));
         codePanel.add(scrollPane, BorderLayout.CENTER);
 
         JSplitPane editorSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, importsPanel, codePanel);

@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import ede.stl.gui.EdeCallable;
+import ede.stl.common.EdeCallable;
 import ede.stl.gui.GuiEde;
 import ede.stl.gui.GuiRam;
 import ede.stl.gui.GuiJob;
@@ -485,8 +485,8 @@ public class GuiMachineSpecifier extends JPanel{
             }
         }
 
-	guiEde.linkJobs();
-	
+        guiEde.linkJobs();
+        
         log.log("[INFO] Opening Ede Environment window: " + edeTitle);
 
         final String frameTitle = edeTitle;

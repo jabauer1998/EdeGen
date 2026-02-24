@@ -190,7 +190,7 @@ public class EdeJarBuilder {
 
     private static String generateJobSource(String className, String code, String imports) {
         StringBuilder sb = new StringBuilder();
-        sb.append("import ede.stl.gui.EdeCallable;\n");
+        sb.append("import ede.stl.common.EdeCallable;\n");
         sb.append("import ede.stl.gui.GuiEde;\n");
         if (imports != null && !imports.trim().isEmpty()) {
             for (String line : imports.split("\\n")) {
@@ -236,7 +236,7 @@ public class EdeJarBuilder {
         sb.append("import ede.stl.gui.GuiJob;\n");
         sb.append("import ede.stl.gui.GuiRegister;\n");
         sb.append("import ede.stl.gui.GuiIO;\n");
-        sb.append("import ede.stl.gui.EdeCallable;\n");
+        sb.append("import ede.stl.common.EdeCallable;\n");
         sb.append("\n");
         sb.append("public class EdeMain {\n");
         sb.append("    public static void main(String[] args) {\n");

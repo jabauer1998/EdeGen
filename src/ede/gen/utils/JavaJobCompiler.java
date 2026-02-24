@@ -4,7 +4,7 @@ import javax.tools.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import ede.stl.gui.EdeCallable;
+import ede.stl.common.EdeCallable;
 import ede.stl.gui.GuiEde;
 
 public class JavaJobCompiler {
@@ -19,7 +19,7 @@ public class JavaJobCompiler {
         String className = "DynamicJob_" + classCounter;
 
         StringBuilder importBlock = new StringBuilder();
-        importBlock.append("import ede.stl.gui.EdeCallable;\n");
+        importBlock.append("import ede.stl.common.EdeCallable;\n");
         importBlock.append("import ede.stl.gui.GuiEde;\n");
         if (userImports != null && !userImports.trim().isEmpty()) {
             for (String line : userImports.split("\\n")) {
