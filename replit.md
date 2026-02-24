@@ -10,15 +10,17 @@ A Java Swing desktop GUI application for generating emulator development environ
 - **Source**: `src/ede/gen/` - main source tree
   - `driver/EdeGenerator.java` - Main entry point
   - `gui/` - GUI components (panels, fields, collapsable frames, specifiers)
-  - `gui/JavaJobCompiler.java` - Runtime Java code compilation into Callable objects
-  - `gui/JavaSyntaxHighlighter.java` - Syntax highlighting for Java code editor
+  - `utils/JavaJobCompiler.java` - Runtime Java code compilation into EdeCallable objects
+  - `utils/JavaSyntaxHighlighter.java` - Syntax highlighting for Java code editor
+  - `utils/EdeJarBuilder.java` - Generates executable JARs from form data with compiled jobs and EdeStl
 - **Libraries**: `lib/EdeStl.jar` - standard library dependency (compiled with Java 25)
 - **Output**: Compiled classes go to `bin/`
 
 ## Key Features
 - **Test Ede Environment**: Collects form parameters and opens a new JFrame with GuiEde from EdeStl.jar
 - **IO Sections**: Dynamic add/remove list in Machine Specifier to configure GuiEde IO sections (tab name, section title, editable/read-only)
-- **Java Job Compilation**: Typed Java code is compiled at runtime into Callable<Void> using javax.tools.JavaCompiler; compiled classes receive GuiEde instance
+- **Java Job Compilation**: Typed Java code is compiled at runtime into EdeCallable using javax.tools.JavaCompiler; compiled classes receive GuiEde instance
+- **Save Ede Environment**: Generates an executable JAR containing EdeStl, compiled Java jobs, and a generated main class that recreates the GuiEde from form data
 - **Syntax Highlighting**: Java code editor with color-coded keywords, types, strings, comments, numbers, annotations
 - **Job Types**: Verilog (file selector), Java (code editor), Exe (file selector)
 
@@ -26,9 +28,14 @@ A Java Swing desktop GUI application for generating emulator development environ
 The workflow compiles all Java sources with JDK 25 and runs `ede.gen.driver.EdeGenerator` via VNC display.
 
 ## Recent Changes
+- 2026-02-24: Implemented Save Ede Environment - generates executable JAR with EdeStl, compiled jobs, and generated main class
+- 2026-02-24: Updated to EdeCallable interface (String call(String)) replacing Callable<Void>
+- 2026-02-24: Added Job Name field to job specifiers, passed to job constructors
+- 2026-02-24: Added Verilog Input File field to Verilog job specifier
+- 2026-02-24: Updated AddExeJob/AddJavaJob to use new varargs constructors
 - 2026-02-17: Upgraded to JDK 25 to match EdeStl.jar class version requirement
 - 2026-02-17: Wired Test Ede Environment button to create GuiEde from EdeStl.jar with form parameters
-- 2026-02-17: Created JavaJobCompiler for runtime compilation of Java code into Callable objects
+- 2026-02-17: Created JavaJobCompiler for runtime compilation of Java code into EdeCallable objects
 - 2026-02-17: Added getter methods to GuiJobSpecifier (job type, paths) and updated GuiMachineSpecifier
 - 2026-02-17: Fixed syntax highlighting order (comments/strings override keywords/numbers)
 - 2026-02-17: Added line wrapping to JTextPane editor

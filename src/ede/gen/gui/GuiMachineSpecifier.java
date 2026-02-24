@@ -12,6 +12,7 @@ import ede.stl.gui.GuiRegister;
 import ede.stl.gui.GuiIO;
 import ede.gen.utils.JavaJobCompiler;
 import ede.gen.utils.JavaSyntaxHighlighter;
+import ede.gen.utils.EdeJarBuilder;
 
 public class GuiMachineSpecifier extends JPanel{
     private GuiEdeGenField title;
@@ -65,7 +66,7 @@ public class GuiMachineSpecifier extends JPanel{
         saveEde.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event){
-
+                saveEdeEnvironment();
             }
         });
         toolBar.add(saveEde);
@@ -227,6 +228,32 @@ public class GuiMachineSpecifier extends JPanel{
         }
     }
 
+    private String getAddressFormatEnumName() {
+        String selected = (String) ramAddressFormatDropdown.getSelectedItem();
+        switch (selected) {
+            case "Hexadecimal": return "HEXIDECIMAL";
+            case "Decimal": return "DECIMAL";
+            case "Octal": return "OCTAL";
+            default: return "BINARY";
+        }
+    }
+
+    private String getMemoryFormatEnumName() {
+        String selected = (String) ramFormatDropdown.getSelectedItem();
+        if ("Hexadecimal".equals(selected)) {
+            return "HEXADECIMAL";
+        }
+        return "BINARY";
+    }
+
+    private String getRegisterFormatEnumName() {
+        String selected = (String) registerFormatDropdown.getSelectedItem();
+        if ("Hexidecimal".equals(selected)) {
+            return "HEXIDECIMAL";
+        }
+        return "BINARY";
+    }
+
     private boolean validateJobs() {
         ArrayList<GuiJobSpecifier> specs = jobList.getJobSpecifiers();
 
@@ -264,6 +291,87 @@ public class GuiMachineSpecifier extends JPanel{
 
         log.log("[PASS] All job validations passed.");
         return true;
+    }
+
+    private void saveEdeEnvironment() {
+        log.log("--- Save Ede Environment ---");
+
+        String edeTitle = title.getInputText();
+        if (edeTitle == null || edeTitle.trim().isEmpty()) {
+            edeTitle = "Ede Environment";
+        }
+
+        int ramBytesPerRowVal = 16;
+        try {
+            ramBytesPerRowVal = Integer.parseInt(ramBytesPerRow.getInputText().trim());
+        } catch (NumberFormatException e) {
+        }
+
+        String addrFmtName = getAddressFormatEnumName();
+        String memFmtName = getMemoryFormatEnumName();
+        String regFmtName = getRegisterFormatEnumName();
+
+        java.util.List<EdeJarBuilder.IoSectionData> ioData = new ArrayList<>();
+        for (IoSectionEntry entry : ioSections) {
+            String tabName = entry.tabNameField.getText().trim();
+            String sectionTitle = entry.sectionTitleField.getText().trim();
+            if (tabName.isEmpty() || sectionTitle.isEmpty()) continue;
+            String editChoice = (String) entry.editableDropdown.getSelectedItem();
+            boolean readOnly = "Read Only".equals(editChoice);
+            ioData.add(new EdeJarBuilder.IoSectionData(tabName, sectionTitle, readOnly));
+        }
+
+        ArrayList<GuiJobSpecifier> specs = jobList.getJobSpecifiers();
+        java.util.List<EdeJarBuilder.JobData> jobData = new ArrayList<>();
+        for (GuiJobSpecifier spec : specs) {
+            String jobType = spec.getSelectedJobType();
+            String jobName = spec.getJobName();
+            EdeJarBuilder.JobData jd = new EdeJarBuilder.JobData(jobType, jobName);
+            if ("Java Job".equals(jobType)) {
+                jd.code = spec.getText();
+                jd.imports = spec.getImportsText();
+                jd.jarPaths = spec.getJarPaths();
+            } else if ("Verilog Job".equals(jobType)) {
+                jd.verilogPath = spec.getVerilogPath();
+                jd.verilogInputFile = spec.getVerilogInputFile();
+            } else if ("Exe Job".equals(jobType)) {
+                jd.exePath = spec.getExePath();
+            }
+            jobData.add(jd);
+        }
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Save Ede JAR - Select Output Directory");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int result = chooser.showSaveDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION) {
+            log.log("[INFO] Save cancelled.");
+            return;
+        }
+        java.io.File outputDir = chooser.getSelectedFile();
+
+        String edeStlJarPath = System.getProperty("user.dir") + java.io.File.separator + "lib" + java.io.File.separator + "EdeStl.jar";
+
+        final String finalEdeTitle = edeTitle;
+        final int finalRamBytesPerRow = ramBytesPerRowVal;
+        log.log("[INFO] Building JAR: " + edeTitle + ".jar ...");
+
+        try {
+            java.io.File jarFile = EdeJarBuilder.buildJar(
+                finalEdeTitle, finalRamBytesPerRow,
+                addrFmtName, memFmtName, regFmtName,
+                ioData, jobData, edeStlJarPath, outputDir
+            );
+            log.log("[PASS] JAR saved successfully: " + jarFile.getAbsolutePath());
+            JOptionPane.showMessageDialog(this,
+                "Ede JAR saved:\n" + jarFile.getAbsolutePath(),
+                "Save Successful", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            log.log("[ERROR] Failed to build JAR: " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                "Failed to build JAR:\n" + e.getMessage(),
+                "Build Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void launchEdeEnvironment() {
