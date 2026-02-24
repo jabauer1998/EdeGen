@@ -213,7 +213,6 @@ public class EdeJarBuilder {
         sb.append("    }\n");
         sb.append("    public String call(String input) throws Exception {\n");
         sb.append("        ").append(code).append("\n");
-        sb.append("        return null;\n");
         sb.append("    }\n");
         sb.append("}\n");
         return sb.toString();
