@@ -26,6 +26,7 @@ public class GuiJobSpecifier extends JPanel {
     private JPanel textAreaPanel;
     private JTextField pathField;
     private JTextField exePathField;
+    private JTextField verilogInputField;
     private DefaultListModel<String> jarListModel;
     private JList<String> jarList;
     private int currentHeight = 300;
@@ -205,7 +206,32 @@ public class GuiJobSpecifier extends JPanel {
         pathRow.add(pathLabel, BorderLayout.WEST);
         pathRow.add(pathField, BorderLayout.CENTER);
         pathRow.add(browseBtn, BorderLayout.EAST);
-        verilogPanel.add(pathRow, BorderLayout.NORTH);
+
+        JPanel inputFileRow = new JPanel(new BorderLayout(4, 0));
+        inputFileRow.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        JLabel inputFileLabel = new JLabel("Verilog Input File: ");
+        verilogInputField = new JTextField();
+        JButton inputBrowseBtn = new JButton("Browse...");
+        inputBrowseBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setDialogTitle("Verilog Input File");
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                int result = chooser.showOpenDialog(GuiJobSpecifier.this);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    verilogInputField.setText(chooser.getSelectedFile().getAbsolutePath());
+                }
+            }
+        });
+        inputFileRow.add(inputFileLabel, BorderLayout.WEST);
+        inputFileRow.add(verilogInputField, BorderLayout.CENTER);
+        inputFileRow.add(inputBrowseBtn, BorderLayout.EAST);
+
+        JPanel verilogFieldsPanel = new JPanel();
+        verilogFieldsPanel.setLayout(new BoxLayout(verilogFieldsPanel, BoxLayout.Y_AXIS));
+        verilogFieldsPanel.add(pathRow);
+        verilogFieldsPanel.add(inputFileRow);
+        verilogPanel.add(verilogFieldsPanel, BorderLayout.NORTH);
 
         exePanel = new JPanel(new BorderLayout());
         JPanel exePathRow = new JPanel(new BorderLayout(4, 0));
@@ -355,6 +381,10 @@ public class GuiJobSpecifier extends JPanel {
 
     public String getVerilogPath() {
         return pathField.getText();
+    }
+
+    public String getVerilogInputFile() {
+        return verilogInputField.getText().trim();
     }
 
     public String getExePath() {
