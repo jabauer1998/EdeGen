@@ -78,9 +78,9 @@ public class GuiJobSpecifier extends JPanel {
         jobNameField = new JTextField(12);
         jobNameField.setToolTipText("Name passed to the job constructor");
 
-        headerBar.add(jobTypeDropdown);
         headerBar.add(jobNameLabel);
         headerBar.add(jobNameField);
+        headerBar.add(jobTypeDropdown);
         headerBar.add(collapseBtn);
         headerBar.add(removeBtn);
 
