@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
+import ede.stl.gui.EdeCallable;
 import ede.stl.gui.GuiEde;
 import ede.stl.gui.GuiRam;
 import ede.stl.gui.GuiJob;
@@ -332,12 +332,8 @@ public class GuiMachineSpecifier extends JPanel{
                 try {
                     String imports = spec.getImportsText();
                     java.util.List<String> jarPaths = spec.getJarPaths();
-                    Callable<Void> callable = JavaJobCompiler.compile(code, imports, jarPaths, guiEde);
-                    java.io.File tmpInput = java.io.File.createTempFile("edegen_input_" + i + "_", ".tmp");
-                    java.io.File tmpOutput = java.io.File.createTempFile("edegen_output_" + i + "_", ".tmp");
-                    tmpInput.deleteOnExit();
-                    tmpOutput.deleteOnExit();
-                    guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, tmpInput.getAbsolutePath(), tmpOutput.getAbsolutePath(), "StandardError");
+                    EdeCallable callable = JavaJobCompiler.compile(code, imports, jarPaths, guiEde);
+                    guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable);
                     log.log("[PASS] " + jobName + " compiled and added successfully.");
                 } catch (Exception e) {
                     log.log("[ERROR] Failed to compile " + jobName + ": " + e.getMessage());
@@ -376,7 +372,7 @@ public class GuiMachineSpecifier extends JPanel{
                     return;
                 }
                 log.log("[INFO] Adding Exe Job: " + jobName + " (path: " + path + ")");
-                guiEde.AddExeJob(jobName, GuiJob.TextAreaType.DEFAULT, path, "default", "StandardInput", "StandardOutput", "StandardError");
+                guiEde.AddExeJob(jobName, GuiJob.TextAreaType.DEFAULT, path);
             }
         }
 

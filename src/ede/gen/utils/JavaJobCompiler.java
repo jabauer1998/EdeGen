@@ -4,22 +4,22 @@ import javax.tools.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.concurrent.Callable;
+import ede.stl.gui.EdeCallable;
 import ede.stl.gui.GuiEde;
 
 public class JavaJobCompiler {
     private static int classCounter = 0;
 
-    public static Callable<Void> compile(String userCode, GuiEde edeInstance) throws Exception {
+    public static EdeCallable compile(String userCode, GuiEde edeInstance) throws Exception {
         return compile(userCode, "", Collections.emptyList(), edeInstance);
     }
 
-    public static Callable<Void> compile(String userCode, String userImports, List<String> jarPaths, GuiEde edeInstance) throws Exception {
+    public static EdeCallable compile(String userCode, String userImports, List<String> jarPaths, GuiEde edeInstance) throws Exception {
         classCounter++;
         String className = "DynamicJob_" + classCounter;
 
         StringBuilder importBlock = new StringBuilder();
-        importBlock.append("import java.util.concurrent.Callable;\n");
+        importBlock.append("import ede.stl.gui.EdeCallable;\n");
         importBlock.append("import ede.stl.gui.GuiEde;\n");
         if (userImports != null && !userImports.trim().isEmpty()) {
             for (String line : userImports.split("\\n")) {
@@ -38,12 +38,12 @@ public class JavaJobCompiler {
 
         String fullSource =
             importBlock.toString() +
-            "public class " + className + " implements Callable<Void> {\n" +
+            "public class " + className + " implements EdeCallable {\n" +
             "    private GuiEde EdeInstance;\n" +
             "    public " + className + "(GuiEde edeInstance){\n"+
             "        this.EdeInstance = edeInstance;\n" +
             "    }\n" +
-            "    public Void call() throws Exception {\n" +
+            "    public String call(String input) throws Exception {\n" +
             "        " + userCode + "\n" +
             "        return null;\n" +
             "    }\n" +
@@ -109,8 +109,8 @@ public class JavaJobCompiler {
         );
 
         @SuppressWarnings("unchecked")
-        Class<Callable<Void>> clazz =
-            (Class<Callable<Void>>) classLoader.loadClass(className);
+        Class<EdeCallable> clazz =
+            (Class<EdeCallable>) classLoader.loadClass(className);
         return clazz.getDeclaredConstructor(GuiEde.class).newInstance(edeInstance);
     }
 }
