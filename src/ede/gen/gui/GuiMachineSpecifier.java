@@ -324,7 +324,7 @@ public class GuiMachineSpecifier extends JPanel{
         for (int i = 0; i < specs.size(); i++) {
             GuiJobSpecifier spec = specs.get(i);
             String jobType = spec.getSelectedJobType();
-            String jobName = spec.getJobTitle();
+            String jobName = spec.getJobName();
 
             if ("Java Job".equals(jobType)) {
                 String code = spec.getText();

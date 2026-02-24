@@ -20,6 +20,7 @@ public class GuiJobSpecifier extends JPanel {
     private TitledBorder border;
     private String jobTitle;
     private JComboBox<String> jobTypeDropdown;
+    private JTextField jobNameField;
     private JPanel verilogPanel;
     private JPanel exePanel;
     private JPanel textAreaPanel;
@@ -73,7 +74,13 @@ public class GuiJobSpecifier extends JPanel {
             }
         });
 
+        JLabel jobNameLabel = new JLabel("Job Name:");
+        jobNameField = new JTextField(12);
+        jobNameField.setToolTipText("Name passed to the job constructor");
+
         headerBar.add(jobTypeDropdown);
+        headerBar.add(jobNameLabel);
+        headerBar.add(jobNameField);
         headerBar.add(collapseBtn);
         headerBar.add(removeBtn);
 
@@ -306,6 +313,10 @@ public class GuiJobSpecifier extends JPanel {
 
     public String getJobTitle() {
         return jobTitle;
+    }
+
+    public String getJobName() {
+        return jobNameField.getText().trim();
     }
 
     public void setJobTitle(String title) {
