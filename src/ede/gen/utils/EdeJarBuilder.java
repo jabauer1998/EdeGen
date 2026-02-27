@@ -30,6 +30,8 @@ public class EdeJarBuilder {
         public String verilogPath;
         public String verilogInputFile;
         public String exePath;
+        public String bundledVerilogPath;
+        public String bundledVerilogInputPath;
 
         public JobData(String jobType, String jobName) {
             this.jobType = jobType;
@@ -156,6 +158,51 @@ public class EdeJarBuilder {
                 }
             }
 
+            int verilogFileIdx = 0;
+            for (JobData job : jobs) {
+                if ("Verilog Job".equals(job.jobType)) {
+                    if (job.verilogPath != null && !job.verilogPath.trim().isEmpty()) {
+                        File vFile = new File(job.verilogPath);
+                        if (vFile.exists()) {
+                            String entryName = "verilog/schematic_" + verilogFileIdx + "_" + vFile.getName();
+                            if (!addedEntries.contains(entryName)) {
+                                addedEntries.add(entryName);
+                                jos.putNextEntry(new JarEntry(entryName));
+                                try (FileInputStream fis = new FileInputStream(vFile)) {
+                                    byte[] buffer = new byte[4096];
+                                    int len;
+                                    while ((len = fis.read(buffer)) > 0) {
+                                        jos.write(buffer, 0, len);
+                                    }
+                                }
+                                jos.closeEntry();
+                            }
+                            job.bundledVerilogPath = entryName;
+                        }
+                    }
+                    if (job.verilogInputFile != null && !job.verilogInputFile.trim().isEmpty()) {
+                        File viFile = new File(job.verilogInputFile);
+                        if (viFile.exists()) {
+                            String entryName = "verilog/input_" + verilogFileIdx + "_" + viFile.getName();
+                            if (!addedEntries.contains(entryName)) {
+                                addedEntries.add(entryName);
+                                jos.putNextEntry(new JarEntry(entryName));
+                                try (FileInputStream fis = new FileInputStream(viFile)) {
+                                    byte[] buffer = new byte[4096];
+                                    int len;
+                                    while ((len = fis.read(buffer)) > 0) {
+                                        jos.write(buffer, 0, len);
+                                    }
+                                }
+                                jos.closeEntry();
+                            }
+                            job.bundledVerilogInputPath = entryName;
+                        }
+                    }
+                    verilogFileIdx++;
+                }
+            }
+
             for (JobData job : jobs) {
                 if (job.jarPaths != null) {
                     for (String jarPath : job.jarPaths) {
@@ -231,6 +278,7 @@ public class EdeJarBuilder {
         StringBuilder sb = new StringBuilder();
         sb.append("import javax.swing.*;\n");
         sb.append("import java.awt.*;\n");
+        sb.append("import java.io.*;\n");
         sb.append("import ede.stl.gui.GuiEde;\n");
         sb.append("import ede.stl.gui.GuiRam;\n");
         sb.append("import ede.stl.gui.GuiJob;\n");
@@ -278,10 +326,18 @@ public class EdeJarBuilder {
                 sb.append("            }\n");
                 javaIdx++;
             } else if ("Verilog Job".equals(job.jobType)) {
-                sb.append("            guiEde.gatherMetaDataFromVerilogFile(\"").append(escapeJava(job.verilogPath)).append("\", regFmt);\n");
-                sb.append("            guiEde.AddVerilogJob(\"").append(escapeJava(job.jobName)).append("\", \"")
-                  .append(escapeJava(job.verilogPath)).append("\", \"")
-                  .append(escapeJava(job.verilogInputFile != null ? job.verilogInputFile : "")).append("\", \"StandardInput\", \"StandardOutput\", \"StandardError\");\n");
+                if (job.bundledVerilogPath != null) {
+                    sb.append("            String verilogPath_").append(i).append(" = extractResource(\"").append(escapeJava(job.bundledVerilogPath)).append("\");\n");
+                } else {
+                    sb.append("            String verilogPath_").append(i).append(" = \"").append(escapeJava(job.verilogPath)).append("\";\n");
+                }
+                if (job.bundledVerilogInputPath != null) {
+                    sb.append("            String verilogInput_").append(i).append(" = extractResource(\"").append(escapeJava(job.bundledVerilogInputPath)).append("\");\n");
+                } else {
+                    sb.append("            String verilogInput_").append(i).append(" = \"").append(escapeJava(job.verilogInputFile != null ? job.verilogInputFile : "")).append("\";\n");
+                }
+                sb.append("            guiEde.gatherMetaDataFromVerilogFile(verilogPath_").append(i).append(", regFmt);\n");
+                sb.append("            guiEde.AddVerilogJob(\"").append(escapeJava(job.jobName)).append("\", verilogPath_").append(i).append(", verilogInput_").append(i).append(", \"StandardInput\", \"StandardOutput\", \"StandardError\");\n");
             } else if ("Exe Job".equals(job.jobType)) {
                 sb.append("            guiEde.AddExeJob(\"").append(escapeJava(job.jobName)).append("\", GuiJob.TextAreaType.DEFAULT, \"")
                   .append(escapeJava(job.exePath)).append("\");\n");
@@ -298,6 +354,25 @@ public class EdeJarBuilder {
         sb.append("            frame.pack();\n");
         sb.append("            frame.setVisible(true);\n");
         sb.append("        });\n");
+        sb.append("    }\n");
+        sb.append("\n");
+        sb.append("    private static String extractResource(String resourcePath) {\n");
+        sb.append("        try {\n");
+        sb.append("            InputStream is = EdeMain.class.getClassLoader().getResourceAsStream(resourcePath);\n");
+        sb.append("            if (is == null) throw new RuntimeException(\"Resource not found: \" + resourcePath);\n");
+        sb.append("            String fileName = resourcePath.contains(\"/\") ? resourcePath.substring(resourcePath.lastIndexOf('/') + 1) : resourcePath;\n");
+        sb.append("            File tmpFile = File.createTempFile(\"ede_\", \"_\" + fileName);\n");
+        sb.append("            tmpFile.deleteOnExit();\n");
+        sb.append("            try (FileOutputStream fos = new FileOutputStream(tmpFile)) {\n");
+        sb.append("                byte[] buffer = new byte[4096];\n");
+        sb.append("                int len;\n");
+        sb.append("                while ((len = is.read(buffer)) > 0) fos.write(buffer, 0, len);\n");
+        sb.append("            }\n");
+        sb.append("            is.close();\n");
+        sb.append("            return tmpFile.getAbsolutePath();\n");
+        sb.append("        } catch (Exception e) {\n");
+        sb.append("            throw new RuntimeException(\"Failed to extract resource: \" + resourcePath, e);\n");
+        sb.append("        }\n");
         sb.append("    }\n");
         sb.append("}\n");
         return sb.toString();
