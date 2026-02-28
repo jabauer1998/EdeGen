@@ -332,12 +332,14 @@ public class GuiMachineSpecifier extends JPanel{
                 jd.imports = spec.getImportsText();
                 jd.jarPaths = spec.getJarPaths();
                 jd.keywords = spec.loadKeywords();
+                jd.syntaxHighlighting = spec.isSyntaxHighlightingEnabled();
             } else if ("Verilog Job".equals(jobType)) {
                 jd.verilogPath = spec.getVerilogPath();
                 jd.verilogInputFile = spec.getVerilogInputFile();
             } else if ("Exe Job".equals(jobType)) {
                 jd.exePath = spec.getExePath();
                 jd.keywords = spec.loadKeywords();
+                jd.syntaxHighlighting = spec.isSyntaxHighlightingEnabled();
             }
             jobData.add(jd);
         }
@@ -444,10 +446,11 @@ public class GuiMachineSpecifier extends JPanel{
                     java.util.List<String> jarPaths = spec.getJarPaths();
                     EdeCallable callable = JavaJobCompiler.compile(code, imports, jarPaths, guiEde);
                     String[] keywords = spec.loadKeywords();
+                    GuiJob.TextAreaType textAreaType = spec.isSyntaxHighlightingEnabled() ? GuiJob.TextAreaType.KEYWORD : GuiJob.TextAreaType.DEFAULT;
                     if (keywords != null && keywords.length > 0) {
-                        guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, keywords);
+                        guiEde.AddJavaJob(jobName, textAreaType, callable, keywords);
                     } else {
-                        guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable);
+                        guiEde.AddJavaJob(jobName, textAreaType, callable);
                     }
                     log.log("[PASS] " + jobName + " compiled and added successfully.");
                 } catch (Exception e) {
@@ -489,10 +492,11 @@ public class GuiMachineSpecifier extends JPanel{
                 }
                 log.log("[INFO] Adding Exe Job: " + jobName + " (path: " + path + ")");
                 String[] keywords = spec.loadKeywords();
+                GuiJob.TextAreaType textAreaType = spec.isSyntaxHighlightingEnabled() ? GuiJob.TextAreaType.KEYWORD : GuiJob.TextAreaType.DEFAULT;
                 if (keywords != null && keywords.length > 0) {
-                    guiEde.AddExeJob(jobName, GuiJob.TextAreaType.DEFAULT, path, keywords);
+                    guiEde.AddExeJob(jobName, textAreaType, path, keywords);
                 } else {
-                    guiEde.AddExeJob(jobName, GuiJob.TextAreaType.DEFAULT, path);
+                    guiEde.AddExeJob(jobName, textAreaType, path);
                 }
             }
         }
