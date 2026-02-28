@@ -30,6 +30,12 @@ public class GuiJobSpecifier extends JPanel {
     private JTextField verilogInputField;
     private DefaultListModel<String> jarListModel;
     private JList<String> jarList;
+    private JCheckBox javaSyntaxCheckbox;
+    private JTextField javaKeywordFileField;
+    private JPanel javaKeywordPanel;
+    private JCheckBox exeSyntaxCheckbox;
+    private JTextField exeKeywordFileField;
+    private JPanel exeKeywordPanel;
     private int currentHeight = 300;
 
     public GuiJobSpecifier(String title, Runnable onRemove) {
@@ -184,7 +190,48 @@ public class GuiJobSpecifier extends JPanel {
         jarPanel.add(jarButtonPanel, BorderLayout.SOUTH);
         jarPanel.setMinimumSize(new Dimension(100, 60));
 
-        JSplitPane codeJarSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, editorSplitPane, jarPanel);
+        javaKeywordPanel = new JPanel(new BorderLayout(4, 0));
+        javaKeywordPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        JLabel javaKeywordLabel = new JLabel("Choose Keyword File: ");
+        javaKeywordFileField = new JTextField();
+        JButton javaKeywordBrowseBtn = new JButton("Browse...");
+        javaKeywordBrowseBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setDialogTitle("Select Keyword File");
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                int result = chooser.showOpenDialog(GuiJobSpecifier.this);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    javaKeywordFileField.setText(chooser.getSelectedFile().getAbsolutePath());
+                }
+            }
+        });
+        javaKeywordPanel.add(javaKeywordLabel, BorderLayout.WEST);
+        javaKeywordPanel.add(javaKeywordFileField, BorderLayout.CENTER);
+        javaKeywordPanel.add(javaKeywordBrowseBtn, BorderLayout.EAST);
+        javaKeywordPanel.setVisible(false);
+
+        javaSyntaxCheckbox = new JCheckBox("Enable Syntax Highlighting");
+        javaSyntaxCheckbox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                javaKeywordPanel.setVisible(javaSyntaxCheckbox.isSelected());
+                revalidate();
+                repaint();
+            }
+        });
+
+        JPanel javaSyntaxSection = new JPanel();
+        javaSyntaxSection.setLayout(new BoxLayout(javaSyntaxSection, BoxLayout.Y_AXIS));
+        javaSyntaxCheckbox.setAlignmentX(LEFT_ALIGNMENT);
+        javaKeywordPanel.setAlignmentX(LEFT_ALIGNMENT);
+        javaSyntaxSection.add(javaSyntaxCheckbox);
+        javaSyntaxSection.add(javaKeywordPanel);
+
+        JPanel javaBottomPanel = new JPanel(new BorderLayout());
+        javaBottomPanel.add(jarPanel, BorderLayout.CENTER);
+        javaBottomPanel.add(javaSyntaxSection, BorderLayout.SOUTH);
+
+        JSplitPane codeJarSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, editorSplitPane, javaBottomPanel);
         codeJarSplitPane.setResizeWeight(0.75);
         codeJarSplitPane.setContinuousLayout(true);
         textAreaPanel.add(codeJarSplitPane, BorderLayout.CENTER);
@@ -256,7 +303,46 @@ public class GuiJobSpecifier extends JPanel {
         exePathRow.add(exePathLabel, BorderLayout.WEST);
         exePathRow.add(exePathField, BorderLayout.CENTER);
         exePathRow.add(exeBrowseBtn, BorderLayout.EAST);
-        exePanel.add(exePathRow, BorderLayout.NORTH);
+
+        exeKeywordPanel = new JPanel(new BorderLayout(4, 0));
+        exeKeywordPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        JLabel exeKeywordLabel = new JLabel("Choose Keyword File: ");
+        exeKeywordFileField = new JTextField();
+        JButton exeKeywordBrowseBtn = new JButton("Browse...");
+        exeKeywordBrowseBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setDialogTitle("Select Keyword File");
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                int result = chooser.showOpenDialog(GuiJobSpecifier.this);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    exeKeywordFileField.setText(chooser.getSelectedFile().getAbsolutePath());
+                }
+            }
+        });
+        exeKeywordPanel.add(exeKeywordLabel, BorderLayout.WEST);
+        exeKeywordPanel.add(exeKeywordFileField, BorderLayout.CENTER);
+        exeKeywordPanel.add(exeKeywordBrowseBtn, BorderLayout.EAST);
+        exeKeywordPanel.setVisible(false);
+
+        exeSyntaxCheckbox = new JCheckBox("Enable Syntax Highlighting");
+        exeSyntaxCheckbox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                exeKeywordPanel.setVisible(exeSyntaxCheckbox.isSelected());
+                revalidate();
+                repaint();
+            }
+        });
+
+        JPanel exeFieldsPanel = new JPanel();
+        exeFieldsPanel.setLayout(new BoxLayout(exeFieldsPanel, BoxLayout.Y_AXIS));
+        exePathRow.setAlignmentX(LEFT_ALIGNMENT);
+        exeSyntaxCheckbox.setAlignmentX(LEFT_ALIGNMENT);
+        exeKeywordPanel.setAlignmentX(LEFT_ALIGNMENT);
+        exeFieldsPanel.add(exePathRow);
+        exeFieldsPanel.add(exeSyntaxCheckbox);
+        exeFieldsPanel.add(exeKeywordPanel);
+        exePanel.add(exeFieldsPanel, BorderLayout.NORTH);
 
         contentPanel.add(verilogPanel, "Verilog Job");
         contentPanel.add(exePanel, "Exe Job");
@@ -354,6 +440,41 @@ public class GuiJobSpecifier extends JPanel {
 
     public String getJobName() {
         return jobNameField.getText().trim();
+    }
+
+    public boolean isSyntaxHighlightingEnabled() {
+        String jobType = getSelectedJobType();
+        if ("Java Job".equals(jobType)) return javaSyntaxCheckbox.isSelected();
+        if ("Exe Job".equals(jobType)) return exeSyntaxCheckbox.isSelected();
+        return false;
+    }
+
+    public String getKeywordFilePath() {
+        String jobType = getSelectedJobType();
+        if ("Java Job".equals(jobType)) return javaKeywordFileField.getText().trim();
+        if ("Exe Job".equals(jobType)) return exeKeywordFileField.getText().trim();
+        return "";
+    }
+
+    public String[] loadKeywords() {
+        if (!isSyntaxHighlightingEnabled()) return null;
+        String path = getKeywordFilePath();
+        if (path.isEmpty()) return null;
+        try {
+            java.util.List<String> keywords = new ArrayList<>();
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(path));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String trimmed = line.trim();
+                if (!trimmed.isEmpty()) {
+                    keywords.add(trimmed);
+                }
+            }
+            reader.close();
+            return keywords.toArray(new String[0]);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public void setJobTitle(String title) {

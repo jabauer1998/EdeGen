@@ -31,6 +31,7 @@ public class EdeJarBuilder {
         public String verilogInputFile;
         public String exePath;
         public String bundledVerilogPath;
+        public String[] keywords;
 
         public JobData(String jobType, String jobName) {
             this.jobType = jobType;
@@ -300,7 +301,15 @@ public class EdeJarBuilder {
                 String className = javaJobClassNames.get(i);
                 sb.append("            try {\n");
                 sb.append("                EdeCallable callable_").append(javaIdx).append(" = new ").append(className).append("(guiEde);\n");
-                sb.append("                guiEde.AddJavaJob(\"").append(escapeJava(job.jobName)).append("\", GuiJob.TextAreaType.DEFAULT, callable_").append(javaIdx).append(");\n");
+                if (job.keywords != null && job.keywords.length > 0) {
+                    sb.append("                guiEde.AddJavaJob(\"").append(escapeJava(job.jobName)).append("\", GuiJob.TextAreaType.DEFAULT, callable_").append(javaIdx);
+                    for (String kw : job.keywords) {
+                        sb.append(", \"").append(escapeJava(kw)).append("\"");
+                    }
+                    sb.append(");\n");
+                } else {
+                    sb.append("                guiEde.AddJavaJob(\"").append(escapeJava(job.jobName)).append("\", GuiJob.TextAreaType.DEFAULT, callable_").append(javaIdx).append(");\n");
+                }
                 sb.append("            } catch (Exception e) {\n");
                 sb.append("                System.err.println(\"Failed to create Java Job: \" + e.getMessage());\n");
                 sb.append("            }\n");
@@ -315,8 +324,17 @@ public class EdeJarBuilder {
                 sb.append("            guiEde.gatherMetaDataFromVerilogFile(verilogPath_").append(i).append(", regFmt);\n");
                 sb.append("            guiEde.AddVerilogJob(\"").append(escapeJava(job.jobName)).append("\", verilogPath_").append(i).append(", verilogInput_").append(i).append(", \"StandardInput\", \"StandardOutput\", \"StandardError\");\n");
             } else if ("Exe Job".equals(job.jobType)) {
-                sb.append("            guiEde.AddExeJob(\"").append(escapeJava(job.jobName)).append("\", GuiJob.TextAreaType.DEFAULT, \"")
-                  .append(escapeJava(job.exePath)).append("\");\n");
+                if (job.keywords != null && job.keywords.length > 0) {
+                    sb.append("            guiEde.AddExeJob(\"").append(escapeJava(job.jobName)).append("\", GuiJob.TextAreaType.DEFAULT, \"")
+                      .append(escapeJava(job.exePath)).append("\"");
+                    for (String kw : job.keywords) {
+                        sb.append(", \"").append(escapeJava(kw)).append("\"");
+                    }
+                    sb.append(");\n");
+                } else {
+                    sb.append("            guiEde.AddExeJob(\"").append(escapeJava(job.jobName)).append("\", GuiJob.TextAreaType.DEFAULT, \"")
+                      .append(escapeJava(job.exePath)).append("\");\n");
+                }
             }
         }
 

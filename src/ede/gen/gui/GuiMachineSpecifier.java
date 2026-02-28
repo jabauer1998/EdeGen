@@ -331,11 +331,13 @@ public class GuiMachineSpecifier extends JPanel{
                 jd.code = spec.getText();
                 jd.imports = spec.getImportsText();
                 jd.jarPaths = spec.getJarPaths();
+                jd.keywords = spec.loadKeywords();
             } else if ("Verilog Job".equals(jobType)) {
                 jd.verilogPath = spec.getVerilogPath();
                 jd.verilogInputFile = spec.getVerilogInputFile();
             } else if ("Exe Job".equals(jobType)) {
                 jd.exePath = spec.getExePath();
+                jd.keywords = spec.loadKeywords();
             }
             jobData.add(jd);
         }
@@ -441,7 +443,12 @@ public class GuiMachineSpecifier extends JPanel{
                     String imports = spec.getImportsText();
                     java.util.List<String> jarPaths = spec.getJarPaths();
                     EdeCallable callable = JavaJobCompiler.compile(code, imports, jarPaths, guiEde);
-                    guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable);
+                    String[] keywords = spec.loadKeywords();
+                    if (keywords != null && keywords.length > 0) {
+                        guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable, keywords);
+                    } else {
+                        guiEde.AddJavaJob(jobName, GuiJob.TextAreaType.DEFAULT, callable);
+                    }
                     log.log("[PASS] " + jobName + " compiled and added successfully.");
                 } catch (Exception e) {
                     log.log("[ERROR] Failed to compile " + jobName + ": " + e.getMessage());
@@ -481,7 +488,12 @@ public class GuiMachineSpecifier extends JPanel{
                     return;
                 }
                 log.log("[INFO] Adding Exe Job: " + jobName + " (path: " + path + ")");
-                guiEde.AddExeJob(jobName, GuiJob.TextAreaType.DEFAULT, path);
+                String[] keywords = spec.loadKeywords();
+                if (keywords != null && keywords.length > 0) {
+                    guiEde.AddExeJob(jobName, GuiJob.TextAreaType.DEFAULT, path, keywords);
+                } else {
+                    guiEde.AddExeJob(jobName, GuiJob.TextAreaType.DEFAULT, path);
+                }
             }
         }
 
