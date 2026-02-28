@@ -30,10 +30,9 @@ public class GuiJobSpecifier extends JPanel {
     private JTextField verilogInputField;
     private DefaultListModel<String> jarListModel;
     private JList<String> jarList;
-    private JCheckBox javaSyntaxCheckbox;
+    private JCheckBox syntaxCheckbox;
     private JTextField javaKeywordFileField;
     private JPanel javaKeywordPanel;
-    private JCheckBox exeSyntaxCheckbox;
     private JTextField exeKeywordFileField;
     private JPanel exeKeywordPanel;
     private int currentHeight = 300;
@@ -91,8 +90,18 @@ public class GuiJobSpecifier extends JPanel {
         leftPanel.add(jobNameLabel, BorderLayout.WEST);
         leftPanel.add(jobNameField, BorderLayout.CENTER);
 
+        syntaxCheckbox = new JCheckBox("Enable Syntax Highlighting");
+        syntaxCheckbox.setOpaque(false);
+        syntaxCheckbox.setVisible(false);
+        syntaxCheckbox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                updateKeywordPanelVisibility();
+            }
+        });
+
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
         rightPanel.setOpaque(false);
+        rightPanel.add(syntaxCheckbox);
         rightPanel.add(jobTypeDropdown);
         rightPanel.add(collapseBtn);
         rightPanel.add(removeBtn);
@@ -211,25 +220,9 @@ public class GuiJobSpecifier extends JPanel {
         javaKeywordPanel.add(javaKeywordBrowseBtn, BorderLayout.EAST);
         javaKeywordPanel.setVisible(false);
 
-        javaSyntaxCheckbox = new JCheckBox("Enable Syntax Highlighting");
-        javaSyntaxCheckbox.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                javaKeywordPanel.setVisible(javaSyntaxCheckbox.isSelected());
-                revalidate();
-                repaint();
-            }
-        });
-
-        JPanel javaSyntaxSection = new JPanel();
-        javaSyntaxSection.setLayout(new BoxLayout(javaSyntaxSection, BoxLayout.Y_AXIS));
-        javaSyntaxCheckbox.setAlignmentX(LEFT_ALIGNMENT);
-        javaKeywordPanel.setAlignmentX(LEFT_ALIGNMENT);
-        javaSyntaxSection.add(javaSyntaxCheckbox);
-        javaSyntaxSection.add(javaKeywordPanel);
-
         JPanel javaBottomPanel = new JPanel(new BorderLayout());
         javaBottomPanel.add(jarPanel, BorderLayout.CENTER);
-        javaBottomPanel.add(javaSyntaxSection, BorderLayout.SOUTH);
+        javaBottomPanel.add(javaKeywordPanel, BorderLayout.SOUTH);
 
         JSplitPane codeJarSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, editorSplitPane, javaBottomPanel);
         codeJarSplitPane.setResizeWeight(0.75);
@@ -325,22 +318,11 @@ public class GuiJobSpecifier extends JPanel {
         exeKeywordPanel.add(exeKeywordBrowseBtn, BorderLayout.EAST);
         exeKeywordPanel.setVisible(false);
 
-        exeSyntaxCheckbox = new JCheckBox("Enable Syntax Highlighting");
-        exeSyntaxCheckbox.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                exeKeywordPanel.setVisible(exeSyntaxCheckbox.isSelected());
-                revalidate();
-                repaint();
-            }
-        });
-
         JPanel exeFieldsPanel = new JPanel();
         exeFieldsPanel.setLayout(new BoxLayout(exeFieldsPanel, BoxLayout.Y_AXIS));
         exePathRow.setAlignmentX(LEFT_ALIGNMENT);
-        exeSyntaxCheckbox.setAlignmentX(LEFT_ALIGNMENT);
         exeKeywordPanel.setAlignmentX(LEFT_ALIGNMENT);
         exeFieldsPanel.add(exePathRow);
-        exeFieldsPanel.add(exeSyntaxCheckbox);
         exeFieldsPanel.add(exeKeywordPanel);
         exePanel.add(exeFieldsPanel, BorderLayout.NORTH);
 
@@ -407,11 +389,24 @@ public class GuiJobSpecifier extends JPanel {
         String selected = (String) jobTypeDropdown.getSelectedItem();
         if ("Verilog Job".equals(selected)) {
             cl.show(contentPanel, "Verilog Job");
+            syntaxCheckbox.setVisible(false);
         } else if ("Exe Job".equals(selected)) {
             cl.show(contentPanel, "Exe Job");
+            syntaxCheckbox.setVisible(true);
         } else {
             cl.show(contentPanel, "TextArea");
+            syntaxCheckbox.setVisible(true);
         }
+        updateKeywordPanelVisibility();
+        revalidate();
+        repaint();
+    }
+
+    private void updateKeywordPanelVisibility() {
+        boolean checked = syntaxCheckbox.isSelected();
+        String selected = (String) jobTypeDropdown.getSelectedItem();
+        javaKeywordPanel.setVisible(checked && "Java Job".equals(selected));
+        exeKeywordPanel.setVisible(checked && "Exe Job".equals(selected));
         revalidate();
         repaint();
     }
@@ -443,10 +438,7 @@ public class GuiJobSpecifier extends JPanel {
     }
 
     public boolean isSyntaxHighlightingEnabled() {
-        String jobType = getSelectedJobType();
-        if ("Java Job".equals(jobType)) return javaSyntaxCheckbox.isSelected();
-        if ("Exe Job".equals(jobType)) return exeSyntaxCheckbox.isSelected();
-        return false;
+        return syntaxCheckbox.isSelected();
     }
 
     public String getKeywordFilePath() {
