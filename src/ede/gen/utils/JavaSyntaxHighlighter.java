@@ -121,12 +121,22 @@ public class JavaSyntaxHighlighter implements DocumentListener {
         }
     }
 
+    private void syncFontSizes() {
+        int fontSize = textPane.getFont().getSize();
+        StyleConstants.setFontSize(defaultStyle, fontSize);
+        StyleConstants.setFontSize(keywordStyle, fontSize);
+        StyleConstants.setFontSize(stringStyle, fontSize);
+        StyleConstants.setFontSize(commentStyle, fontSize);
+        StyleConstants.setFontSize(numberStyle, fontSize);
+        StyleConstants.setFontSize(annotationStyle, fontSize);
+        StyleConstants.setFontSize(typeStyle, fontSize);
+    }
+
     private void highlightAll() {
         updating = true;
         try {
             String text = doc.getText(0, doc.getLength());
-            int fontSize = textPane.getFont().getSize();
-            StyleConstants.setFontSize(defaultStyle, fontSize);
+            syncFontSizes();
             doc.setCharacterAttributes(0, text.length(), defaultStyle, true);
 
             highlightKeywordsAndTypes(text);
