@@ -3,6 +3,7 @@ package ede.gen.gui;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.*;
+import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -36,10 +37,14 @@ public class GuiJobSpecifier extends JPanel {
     private JTextField exeKeywordFileField;
     private JPanel exeKeywordPanel;
     private int currentHeight = 300;
+    private JSplitPane editorSplitPane;
+    private GuiGenPanel genPanel;
+    private String previousJobType;
 
-    public GuiJobSpecifier(String title, Runnable onRemove) {
+    public GuiJobSpecifier(String title, Runnable onRemove, GuiGenPanel genPanel) {
         this.jobTitle = title;
         this.collapsed = false;
+        this.genPanel = genPanel;
 
         setLayout(new BorderLayout());
         setAlignmentX(LEFT_ALIGNMENT);
@@ -84,6 +89,11 @@ public class GuiJobSpecifier extends JPanel {
         JLabel jobNameLabel = new JLabel("Job Name: ");
         jobNameField = new JTextField();
         jobNameField.setToolTipText("Name passed to the job constructor");
+        jobNameField.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { onJobNameChanged(); }
+            public void removeUpdate(DocumentEvent e) { onJobNameChanged(); }
+            public void changedUpdate(DocumentEvent e) { onJobNameChanged(); }
+        });
 
         JPanel leftPanel = new JPanel(new BorderLayout(4, 0));
         leftPanel.setOpaque(false);
@@ -149,7 +159,7 @@ public class GuiJobSpecifier extends JPanel {
         scrollPane.setRowHeaderView(new GuiLineNumberGutter(textPane));
         codePanel.add(scrollPane, BorderLayout.CENTER);
 
-        JSplitPane editorSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, importsPanel, codePanel);
+        editorSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, importsPanel, codePanel);
         editorSplitPane.setResizeWeight(0.3);
         editorSplitPane.setDividerLocation(80);
         editorSplitPane.setContinuousLayout(true);
@@ -224,10 +234,7 @@ public class GuiJobSpecifier extends JPanel {
         javaBottomPanel.add(jarPanel, BorderLayout.CENTER);
         javaBottomPanel.add(javaKeywordPanel, BorderLayout.SOUTH);
 
-        JSplitPane codeJarSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, editorSplitPane, javaBottomPanel);
-        codeJarSplitPane.setResizeWeight(0.75);
-        codeJarSplitPane.setContinuousLayout(true);
-        textAreaPanel.add(codeJarSplitPane, BorderLayout.CENTER);
+        textAreaPanel.add(javaBottomPanel, BorderLayout.CENTER);
 
         verilogPanel = new JPanel(new BorderLayout());
         JPanel pathRow = new JPanel(new BorderLayout(4, 0));
@@ -330,6 +337,7 @@ public class GuiJobSpecifier extends JPanel {
         contentPanel.add(exePanel, "Exe Job");
         contentPanel.add(textAreaPanel, "TextArea");
 
+        previousJobType = (String) jobTypeDropdown.getSelectedItem();
         updateContentForJobType();
 
         JPanel resizeHandle = new JPanel();
@@ -387,6 +395,17 @@ public class GuiJobSpecifier extends JPanel {
     private void updateContentForJobType() {
         CardLayout cl = (CardLayout) contentPanel.getLayout();
         String selected = (String) jobTypeDropdown.getSelectedItem();
+
+        if (genPanel != null) {
+            if ("Java Job".equals(previousJobType) && !"Java Job".equals(selected)) {
+                genPanel.removeJavaTab(this);
+            }
+            if ("Java Job".equals(selected) && !"Java Job".equals(previousJobType)) {
+                genPanel.addJavaTab(this);
+            }
+        }
+        previousJobType = selected;
+
         if ("Verilog Job".equals(selected)) {
             cl.show(contentPanel, "Verilog Job");
             syntaxCheckbox.setVisible(false);
@@ -409,6 +428,21 @@ public class GuiJobSpecifier extends JPanel {
         exeKeywordPanel.setVisible(checked && "Exe Job".equals(selected));
         revalidate();
         repaint();
+    }
+
+    private void onJobNameChanged() {
+        if (genPanel != null && "Java Job".equals(getSelectedJobType())) {
+            genPanel.updateJavaTabTitle(this);
+        }
+    }
+
+    public JSplitPane getJavaEditorPanel() {
+        return editorSplitPane;
+    }
+
+    public String getTabTitle() {
+        String name = jobNameField.getText().trim();
+        return name.isEmpty() ? jobTitle : name;
     }
 
     public void toggleCollapsed() {
@@ -477,6 +511,9 @@ public class GuiJobSpecifier extends JPanel {
             border.setTitle(title + " [-]");
         }
         repaint();
+        if (genPanel != null && "Java Job".equals(getSelectedJobType())) {
+            genPanel.updateJavaTabTitle(this);
+        }
     }
 
     public String getText() {

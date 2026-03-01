@@ -11,8 +11,10 @@ public class GuiJobSpecifierList extends JPanel {
     private ArrayList<GuiJobSpecifier> jobSpecifiers;
     private int jobCounter;
     private JScrollPane scrollPane;
+    private GuiGenPanel genPanel;
 
-    public GuiJobSpecifierList(double width, double height) {
+    public GuiJobSpecifierList(double width, double height, GuiGenPanel genPanel) {
+        this.genPanel = genPanel;
         jobSpecifiers = new ArrayList<GuiJobSpecifier>();
         jobCounter = 0;
 
@@ -82,7 +84,7 @@ public class GuiJobSpecifierList extends JPanel {
             public void run() {
                 removeJobSpecifier(holder[0]);
             }
-        });
+        }, genPanel);
         jobSpecifiers.add(holder[0]);
         listPanel.add(holder[0]);
         listPanel.add(Box.createRigidArea(new Dimension(0, 4)));
@@ -91,6 +93,9 @@ public class GuiJobSpecifierList extends JPanel {
     }
 
     public void removeJobSpecifier(GuiJobSpecifier spec) {
+        if ("Java Job".equals(spec.getSelectedJobType()) && genPanel != null) {
+            genPanel.removeJavaTab(spec);
+        }
         jobSpecifiers.remove(spec);
         listPanel.remove(spec);
         renumberJobs();

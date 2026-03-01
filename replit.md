@@ -28,6 +28,9 @@ A Java Swing desktop GUI application for generating emulator development environ
 The workflow compiles all Java sources with JDK 25 and runs `ede.gen.driver.EdeGenerator` via VNC display.
 
 ## Recent Changes
+- 2026-03-01: Added JTabbedPane to GuiGenPanel - Home tab has original layout, each Java Job gets its own full-page tab for imports+code editing
+- 2026-03-01: Enable Syntax Highlighting checkbox moved to header bar, controls TextAreaType (DEFAULT vs KEYWORD)
+- 2026-03-01: Added keyword file loading for Java and Exe jobs, passed as varargs to AddJavaJob/AddExeJob
 - 2026-02-24: Implemented Save Ede Environment - generates executable JAR with EdeStl, compiled jobs, and generated main class
 - 2026-02-24: Updated to EdeCallable interface (String call(String)) replacing Callable<Void>
 - 2026-02-24: Added Job Name field to job specifiers, passed to job constructors
