@@ -159,9 +159,13 @@ public class GuiJobSpecifier extends JPanel {
         JScrollPane scrollPane = new JScrollPane(textPane);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setMinimumSize(new Dimension(100, 30));
-        scrollPane.setRowHeaderView(new GuiLineNumberGutter(textPane));
+        GuiLineNumberGutter codeGutter = new GuiLineNumberGutter(textPane);
+        scrollPane.setRowHeaderView(codeGutter);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
         Font codeFont = new Font(Font.MONOSPACED, Font.PLAIN, textPane.getFont().getSize());
+        int gutterWidth = codeGutter.getPreferredSize().width;
+        Color gutterBg = codeGutter.getBackground();
 
         codeHeaderText = new JTextArea();
         codeHeaderText.setFont(codeFont);
@@ -169,8 +173,15 @@ public class GuiJobSpecifier extends JPanel {
         codeHeaderText.setBackground(Color.WHITE);
         codeHeaderText.setEditable(false);
         codeHeaderText.setFocusable(false);
-        codeHeaderText.setBorder(BorderFactory.createEmptyBorder(2, 4, 0, 4));
+        codeHeaderText.setBorder(BorderFactory.createEmptyBorder(2, 3, 0, 0));
         updateCodeContextText();
+
+        JPanel headerGutterSpacer = new JPanel();
+        headerGutterSpacer.setBackground(gutterBg);
+        headerGutterSpacer.setPreferredSize(new Dimension(gutterWidth, 0));
+        JPanel codeHeaderRow = new JPanel(new BorderLayout());
+        codeHeaderRow.add(headerGutterSpacer, BorderLayout.WEST);
+        codeHeaderRow.add(codeHeaderText, BorderLayout.CENTER);
 
         codeFooterText = new JTextArea("});");
         codeFooterText.setFont(codeFont);
@@ -178,11 +189,28 @@ public class GuiJobSpecifier extends JPanel {
         codeFooterText.setBackground(Color.WHITE);
         codeFooterText.setEditable(false);
         codeFooterText.setFocusable(false);
-        codeFooterText.setBorder(BorderFactory.createEmptyBorder(0, 4, 2, 4));
+        codeFooterText.setBorder(BorderFactory.createEmptyBorder(0, 3, 2, 0));
 
-        codePanel.add(codeHeaderText, BorderLayout.NORTH);
+        JPanel footerGutterSpacer = new JPanel();
+        footerGutterSpacer.setBackground(gutterBg);
+        footerGutterSpacer.setPreferredSize(new Dimension(gutterWidth, 0));
+        JPanel codeFooterRow = new JPanel(new BorderLayout());
+        codeFooterRow.add(footerGutterSpacer, BorderLayout.WEST);
+        codeFooterRow.add(codeFooterText, BorderLayout.CENTER);
+
+        codeGutter.addComponentListener(new ComponentAdapter() {
+            public void componentResized(ComponentEvent e) {
+                int w = codeGutter.getWidth();
+                headerGutterSpacer.setPreferredSize(new Dimension(w, headerGutterSpacer.getHeight()));
+                footerGutterSpacer.setPreferredSize(new Dimension(w, footerGutterSpacer.getHeight()));
+                codeHeaderRow.revalidate();
+                codeFooterRow.revalidate();
+            }
+        });
+
+        codePanel.add(codeHeaderRow, BorderLayout.NORTH);
         codePanel.add(scrollPane, BorderLayout.CENTER);
-        codePanel.add(codeFooterText, BorderLayout.SOUTH);
+        codePanel.add(codeFooterRow, BorderLayout.SOUTH);
 
         editorSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, importsPanel, codePanel);
         editorSplitPane.setResizeWeight(0.3);
