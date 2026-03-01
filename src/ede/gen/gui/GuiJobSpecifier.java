@@ -183,7 +183,7 @@ public class GuiJobSpecifier extends JPanel {
         codeHeaderRow.add(headerGutterSpacer, BorderLayout.WEST);
         codeHeaderRow.add(codeHeaderText, BorderLayout.CENTER);
 
-        codeFooterText = new JTextArea("});");
+        codeFooterText = new JTextArea("    }\n});");
         codeFooterText.setFont(codeFont);
         codeFooterText.setForeground(Color.GRAY);
         codeFooterText.setBackground(Color.WHITE);
@@ -495,7 +495,7 @@ public class GuiJobSpecifier extends JPanel {
         String name = jobNameField.getText().trim();
         if (name.isEmpty()) name = "jobName";
         String type = syntaxCheckbox.isSelected() ? "GuiJob.TextAreaType.KEYWORD" : "GuiJob.TextAreaType.DEFAULT";
-        codeHeaderText.setText("guiEde.AddJavaJob(\"" + name + "\", " + type + ", new EdeCallable() {");
+        codeHeaderText.setText("guiEde.AddJavaJob(\"" + name + "\", " + type + ", new EdeCallable() {\n    @Override public String call(String input) {");
     }
 
     public JSplitPane getJavaEditorPanel() {
