@@ -169,7 +169,7 @@ public class GuiJobSpecifier extends JPanel {
 
         codeHeaderText = new JTextArea();
         codeHeaderText.setFont(codeFont);
-        codeHeaderText.setForeground(Color.GRAY);
+        codeHeaderText.setForeground(new Color(180, 180, 180));
         codeHeaderText.setBackground(textPane.getBackground());
         codeHeaderText.setEditable(false);
         codeHeaderText.setFocusable(false);
@@ -185,7 +185,7 @@ public class GuiJobSpecifier extends JPanel {
 
         codeFooterText = new JTextArea("    }\n});");
         codeFooterText.setFont(codeFont);
-        codeFooterText.setForeground(Color.GRAY);
+        codeFooterText.setForeground(new Color(180, 180, 180));
         codeFooterText.setBackground(textPane.getBackground());
         codeFooterText.setEditable(false);
         codeFooterText.setFocusable(false);
