@@ -170,7 +170,7 @@ public class GuiJobSpecifier extends JPanel {
         codeHeaderText = new JTextArea();
         codeHeaderText.setFont(codeFont);
         codeHeaderText.setForeground(Color.GRAY);
-        codeHeaderText.setBackground(Color.WHITE);
+        codeHeaderText.setBackground(textPane.getBackground());
         codeHeaderText.setEditable(false);
         codeHeaderText.setFocusable(false);
         codeHeaderText.setBorder(BorderFactory.createEmptyBorder(2, 3, 0, 0));
@@ -186,7 +186,7 @@ public class GuiJobSpecifier extends JPanel {
         codeFooterText = new JTextArea("    }\n});");
         codeFooterText.setFont(codeFont);
         codeFooterText.setForeground(Color.GRAY);
-        codeFooterText.setBackground(Color.WHITE);
+        codeFooterText.setBackground(textPane.getBackground());
         codeFooterText.setEditable(false);
         codeFooterText.setFocusable(false);
         codeFooterText.setBorder(BorderFactory.createEmptyBorder(0, 3, 2, 0));
@@ -495,7 +495,7 @@ public class GuiJobSpecifier extends JPanel {
         String name = jobNameField.getText().trim();
         if (name.isEmpty()) name = "jobName";
         String type = syntaxCheckbox.isSelected() ? "GuiJob.TextAreaType.KEYWORD" : "GuiJob.TextAreaType.DEFAULT";
-        codeHeaderText.setText("guiEde.AddJavaJob(\"" + name + "\", " + type + ", new EdeCallable() {\n    @Override public String call(String input) {");
+        codeHeaderText.setText("guiEde.AddJavaJob(\"" + name + "\", " + type + ", new EdeCallable() {\n    @Override\n    public String call(String input) {");
     }
 
     public JSplitPane getJavaEditorPanel() {
