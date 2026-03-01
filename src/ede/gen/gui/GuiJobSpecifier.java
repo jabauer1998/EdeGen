@@ -127,7 +127,31 @@ public class GuiJobSpecifier extends JPanel {
         textAreaPanel = new JPanel(new BorderLayout());
 
         JPanel importsPanel = new JPanel(new BorderLayout());
-        importsPanel.setBorder(BorderFactory.createTitledBorder("Imports"));
+
+        JPanel importsTitleBar = new JPanel(new BorderLayout());
+        importsTitleBar.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        importsTitleBar.add(new JLabel("Imports"), BorderLayout.WEST);
+        JPanel importsZoomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 2, 0));
+        JButton importsZoomIn = new JButton("+");
+        importsZoomIn.setMargin(new Insets(0, 4, 0, 4));
+        importsZoomIn.setToolTipText("Zoom in");
+        JButton importsZoomOut = new JButton("\u2212");
+        importsZoomOut.setMargin(new Insets(0, 4, 0, 4));
+        importsZoomOut.setToolTipText("Zoom out");
+        importsZoomIn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                zoomPane(importsPane, 2);
+            }
+        });
+        importsZoomOut.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                zoomPane(importsPane, -2);
+            }
+        });
+        importsZoomPanel.add(importsZoomOut);
+        importsZoomPanel.add(importsZoomIn);
+        importsTitleBar.add(importsZoomPanel, BorderLayout.EAST);
+        importsPanel.add(importsTitleBar, BorderLayout.NORTH);
         importsPane = new JTextPane() {
             @Override
             public boolean getScrollableTracksViewportWidth() {
@@ -145,7 +169,30 @@ public class GuiJobSpecifier extends JPanel {
         importsPanel.add(importsScrollPane, BorderLayout.CENTER);
 
         JPanel codePanel = new JPanel(new BorderLayout());
-        codePanel.setBorder(BorderFactory.createTitledBorder("Code"));
+
+        JPanel codeTitleBar = new JPanel(new BorderLayout());
+        codeTitleBar.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
+        codeTitleBar.add(new JLabel("Code"), BorderLayout.WEST);
+        JPanel codeZoomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 2, 0));
+        JButton codeZoomIn = new JButton("+");
+        codeZoomIn.setMargin(new Insets(0, 4, 0, 4));
+        codeZoomIn.setToolTipText("Zoom in");
+        JButton codeZoomOut = new JButton("\u2212");
+        codeZoomOut.setMargin(new Insets(0, 4, 0, 4));
+        codeZoomOut.setToolTipText("Zoom out");
+        codeZoomIn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                zoomCodePane(2);
+            }
+        });
+        codeZoomOut.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                zoomCodePane(-2);
+            }
+        });
+        codeZoomPanel.add(codeZoomOut);
+        codeZoomPanel.add(codeZoomIn);
+        codeTitleBar.add(codeZoomPanel, BorderLayout.EAST);
         textPane = new JTextPane() {
             @Override
             public boolean getScrollableTracksViewportWidth() {
@@ -238,9 +285,13 @@ public class GuiJobSpecifier extends JPanel {
             }
         });
 
-        codePanel.add(codeHeaderRow, BorderLayout.NORTH);
-        codePanel.add(scrollPane, BorderLayout.CENTER);
-        codePanel.add(codeFooterRow, BorderLayout.SOUTH);
+        JPanel codeContentPanel = new JPanel(new BorderLayout());
+        codeContentPanel.add(codeHeaderRow, BorderLayout.NORTH);
+        codeContentPanel.add(scrollPane, BorderLayout.CENTER);
+        codeContentPanel.add(codeFooterRow, BorderLayout.SOUTH);
+
+        codePanel.add(codeTitleBar, BorderLayout.NORTH);
+        codePanel.add(codeContentPanel, BorderLayout.CENTER);
 
         editorSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, importsPanel, codePanel);
         editorSplitPane.setResizeWeight(0.3);
@@ -502,6 +553,26 @@ public class GuiJobSpecifier extends JPanel {
         updateKeywordPanelVisibility();
         revalidate();
         repaint();
+    }
+
+    private void zoomPane(JTextPane pane, int delta) {
+        Font f = pane.getFont();
+        int newSize = f.getSize() + delta;
+        if (newSize < 8) newSize = 8;
+        if (newSize > 48) newSize = 48;
+        pane.setFont(new Font(f.getFamily(), f.getStyle(), newSize));
+        pane.revalidate();
+        pane.repaint();
+    }
+
+    private void zoomCodePane(int delta) {
+        zoomPane(textPane, delta);
+        Font f = textPane.getFont();
+        Font contextFont = new Font(Font.MONOSPACED, Font.PLAIN, f.getSize());
+        codeHeaderText.setFont(contextFont);
+        codeFooterText.setFont(contextFont);
+        codeHeaderText.revalidate();
+        codeFooterText.revalidate();
     }
 
     private void updateKeywordPanelVisibility() {
