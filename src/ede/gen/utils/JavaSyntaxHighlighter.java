@@ -58,42 +58,36 @@ public class JavaSyntaxHighlighter implements DocumentListener {
         defaultStyle = doc.addStyle("default", null);
         StyleConstants.setForeground(defaultStyle, Color.WHITE);
         StyleConstants.setFontFamily(defaultStyle, "Monospaced");
-        StyleConstants.setFontSize(defaultStyle, 13);
 
         keywordStyle = doc.addStyle("keyword", null);
         StyleConstants.setForeground(keywordStyle, new Color(204, 120, 50));
         StyleConstants.setBold(keywordStyle, true);
         StyleConstants.setFontFamily(keywordStyle, "Monospaced");
-        StyleConstants.setFontSize(keywordStyle, 13);
 
         stringStyle = doc.addStyle("string", null);
         StyleConstants.setForeground(stringStyle, new Color(106, 135, 89));
         StyleConstants.setFontFamily(stringStyle, "Monospaced");
-        StyleConstants.setFontSize(stringStyle, 13);
 
         commentStyle = doc.addStyle("comment", null);
         StyleConstants.setForeground(commentStyle, new Color(128, 128, 128));
         StyleConstants.setItalic(commentStyle, true);
         StyleConstants.setFontFamily(commentStyle, "Monospaced");
-        StyleConstants.setFontSize(commentStyle, 13);
 
         numberStyle = doc.addStyle("number", null);
         StyleConstants.setForeground(numberStyle, new Color(104, 151, 187));
         StyleConstants.setFontFamily(numberStyle, "Monospaced");
-        StyleConstants.setFontSize(numberStyle, 13);
 
         annotationStyle = doc.addStyle("annotation", null);
         StyleConstants.setForeground(annotationStyle, new Color(187, 181, 41));
         StyleConstants.setFontFamily(annotationStyle, "Monospaced");
-        StyleConstants.setFontSize(annotationStyle, 13);
 
         typeStyle = doc.addStyle("type", null);
         StyleConstants.setForeground(typeStyle, new Color(78, 154, 190));
         StyleConstants.setFontFamily(typeStyle, "Monospaced");
-        StyleConstants.setFontSize(typeStyle, 13);
 
         pane.setBackground(new Color(43, 43, 43));
         pane.setCaretColor(Color.WHITE);
+        pane.setFont(new Font("Monospaced", Font.PLAIN, 13));
     }
 
     @Override
@@ -124,6 +118,8 @@ public class JavaSyntaxHighlighter implements DocumentListener {
         updating = true;
         try {
             String text = doc.getText(0, doc.getLength());
+            int fontSize = textPane.getFont().getSize();
+            StyleConstants.setFontSize(defaultStyle, fontSize);
             doc.setCharacterAttributes(0, text.length(), defaultStyle, true);
 
             highlightKeywordsAndTypes(text);
