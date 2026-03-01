@@ -86,8 +86,15 @@ public class JavaSyntaxHighlighter implements DocumentListener {
         StyleConstants.setFontFamily(typeStyle, "Monospaced");
 
         pane.setBackground(new Color(43, 43, 43));
+        pane.setForeground(Color.WHITE);
         pane.setCaretColor(Color.WHITE);
         pane.setFont(new Font("Monospaced", Font.PLAIN, 13));
+
+        SimpleAttributeSet inputAttrs = new SimpleAttributeSet();
+        StyleConstants.setForeground(inputAttrs, Color.WHITE);
+        StyleConstants.setFontFamily(inputAttrs, "Monospaced");
+        StyleConstants.setFontSize(inputAttrs, 13);
+        pane.setCharacterAttributes(inputAttrs, true);
     }
 
     @Override
