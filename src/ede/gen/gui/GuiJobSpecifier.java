@@ -40,6 +40,8 @@ public class GuiJobSpecifier extends JPanel {
     private JSplitPane editorSplitPane;
     private GuiGenPanel genPanel;
     private String previousJobType;
+    private JTextArea codeHeaderText;
+    private JTextArea codeFooterText;
 
     public GuiJobSpecifier(String title, Runnable onRemove, GuiGenPanel genPanel) {
         this.jobTitle = title;
@@ -106,6 +108,7 @@ public class GuiJobSpecifier extends JPanel {
         syntaxCheckbox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 updateKeywordPanelVisibility();
+                updateCodeContextText();
             }
         });
 
@@ -157,7 +160,29 @@ public class GuiJobSpecifier extends JPanel {
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setMinimumSize(new Dimension(100, 30));
         scrollPane.setRowHeaderView(new GuiLineNumberGutter(textPane));
+
+        Font codeFont = new Font(Font.MONOSPACED, Font.PLAIN, textPane.getFont().getSize());
+
+        codeHeaderText = new JTextArea();
+        codeHeaderText.setFont(codeFont);
+        codeHeaderText.setForeground(Color.GRAY);
+        codeHeaderText.setBackground(Color.WHITE);
+        codeHeaderText.setEditable(false);
+        codeHeaderText.setFocusable(false);
+        codeHeaderText.setBorder(BorderFactory.createEmptyBorder(2, 4, 0, 4));
+        updateCodeContextText();
+
+        codeFooterText = new JTextArea("});");
+        codeFooterText.setFont(codeFont);
+        codeFooterText.setForeground(Color.GRAY);
+        codeFooterText.setBackground(Color.WHITE);
+        codeFooterText.setEditable(false);
+        codeFooterText.setFocusable(false);
+        codeFooterText.setBorder(BorderFactory.createEmptyBorder(0, 4, 2, 4));
+
+        codePanel.add(codeHeaderText, BorderLayout.NORTH);
         codePanel.add(scrollPane, BorderLayout.CENTER);
+        codePanel.add(codeFooterText, BorderLayout.SOUTH);
 
         editorSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, importsPanel, codePanel);
         editorSplitPane.setResizeWeight(0.3);
@@ -434,6 +459,15 @@ public class GuiJobSpecifier extends JPanel {
         if (genPanel != null && "Java Job".equals(getSelectedJobType())) {
             genPanel.updateJavaTabTitle(this);
         }
+        updateCodeContextText();
+    }
+
+    private void updateCodeContextText() {
+        if (codeHeaderText == null) return;
+        String name = jobNameField.getText().trim();
+        if (name.isEmpty()) name = "jobName";
+        String type = syntaxCheckbox.isSelected() ? "GuiJob.TextAreaType.KEYWORD" : "GuiJob.TextAreaType.DEFAULT";
+        codeHeaderText.setText("guiEde.AddJavaJob(\"" + name + "\", " + type + ", new EdeCallable() {");
     }
 
     public JSplitPane getJavaEditorPanel() {
