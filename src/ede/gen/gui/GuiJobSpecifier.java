@@ -152,6 +152,7 @@ public class GuiJobSpecifier extends JPanel {
                 return true;
             }
         };
+        textPane.setText("\t");
         textPane.setPreferredSize(new Dimension(400, 100));
         textPane.setMinimumSize(new Dimension(100, 30));
         textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "autoIndentNewline");
