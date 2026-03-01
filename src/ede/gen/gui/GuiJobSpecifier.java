@@ -560,7 +560,14 @@ public class GuiJobSpecifier extends JPanel {
         int newSize = f.getSize() + delta;
         if (newSize < 8) newSize = 8;
         if (newSize > 48) newSize = 48;
-        pane.setFont(new Font(f.getFamily(), f.getStyle(), newSize));
+        Font newFont = new Font(f.getFamily(), f.getStyle(), newSize);
+        pane.setFont(newFont);
+        StyledDocument doc = pane.getStyledDocument();
+        SimpleAttributeSet attrs = new SimpleAttributeSet();
+        StyleConstants.setFontSize(attrs, newSize);
+        StyleConstants.setFontFamily(attrs, newFont.getFamily());
+        doc.setCharacterAttributes(0, doc.getLength(), attrs, false);
+        pane.setCharacterAttributes(attrs, false);
         pane.revalidate();
         pane.repaint();
     }
