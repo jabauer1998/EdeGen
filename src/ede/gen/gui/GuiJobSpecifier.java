@@ -154,6 +154,35 @@ public class GuiJobSpecifier extends JPanel {
         };
         textPane.setPreferredSize(new Dimension(400, 100));
         textPane.setMinimumSize(new Dimension(100, 30));
+        textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "autoIndentNewline");
+        textPane.getActionMap().put("autoIndentNewline", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int caretPos = textPane.getCaretPosition();
+                    javax.swing.text.Document doc = textPane.getDocument();
+                    String text = doc.getText(0, caretPos);
+                    int lineStart = text.lastIndexOf('\n') + 1;
+                    String currentLine = text.substring(lineStart);
+                    StringBuilder indent = new StringBuilder();
+                    for (int i = 0; i < currentLine.length(); i++) {
+                        char c = currentLine.charAt(i);
+                        if (c == ' ' || c == '\t') {
+                            indent.append(c);
+                        } else {
+                            break;
+                        }
+                    }
+                    if (indent.length() == 0) {
+                        indent.append("\t");
+                    }
+                    doc.insertString(caretPos, "\n" + indent.toString(), null);
+                } catch (Exception ex) {
+                    try {
+                        textPane.getDocument().insertString(textPane.getCaretPosition(), "\n\t", null);
+                    } catch (Exception ignored) {}
+                }
+            }
+        });
         JavaSyntaxHighlighter highlighter = new JavaSyntaxHighlighter(textPane);
         textPane.getDocument().addDocumentListener(highlighter);
         JScrollPane scrollPane = new JScrollPane(textPane);
