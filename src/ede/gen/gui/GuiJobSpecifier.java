@@ -578,15 +578,20 @@ public class GuiJobSpecifier extends JPanel {
         Font contextFont = new Font(Font.MONOSPACED, Font.PLAIN, f.getSize());
         codeHeaderText.setFont(contextFont);
         codeFooterText.setFont(contextFont);
-        codeHeaderText.setRows(0);
-        codeFooterText.setRows(0);
-        codeHeaderText.setPreferredSize(null);
-        codeFooterText.setPreferredSize(null);
-        Container parent = codeHeaderText.getParent();
-        if (parent != null) {
-            parent.getParent().revalidate();
-            parent.getParent().repaint();
-        }
+        String headerContent = codeHeaderText.getText();
+        String footerContent = codeFooterText.getText();
+        codeHeaderText.setText("");
+        codeHeaderText.setText(headerContent);
+        codeFooterText.setText("");
+        codeFooterText.setText(footerContent);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                codeHeaderText.getParent().revalidate();
+                codeFooterText.getParent().revalidate();
+                codeHeaderText.getParent().getParent().revalidate();
+                codeHeaderText.getParent().getParent().repaint();
+            }
+        });
     }
 
     private void updateKeywordPanelVisibility() {
