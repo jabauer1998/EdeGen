@@ -578,8 +578,15 @@ public class GuiJobSpecifier extends JPanel {
         Font contextFont = new Font(Font.MONOSPACED, Font.PLAIN, f.getSize());
         codeHeaderText.setFont(contextFont);
         codeFooterText.setFont(contextFont);
-        codeHeaderText.revalidate();
-        codeFooterText.revalidate();
+        codeHeaderText.setRows(0);
+        codeFooterText.setRows(0);
+        codeHeaderText.setPreferredSize(null);
+        codeFooterText.setPreferredSize(null);
+        Container parent = codeHeaderText.getParent();
+        if (parent != null) {
+            parent.getParent().revalidate();
+            parent.getParent().repaint();
+        }
     }
 
     private void updateKeywordPanelVisibility() {
