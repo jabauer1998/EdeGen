@@ -205,7 +205,10 @@ public class EdeJarBuilder {
                 }
             }
 
-            if (hasVerilogJobs && verilogInstanceDir.exists()) {
+            if (hasVerilogJobs) {
+                if (!verilogInstanceDir.exists()) {
+                    throw new RuntimeException("Compiled Verilog classes not found at: " + verilogInstanceDir.getAbsolutePath());
+                }
                 addClassFiles(jos, verilogInstanceDir, verilogRootDir, addedEntries);
             }
 
@@ -261,6 +264,7 @@ public class EdeJarBuilder {
         reader.close();
         if (errorLog.size() > 0) {
             errorLog.printLog();
+            throw new RuntimeException("Verilog parse errors in: " + path);
         }
         return verilogFile;
     }
@@ -339,6 +343,27 @@ public class EdeJarBuilder {
         if (expr instanceof DecimalNode) {
             try {
                 return Integer.parseInt(((DecimalNode) expr).lexeme.trim());
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        } else if (expr instanceof HexadecimalNode) {
+            try {
+                String hex = ((HexadecimalNode) expr).lexeme.trim().replaceAll("_", "");
+                return Integer.parseInt(hex, 16);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        } else if (expr instanceof OctalNode) {
+            try {
+                String oct = ((OctalNode) expr).lexeme.trim().replaceAll("_", "");
+                return Integer.parseInt(oct, 8);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        } else if (expr instanceof BinaryNode) {
+            try {
+                String bin = ((BinaryNode) expr).lexeme.trim().replaceAll("_", "");
+                return Integer.parseInt(bin, 2);
             } catch (NumberFormatException e) {
                 return 0;
             }

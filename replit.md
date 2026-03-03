@@ -20,7 +20,7 @@ A Java Swing desktop GUI application for generating emulator development environ
 - **Test Ede Environment**: Collects form parameters and opens a new JFrame with GuiEde from EdeStl.jar
 - **IO Sections**: Dynamic add/remove list in Machine Specifier to configure GuiEde IO sections (tab name, section title, editable/read-only)
 - **Java Job Compilation**: Typed Java code is compiled at runtime into EdeCallable using javax.tools.JavaCompiler; compiled classes receive GuiEde instance
-- **Save Ede Environment**: Generates an executable JAR containing EdeStl, compiled Java jobs, and a generated main class that recreates the GuiEde from form data
+- **Save Ede Environment**: Generates a portable FAT JAR with compiled Verilog (via VerilogToJavaGen ASM bytecode generation), compiled Java jobs, and EdeStl (excluding interpreter/parser/AST/passes for compiled Verilog mode)
 - **Syntax Highlighting**: Java code editor with color-coded keywords, types, strings, comments, numbers, annotations
 - **Job Types**: Verilog (file selector), Java (code editor), Exe (file selector)
 
@@ -28,6 +28,7 @@ A Java Swing desktop GUI application for generating emulator development environ
 The workflow compiles all Java sources with JDK 25 and runs `ede.gen.driver.EdeGenerator` via VNC display.
 
 ## Recent Changes
+- 2026-03-03: Compiled Verilog mode for Save: VerilogToJavaGen generates bytecode (.class files) at build time; AST annotations (@register→AddRegister, @status→AddFlag, @memory→setUpMemory) extracted and emitted as explicit calls in generated EdeMain; FAT JAR excludes ast/parser/interpreter/passes packages; AddVerilogJob uses compiled mode (false)
 - 2026-03-01: Added JTabbedPane to GuiGenPanel - Home tab has original layout, each Java Job gets its own full-page tab for imports+code editing
 - 2026-03-01: Enable Syntax Highlighting checkbox moved to header bar, controls TextAreaType (DEFAULT vs KEYWORD)
 - 2026-03-01: Added keyword file loading for Java and Exe jobs, passed as varargs to AddJavaJob/AddExeJob
