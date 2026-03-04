@@ -371,7 +371,10 @@ public class GuiMachineSpecifier extends JPanel{
                 "Ede JAR saved:\n" + jarFile.getAbsolutePath(),
                 "Save Successful", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
+            java.io.StringWriter sw = new java.io.StringWriter();
+            e.printStackTrace(new java.io.PrintWriter(sw));
             log.log("[ERROR] Failed to build JAR: " + e.getMessage());
+            log.log("[TRACE] " + sw.toString());
             JOptionPane.showMessageDialog(this,
                 "Failed to build JAR:\n" + e.getMessage(),
                 "Build Error", JOptionPane.ERROR_MESSAGE);
