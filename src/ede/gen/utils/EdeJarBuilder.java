@@ -258,8 +258,9 @@ public class EdeJarBuilder {
         ErrorLog errorLog = new ErrorLog();
         Lexer lexer = new Lexer(source, errorLog);
         List<Token> tokens = lexer.tokenize();
-        List<Token> filtered = Lexer.filterWhiteSpace(tokens);
-        Parser parser = new Parser(filtered, errorLog);
+	Preprocessor preProc = new Preprocessor(errorLog, tokens);
+	tokens = preProc.executePass();
+        Parser parser = new Parser(tokens, errorLog);
         VerilogFile verilogFile = parser.parseVerilogFile();
         reader.close();
         if (errorLog.size() > 0) {
