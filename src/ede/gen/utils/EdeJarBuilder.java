@@ -108,7 +108,7 @@ public class EdeJarBuilder {
                         hasVerilogJobs = true;
                         VerilogFile ast = parseVerilogFile(job.verilogPath);
                         extractVerilogMetadata(ast, job);
-                        VerilogToJavaGen gen = new VerilogToJavaGen(25);
+                        VerilogToJavaGen gen = new VerilogToJavaGen(69);
                         gen.codeGenVerilogFile(ast);
                     }
                 }
