@@ -109,9 +109,7 @@ public class EdeJarBuilder {
                         VerilogFile ast = parseVerilogFile(job.verilogPath);
                         extractVerilogMetadata(ast, job);
                         VerilogToJavaGen gen = new VerilogToJavaGen(69);
-                        String modsDir = verilogInstanceDir.getAbsolutePath() + File.separator + "mods";
-                        String processesPath = verilogInstanceDir.getAbsolutePath() + File.separator + "Processes.class";
-                        gen.codeGenVerilogFile(ast, ramBytesPerRow, modsDir, processesPath);
+                        gen.codeGenVerilogFile(ast);
                     }
                 }
             } else {

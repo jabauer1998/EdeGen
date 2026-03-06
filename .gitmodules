@@ -1,0 +1,3 @@
+[submodule "lib/EdeStl"]
+	path = lib/EdeStl
+	url = https://jabuuer1998@github.com/jabauer1998/EdeStl.git
