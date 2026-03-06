@@ -18,6 +18,9 @@ if [ -n "$javaExists" ]; then
         command=$1
         echo "Command is $command"
         if [ "$command" = "build" ]; then
+            echo "Building SubModule -EdeStl.jar..."
+            bash ./lib/EdeStl/build/LinuxBuild.sh build
+            echo "Built SubModule -EdeStl.jar..."
             srcRoot=$(pwd)
             if [ -f build/BuildList.txt ]; then
                 rm -f build/BuildList.txt
@@ -30,15 +33,18 @@ if [ -n "$javaExists" ]; then
                 fi
             done
             cat "build/BuildList.txt"
-            javac "@build/BuildList.txt" -d "./tmp" -sourcepath "./src" -cp "./lib/*" -encoding "UTF-8"
-            for jar in lib/*.jar; do
-                if [ -f "$jar" ]; then
-                    jar xf "$jar" -C "./tmp"
-                    if [ -f "./tmp/META-INF/MANIFEST.MF" ]; then
-                        rm -f "./tmp/META-INF/MANIFEST.MF"
-                    fi
-                fi
-            done
+            mkdir -p tmp
+            mkdir -p bin
+            javac "@build/BuildList.txt" -d "./tmp" -sourcepath "./src" -cp "./lib/EdeStl/bin/EdeStl.jar" -encoding "UTF-8"
+            if [ $? -ne 0 ]; then
+                echo "Build failed!"
+                cd "$location"
+                exit 1
+            fi
+            (cd tmp && jar xf "../lib/EdeStl/bin/EdeStl.jar")
+            if [ -f "./tmp/META-INF/MANIFEST.MF" ]; then
+                rm -f "./tmp/META-INF/MANIFEST.MF"
+            fi
             jar cfe "./bin/EdeGen.jar" "ede.gen.driver.EdeGenerator" -C "./tmp" "."
             rm -rf ./tmp/*
         elif [ "$command" = "clean" ]; then

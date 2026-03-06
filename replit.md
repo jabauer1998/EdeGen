@@ -13,7 +13,7 @@ A Java Swing desktop GUI application for generating emulator development environ
   - `utils/JavaJobCompiler.java` - Runtime Java code compilation into EdeCallable objects
   - `utils/JavaSyntaxHighlighter.java` - Syntax highlighting for Java code editor
   - `utils/EdeJarBuilder.java` - Generates executable JARs from form data with compiled jobs and EdeStl
-- **Libraries**: `lib/EdeStl.jar` - standard library dependency (compiled with Java 25)
+- **Libraries**: `lib/EdeStl/` - EdeStl git submodule (compiled to `lib/EdeStl/bin/EdeStl.jar`); depends on ASM 9.6 (`lib/EdeStl/lib/asm-9.6.jar`, gitignored, auto-downloaded)
 - **Output**: Compiled classes go to `bin/`
 
 ## Key Features
@@ -28,6 +28,7 @@ A Java Swing desktop GUI application for generating emulator development environ
 The workflow compiles all Java sources with JDK 25 and runs `ede.gen.driver.EdeGenerator` via VNC display.
 
 ## Recent Changes
+- 2026-03-06: EdeStl is now a git submodule at lib/EdeStl; updated build scripts (LinuxBuild.sh for both EdeGen and EdeStl) to match Windows counterparts; workflow builds submodule first then EdeGen; EdeStl.jar path updated to lib/EdeStl/bin/EdeStl.jar
 - 2026-03-03: Compiled Verilog mode for Save: VerilogToJavaGen generates bytecode (.class files) at build time; AST annotations (@register→AddRegister, @status→AddFlag, @memory→setUpMemory) extracted and emitted as explicit calls in generated EdeMain; FAT JAR excludes ast/parser/interpreter/passes packages; AddVerilogJob uses compiled mode (false)
 - 2026-03-01: Added JTabbedPane to GuiGenPanel - Home tab has original layout, each Java Job gets its own full-page tab for imports+code editing
 - 2026-03-01: Enable Syntax Highlighting checkbox moved to header bar, controls TextAreaType (DEFAULT vs KEYWORD)

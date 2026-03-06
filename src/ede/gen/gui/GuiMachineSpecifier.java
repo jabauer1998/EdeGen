@@ -354,7 +354,7 @@ public class GuiMachineSpecifier extends JPanel{
         }
         java.io.File outputDir = chooser.getSelectedFile();
 
-        String edeStlJarPath = System.getProperty("user.dir") + java.io.File.separator + "lib" + java.io.File.separator + "EdeStl.jar";
+        String edeStlJarPath = System.getProperty("user.dir") + java.io.File.separator + "lib" + java.io.File.separator + "EdeStl" + java.io.File.separator + "bin" + java.io.File.separator + "EdeStl.jar";
 
         final String finalEdeTitle = edeTitle;
         final int finalRamBytesPerRow = ramBytesPerRowVal;
