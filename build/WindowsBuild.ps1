@@ -16,6 +16,9 @@ if($javaExists -ne ""){
 	$command = $args[0]
 	Write-Host "Command is $command"
 	if($command -eq "build"){
+	    Write-Host "Building SubModule -EdeStl.jar..."
+	    ./lib/EdeStl/build/WindowsBuild.ps1 build
+	    Write-Host "Built SubModule -EdeStl.jar..."
 	    $srcRoot = Get-Location
 	    if(Test-Path -Path build\BuildList.txt){
 		Remove-Item -Force build\BuildList.txt
@@ -30,15 +33,10 @@ if($javaExists -ne ""){
 		[System.IO.File]::WriteAllText($line, $content, $Utf8NoBomEncoding)
 	    }
 	    cat "build/BuildList.txt"
-	    javac "@build/BuildList.txt" -d "./tmp" -sourcepath "./src" -cp "./lib/*" -encoding "UTF-8"
-	    $dependencyJars = Get-ChildItem -Path "./lib" -Filter *.jar
-	    Write-Host $dependencyJars
-	    foreach ($jar in $dependencyJars) {
-		# Extract contents of each dependency JAR into the temp directory
-		jar xf $jar.FullName -C "./tmp"
-	        if (Test-Path ".\tmp\META-INF\MANIFEST.MF") {
-		    Remove-Item ".\tmp\META-INF\MANIFEST.MF"
-		}
+	    javac "@build/BuildList.txt" -d "./tmp" -sourcepath "./src" -cp "./lib/EdeStl/bin/EdeStl.jar" -encoding "UTF-8"
+	    jar xf "./lib/EdeStl/bin/EdeStl.jar" -C "./tmp"
+	    if (Test-Path ".\tmp\META-INF\MANIFEST.MF") {
+		Remove-Item ".\tmp\META-INF\MANIFEST.MF"
 	    } 
 	    jar cfe "./bin/EdeGen.jar" "ede.gen.driver.EdeGenerator" -C "./tmp" "."
 	    Remove-Item -Path ./tmp/* -Recurse -Force
