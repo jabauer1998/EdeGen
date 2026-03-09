@@ -28,6 +28,7 @@ A Java Swing desktop GUI application for generating emulator development environ
 The workflow compiles all Java sources with JDK 25 and runs `ede.gen.driver.EdeGenerator` via VNC display.
 
 ## Recent Changes
+- 2026-03-09: VerilogToJavaGen: process methods now generated as instance methods (non-static) on module class instead of separate Processes class; module extends VerilogAsJavaBase; loadProcesses override generated to call each processN; processes can access module fields; VerilogAsJavaBase fixed with proper imports and CompiledEnvironment type; added missing SystemFunctionCall import
 - 2026-03-06: EdeStl is now a git submodule at lib/EdeStl; updated build scripts (LinuxBuild.sh for both EdeGen and EdeStl) to match Windows counterparts; workflow builds submodule first then EdeGen; EdeStl.jar path updated to lib/EdeStl/bin/EdeStl.jar
 - 2026-03-03: Compiled Verilog mode for Save: VerilogToJavaGen generates bytecode (.class files) at build time; AST annotations (@register→AddRegister, @status→AddFlag, @memory→setUpMemory) extracted and emitted as explicit calls in generated EdeMain; FAT JAR excludes ast/parser/interpreter/passes packages; AddVerilogJob uses compiled mode (false)
 - 2026-03-01: Added JTabbedPane to GuiGenPanel - Home tab has original layout, each Java Job gets its own full-page tab for imports+code editing
