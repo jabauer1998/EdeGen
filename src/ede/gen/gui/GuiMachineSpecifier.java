@@ -24,6 +24,7 @@ public class GuiMachineSpecifier extends JPanel{
     private GuiEdeLog log;
     private JPanel ioListPanel;
     private ArrayList<IoSectionEntry> ioSections;
+    private GuiGenPanel genPanel;
 
     private static class IoSectionEntry {
         JTextField tabNameField;
@@ -39,9 +40,10 @@ public class GuiMachineSpecifier extends JPanel{
         }
     }
     
-    public GuiMachineSpecifier(double width, double height, GuiJobSpecifierList jobList, GuiEdeLog log){
+    public GuiMachineSpecifier(double width, double height, GuiJobSpecifierList jobList, GuiEdeLog log, GuiGenPanel genPanel){
         this.jobList = jobList;
         this.log = log;
+        this.genPanel = genPanel;
         this.setLayout(new BorderLayout());
 
         JPanel topSection = new JPanel();
@@ -364,7 +366,7 @@ public class GuiMachineSpecifier extends JPanel{
             java.io.File jarFile = EdeJarBuilder.buildJar(
                 finalEdeTitle, finalRamBytesPerRow,
                 addrFmtName, memFmtName, regFmtName,
-                ioData, jobData, edeStlJarPath, outputDir
+                ioData, jobData, edeStlJarPath, outputDir, genPanel
             );
             log.log("[PASS] JAR saved successfully: " + jarFile.getAbsolutePath());
             JOptionPane.showMessageDialog(this,

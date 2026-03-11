@@ -14,14 +14,22 @@ import ede.stl.ast.BlockingAssignment;
 import ede.stl.ast.SystemTaskStatement;
 import ede.stl.ast.TaskStatement;
 import ede.stl.compiler.VerilogToJavaGen;
+import ede.gen.gui.GuiGenPanel;
 
 public class VerilogToEdeGen extends VerilogToJavaGen{
-    public VerilogToEdeGen(int javaVersion, EdeGenerator gen,  String standardOutputPane, String standardInputPane){
+    private GuiGenPanel gen;
+    private String standardOutputPane;
+    private String standardInputPane;
+    
+    public VerilogToEdeGen(int javaVersion, GuiGenPanel gen,  String standardOutputPane, String standardInputPane){
         super(javaVersion);
+        this.gen = gen;
+        this.standardOutputPane = standardOutputPane;
+        this.standardInputPane = standardInputPane;
     }
 
-    protected void printString(String str){
-        
+    protected void printStringNow(String str){
+        gen.addLog(str);
     }
 
     protected void codeGenFieldRegScalarIdent(Reg.Scalar.Ident ident, MethodVisitor constructor, String modName, ClassWriter moduleWriter){
@@ -30,6 +38,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
             if(annotationLexeme.toLowerCase().equals("@status")){
                 FieldVisitor fv = moduleWriter.visitField(Opcodes.ACC_PRIVATE, ident.declarationIdentifier, "Lede/stl/values/EdeStatVal;", null, null);
                 if (fv != null) {
+                    addField(ident.declarationIdentifier);
                     fv.visitEnd();
                 }
                 return;
@@ -44,6 +53,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
             if(annotationLexeme.toLowerCase().equals("@register")){
                 FieldVisitor fv = moduleWriter.visitField(Opcodes.ACC_PRIVATE, ident.declarationIdentifier, "Lede/stl/values/EdeRegVal;", null, null);
                 if (fv != null) {
+                    addField(ident.declarationIdentifier);
                     fv.visitEnd();
                 }
                 return;
@@ -58,6 +68,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
             if(annotationLexeme.toLowerCase().equals("@memory")){
                 FieldVisitor fv = moduleWriter.visitField(Opcodes.ACC_PRIVATE, array.declarationIdentifier, "Lede/stl/values/EdeMemVal;", null, null);
                 if (fv != null) {
+                    addField(array.declarationIdentifier);
                     fv.visitEnd();
                 }
                 return;
@@ -75,8 +86,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "isDebuggerEnabled", "()Z", false);
                 Label l0 = new Label();
                 mv.visitJumpInsn(Opcodes.IFEQ, l0);
-                mv.visitVarInsn(Opcodes.ALOAD, 0);
-                mv.visitFieldInsn(Opcodes.GETFIELD, modName, "guiInstance", "Lede/stl/gui/GuiEde;");
+                mv.visitVarInsn(Opcodes.ALOAD, 1);
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "waitForStep", "()V", false);
                 mv.visitLabel(l0);
             }

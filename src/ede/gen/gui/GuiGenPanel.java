@@ -21,7 +21,7 @@ public class GuiGenPanel extends JPanel {
 
         this.log = new GuiEdeLog(width, height / 6);
         this.jobs = new GuiJobSpecifierList(width / 2, 5 * height / 6, this);
-        this.machine = new GuiMachineSpecifier(width / 2, 5 * height / 6, this.jobs, this.log);
+        this.machine = new GuiMachineSpecifier(width / 2, 5 * height / 6, this.jobs, this.log, this);
 
         JSplitPane horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, this.jobs, this.machine);
         horizontalSplit.setResizeWeight(0.5);
@@ -42,6 +42,10 @@ public class GuiGenPanel extends JPanel {
         tabbedPane.addTab("Home", verticalSplit);
 
         this.add(tabbedPane, BorderLayout.CENTER);
+    }
+
+    public void addLog(String text){
+        this.log.log(text);
     }
 
     public void addJavaTab(GuiJobSpecifier spec) {

@@ -10,6 +10,7 @@ import ede.stl.ast.*;
 import ede.stl.common.*;
 import ede.stl.parser.*;
 import ede.gen.compiler.VerilogToEdeGen;
+import ede.gen.gui.GuiGenPanel;
 
 public class EdeJarBuilder {
 
@@ -77,7 +78,8 @@ public class EdeJarBuilder {
             List<IoSectionData> ioSections,
             List<JobData> jobs,
             String edeStlJarPath,
-            File outputDir
+            File outputDir,
+            GuiGenPanel genPanel
     ) throws Exception {
 
         File tmpDir = new File(System.getProperty("java.io.tmpdir"), "edegen_jar_build_" + System.currentTimeMillis());
@@ -108,7 +110,7 @@ public class EdeJarBuilder {
                         hasVerilogJobs = true;
                         VerilogFile ast = parseVerilogFile(job.verilogPath);
                         extractVerilogMetadata(ast, job);
-                        VerilogToEdeGen gen = new VerilogToEdeGen(69, null, "StandardOutput", "StandardInput");
+                        VerilogToEdeGen gen = new VerilogToEdeGen(69, genPanel, "StandardOutput", "StandardInput");
                         gen.codeGenVerilogFile(ast);
                     }
                 }
