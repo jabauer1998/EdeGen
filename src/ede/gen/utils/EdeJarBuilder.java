@@ -9,7 +9,7 @@ import java.util.zip.*;
 import ede.stl.ast.*;
 import ede.stl.common.*;
 import ede.stl.parser.*;
-import ede.stl.compiler.VerilogToJavaGen;
+import ede.stl.compiler.VerilogToEdeGen;
 
 public class EdeJarBuilder {
 
@@ -108,7 +108,7 @@ public class EdeJarBuilder {
                         hasVerilogJobs = true;
                         VerilogFile ast = parseVerilogFile(job.verilogPath);
                         extractVerilogMetadata(ast, job);
-                        VerilogToJavaGen gen = new VerilogToJavaGen(69);
+                        VerilogToEdeGen gen = new VerilogToEdeGen(69, "StandardOutput", "StandardInput");
                         gen.codeGenVerilogFile(ast);
                     }
                 }
@@ -248,7 +248,7 @@ public class EdeJarBuilder {
         for (String prefix : EXCLUDED_STL_PREFIXES) {
             if (name.startsWith(prefix)) return true;
         }
-        if (name.startsWith("ede/stl/compiler/VerilogToJavaGen")) return true;
+        if (name.startsWith("ede/stl/compiler/VerilogToJavaGen") || name.startsWith("ede/stl/compiler/VerilogToEdeGen")) return true;
         return false;
     }
 
@@ -258,8 +258,8 @@ public class EdeJarBuilder {
         ErrorLog errorLog = new ErrorLog();
         Lexer lexer = new Lexer(source, errorLog);
         List<Token> tokens = lexer.tokenize();
-	Preprocessor preProc = new Preprocessor(errorLog, tokens);
-	tokens = preProc.executePass();
+        Preprocessor preProc = new Preprocessor(errorLog, tokens);
+        tokens = preProc.executePass();
         Parser parser = new Parser(tokens, errorLog);
         VerilogFile verilogFile = parser.parseVerilogFile();
         reader.close();
