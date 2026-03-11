@@ -9,7 +9,7 @@ import java.util.zip.*;
 import ede.stl.ast.*;
 import ede.stl.common.*;
 import ede.stl.parser.*;
-import ede.stl.compiler.VerilogToEdeGen;
+import ede.gen.compiler.VerilogToEdeGen;
 
 public class EdeJarBuilder {
 
@@ -108,7 +108,7 @@ public class EdeJarBuilder {
                         hasVerilogJobs = true;
                         VerilogFile ast = parseVerilogFile(job.verilogPath);
                         extractVerilogMetadata(ast, job);
-                        VerilogToEdeGen gen = new VerilogToEdeGen(69, "StandardOutput", "StandardInput");
+                        VerilogToEdeGen gen = new VerilogToEdeGen(69, null, "StandardOutput", "StandardInput");
                         gen.codeGenVerilogFile(ast);
                     }
                 }
