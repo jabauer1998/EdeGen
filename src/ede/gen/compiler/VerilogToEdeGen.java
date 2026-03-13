@@ -158,7 +158,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
         } else if(assign.leftHandSide instanceof Identifier){
             Identifier leftHandSide = (Identifier)assign.leftHandSide;
             if((leftHandSide.labelIdentifier + "Shallow").equals(funcName)){
-                mv.visitInsn(Opcodes.RETURN);
+                mv.visitInsn(Opcodes.ARETURN);
             } else {
                 if(localInScope(leftHandSide.labelIdentifier)){
                      int ptr = this.getFromScope(leftHandSide.labelIdentifier);
