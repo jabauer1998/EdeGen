@@ -157,6 +157,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                  false);
         } else if(assign.leftHandSide instanceof Identifier){
             Identifier leftHandSide = (Identifier)assign.leftHandSide;
+            printStringNow("DEBUG blockingAssign LHS=" + leftHandSide.labelIdentifier + " funcName=" + funcName);
             if((leftHandSide.labelIdentifier + "Shallow").equals(funcName)){
                 mv.visitInsn(Opcodes.ARETURN);
             } else {
@@ -167,6 +168,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                     mv.visitVarInsn(Opcodes.ALOAD, 0);
                     mv.visitFieldInsn(Opcodes.PUTFIELD, modName, leftHandSide.labelIdentifier, "Lede/stl/values/Value;");
                 } else {
+                    printStringNow("DEBUG FAIL: LHS=" + leftHandSide.labelIdentifier + " funcName=" + funcName + " localInScope=" + localInScope(leftHandSide.labelIdentifier) + " fieldInScope=" + fieldInScope(leftHandSide.labelIdentifier));
                     Utils.errorAndExit("Variable " + leftHandSide.labelIdentifier + " does not exist in the current scope", leftHandSide.position);
                 }
             }
