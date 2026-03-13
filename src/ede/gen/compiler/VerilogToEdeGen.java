@@ -30,6 +30,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
 
     protected void printStringNow(String str){
         gen.addLog(str);
+        System.out.println(str);
     }
 
     protected void codeGenFieldRegScalarIdent(Reg.Scalar.Ident ident, MethodVisitor constructor, String modName, ClassWriter moduleWriter){
