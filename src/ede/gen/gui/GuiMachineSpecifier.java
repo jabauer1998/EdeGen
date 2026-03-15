@@ -377,8 +377,7 @@ public class GuiMachineSpecifier extends JPanel{
             e.printStackTrace(new java.io.PrintWriter(sw));
             log.log("[ERROR] Failed to build JAR: " + e.getMessage());
             log.log("[TRACE] " + sw.toString());
-            JOptionPane.showMessageDialog(this,
-                scrollableMessage("Failed to build JAR:\n\n" + sw.toString()),
+            showScrollableDialog("Failed to build JAR:\n\n" + sw.toString(),
                 "Build Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -462,8 +461,7 @@ public class GuiMachineSpecifier extends JPanel{
                     java.io.StringWriter sw = new java.io.StringWriter();
                     e.printStackTrace(new java.io.PrintWriter(sw));
                     log.log("[ERROR] Failed to compile " + jobName + ": " + e.getMessage());
-                    JOptionPane.showMessageDialog(this,
-                        scrollableMessage("Failed to compile " + jobName + ":\n\n" + sw.toString()),
+                    showScrollableDialog("Failed to compile " + jobName + ":\n\n" + sw.toString(),
                         "Compilation Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
@@ -471,16 +469,14 @@ public class GuiMachineSpecifier extends JPanel{
                 String path = spec.getVerilogPath();
                 if (path == null || path.trim().isEmpty()) {
                     log.log("[ERROR] Verilog Job \"" + jobName + "\" has no file path specified.");
-                    JOptionPane.showMessageDialog(this,
-                        scrollableMessage("Verilog Job \"" + jobName + "\" requires a file path."),
+                    showScrollableDialog("Verilog Job \"" + jobName + "\" requires a file path.",
                         "Missing Verilog Path", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 java.io.File verilogFile = new java.io.File(path);
                 if (!verilogFile.exists()) {
                     log.log("[ERROR] Verilog file not found: " + path);
-                    JOptionPane.showMessageDialog(this,
-                        scrollableMessage("Verilog file not found:\n" + path),
+                    showScrollableDialog("Verilog file not found:\n" + path,
                         "File Not Found", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
@@ -492,8 +488,7 @@ public class GuiMachineSpecifier extends JPanel{
                 String path = spec.getExePath();
                 if (path == null || path.trim().isEmpty()) {
                     log.log("[ERROR] Exe Job \"" + jobName + "\" has no file path specified.");
-                    JOptionPane.showMessageDialog(this,
-                        scrollableMessage("Exe Job \"" + jobName + "\" requires a file path."),
+                    showScrollableDialog("Exe Job \"" + jobName + "\" requires a file path.",
                         "Missing Exe Path", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
@@ -525,7 +520,7 @@ public class GuiMachineSpecifier extends JPanel{
         });
     }
 
-    private JScrollPane scrollableMessage(String text) {
+    private void showScrollableDialog(String text, String title, int messageType) {
         JTextArea area = new JTextArea(text);
         area.setEditable(false);
         area.setLineWrap(true);
@@ -533,6 +528,9 @@ public class GuiMachineSpecifier extends JPanel{
         area.setCaretPosition(0);
         JScrollPane scroll = new JScrollPane(area);
         scroll.setPreferredSize(new Dimension(600, 300));
-        return scroll;
+        JOptionPane pane = new JOptionPane(scroll, messageType);
+        JDialog dialog = pane.createDialog(this, title);
+        dialog.setResizable(true);
+        dialog.setVisible(true);
     }
 }
