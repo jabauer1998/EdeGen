@@ -6,6 +6,8 @@ import java.awt.*;
 public class GuiEdeLog extends JTextArea{
     public GuiEdeLog(double width, double height){
         this.setEditable(false);
+        this.setLineWrap(true);
+        this.setWrapStyleWord(true);
         this.setPreferredSize(new Dimension((int)width, (int)height));
         this.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int)height));
         this.setMinimumSize(new Dimension((int)width, (int)height));

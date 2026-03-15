@@ -31,6 +31,8 @@ public class GuiGenPanel extends JPanel {
         JPanel logPanel = new JPanel(new BorderLayout());
         JLabel logTitle = new JLabel("Ede Generator Tool Log", SwingConstants.CENTER);
         JScrollPane logScroll = new JScrollPane(this.log);
+        logScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        logScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         logPanel.add(logTitle, BorderLayout.NORTH);
         logPanel.add(logScroll, BorderLayout.CENTER);
 
