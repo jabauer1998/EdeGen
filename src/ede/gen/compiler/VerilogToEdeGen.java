@@ -1,5 +1,6 @@
 package ede.gen.compiler;
 
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
@@ -32,7 +33,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
         gen.addLog(str);
     }
 
-    protected void codeGenFieldRegScalarIdent(Reg.Scalar.Ident ident, MethodVisitor constructor, String modName, ClassWriter moduleWriter){
+    protected void codeGenFieldRegScalarIdent(Reg.Scalar.Ident ident, MethodVisitor constructor, String modName, ClassVisitor moduleWriter){
         String annotationLexeme = ident.annotationLexeme;
         if(annotationLexeme != null){
             if(annotationLexeme.toLowerCase().equals("@status")){
@@ -47,7 +48,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
         super.codeGenFieldRegScalarIdent(ident, constructor, modName, moduleWriter);
     }
 
-    protected void codeGenFieldRegVectorIdent(Reg.Vector.Ident ident, MethodVisitor constructor, String modName, ClassWriter moduleWriter) throws Exception {
+    protected void codeGenFieldRegVectorIdent(Reg.Vector.Ident ident, MethodVisitor constructor, String modName, ClassVisitor moduleWriter) throws Exception {
         String annotationLexeme = ident.annotationLexeme;
         if(annotationLexeme != null){
             if(annotationLexeme.toLowerCase().equals("@register")){
@@ -62,7 +63,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
         super.codeGenFieldRegVectorIdent(ident, constructor, modName, moduleWriter);
     }
 
-    protected void codeGenFieldRegVectorArray(Reg.Vector.Array array, MethodVisitor constructor, String modName, ClassWriter moduleWriter) throws Exception {
+    protected void codeGenFieldRegVectorArray(Reg.Vector.Array array, MethodVisitor constructor, String modName, ClassVisitor moduleWriter) throws Exception {
         String annotationLexeme = array.annotationLexeme;
         if(annotationLexeme != null){
             if(annotationLexeme.toLowerCase().equals("@memory")){
@@ -77,7 +78,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
         super.codeGenFieldRegVectorArray(array, constructor, modName, moduleWriter);
     }
 
-    protected void codeGenShallowTaskCall(TaskStatement taskCall, MethodVisitor mv, String modName, ClassWriter moduleWriter) throws Exception{
+    protected void codeGenShallowTaskCall(TaskStatement taskCall, MethodVisitor mv, String modName, ClassVisitor moduleWriter) throws Exception{
         String annotationLexeme = taskCall.annotationLexeme;
         if(annotationLexeme != null){
             if(annotationLexeme.toLowerCase().equals("@breakpoint")){
@@ -95,7 +96,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
         }
     }
 
-    protected void codeGenShallowSystemTaskCall(SystemTaskStatement taskCall, MethodVisitor mv, String modName, ClassWriter moduleWriter) throws Exception {
+    protected void codeGenShallowSystemTaskCall(SystemTaskStatement taskCall, MethodVisitor mv, String modName, ClassVisitor moduleWriter) throws Exception {
         if(taskCall.taskName.equals("display")){
             if(taskCall.argumentList.size() >= 2){
                 mv.visitVarInsn(Opcodes.ALOAD, 1);
@@ -117,7 +118,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
         super.codeGenShallowSystemTaskCall(taskCall, mv, modName, moduleWriter);
     }
 
-    protected void codeGenShallowBlockingAssign(BlockingAssignment assign, String funcName, MethodVisitor mv, String modName, ClassWriter moduleWriter) throws Exception {
+    protected void codeGenShallowBlockingAssign(BlockingAssignment assign, String funcName, MethodVisitor mv, String modName, ClassVisitor moduleWriter) throws Exception {
         codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
         if(assign.leftHandSide instanceof Element){
             Element leftHandSide = (Element)assign.leftHandSide;
