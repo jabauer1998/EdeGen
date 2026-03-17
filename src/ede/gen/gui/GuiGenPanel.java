@@ -19,7 +19,7 @@ public class GuiGenPanel extends JPanel {
         tabbedPane = new JTabbedPane();
         javaTabPanels = new LinkedHashMap<>();
 
-        this.log = new GuiEdeLog(width, height / 6);
+        this.log = new GuiEdeLog();
         this.jobs = new GuiJobSpecifierList(width / 2, 5 * height / 6, this);
         this.machine = new GuiMachineSpecifier(width / 2, 5 * height / 6, this.jobs, this.log, this);
 
