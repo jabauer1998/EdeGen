@@ -319,11 +319,11 @@ public class EdeJarBuilder {
     private static void handleAnnotation(String annotation, String name, int regSize, int memSize, JobData job) {
         if (annotation == null || annotation.isEmpty()) return;
         String ann = annotation.trim().toLowerCase();
-        if (ann.equals("register")) {
+        if (ann.equals("@register") || ann.equals("register")) {
             job.verilogRegisters.add(new RegisterData(name, regSize));
-        } else if (ann.equals("status")) {
+        } else if (ann.equals("@status") || ann.equals("status")) {
             job.verilogFlags.add(name);
-        } else if (ann.equals("memory")) {
+        } else if (ann.equals("@memory") || ann.equals("memory")) {
             if (memSize > 0) {
                 job.verilogMemorySize = memSize;
             }
