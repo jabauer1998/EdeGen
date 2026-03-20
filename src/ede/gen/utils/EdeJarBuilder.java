@@ -274,12 +274,7 @@ public class EdeJarBuilder {
     }
 
     private static void extractVerilogMetadata(VerilogFile ast, JobData job) {
-        boolean first = true;
         for (ModuleDeclaration module : ast.modules) {
-            if (first) {
-                job.mainModuleName = module.moduleName;
-                first = false;
-            }
             for (ModuleItem item : module.moduleItemList) {
                 processModuleItem(item, job);
             }

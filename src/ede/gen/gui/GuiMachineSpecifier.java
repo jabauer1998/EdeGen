@@ -338,6 +338,7 @@ public class GuiMachineSpecifier extends JPanel{
             } else if ("Verilog Job".equals(jobType)) {
                 jd.verilogPath = spec.getVerilogPath();
                 jd.verilogInputFile = spec.getVerilogInputFile();
+                jd.mainModuleName = spec.getVerilogMainModule();
             } else if ("Exe Job".equals(jobType)) {
                 jd.exePath = spec.getExePath();
                 jd.keywords = spec.loadKeywords();
@@ -483,7 +484,8 @@ public class GuiMachineSpecifier extends JPanel{
                 guiEde.gatherMetaDataFromVerilogFile(path, regFmt);
                 log.log("[INFO] Adding Verilog Job: " + jobName + " (path: " + path + ")");
                 String verilogInputFile = spec.getVerilogInputFile();
-                guiEde.AddVerilogJob(jobName, "", path, verilogInputFile, "StandardInput", "StandardOutput", "StandardError", true);
+                String verilogMainModule = spec.getVerilogMainModule();
+                guiEde.AddVerilogJob(jobName, verilogMainModule, path, verilogInputFile, "StandardInput", "StandardOutput", "StandardError", true);
             } else if ("Exe Job".equals(jobType)) {
                 String path = spec.getExePath();
                 if (path == null || path.trim().isEmpty()) {

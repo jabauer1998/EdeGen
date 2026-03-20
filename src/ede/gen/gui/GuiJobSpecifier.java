@@ -29,6 +29,7 @@ public class GuiJobSpecifier extends JPanel {
     private JTextField pathField;
     private JTextField exePathField;
     private JTextField verilogInputField;
+    private JTextField verilogMainModuleField;
     private DefaultListModel<String> jarListModel;
     private JList<String> jarList;
     private JCheckBox syntaxCheckbox;
@@ -411,10 +412,19 @@ public class GuiJobSpecifier extends JPanel {
         inputFileRow.add(verilogInputField, BorderLayout.CENTER);
         inputFileRow.add(inputBrowseBtn, BorderLayout.EAST);
 
+        JPanel rootModuleRow = new JPanel(new BorderLayout(4, 0));
+        rootModuleRow.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        JLabel rootModuleLabel = new JLabel("Root Module Name: ");
+        verilogMainModuleField = new JTextField();
+        verilogMainModuleField.setToolTipText("Name of the top-level Verilog module");
+        rootModuleRow.add(rootModuleLabel, BorderLayout.WEST);
+        rootModuleRow.add(verilogMainModuleField, BorderLayout.CENTER);
+
         JPanel verilogFieldsPanel = new JPanel();
         verilogFieldsPanel.setLayout(new BoxLayout(verilogFieldsPanel, BoxLayout.Y_AXIS));
         verilogFieldsPanel.add(pathRow);
         verilogFieldsPanel.add(inputFileRow);
+        verilogFieldsPanel.add(rootModuleRow);
         verilogPanel.add(verilogFieldsPanel, BorderLayout.NORTH);
 
         exePanel = new JPanel(new BorderLayout());
@@ -720,6 +730,10 @@ public class GuiJobSpecifier extends JPanel {
 
     public String getVerilogInputFile() {
         return verilogInputField.getText().trim();
+    }
+
+    public String getVerilogMainModule() {
+        return verilogMainModuleField.getText().trim();
     }
 
     public String getExePath() {
