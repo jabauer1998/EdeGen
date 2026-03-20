@@ -58,6 +58,7 @@ public class EdeJarBuilder {
         public List<RegisterData> verilogRegisters;
         public List<String> verilogFlags;
         public int verilogMemorySize;
+        public String mainModuleName;
 
         public JobData(String jobType, String jobName) {
             this.jobType = jobType;
@@ -273,7 +274,12 @@ public class EdeJarBuilder {
     }
 
     private static void extractVerilogMetadata(VerilogFile ast, JobData job) {
+        boolean first = true;
         for (ModuleDeclaration module : ast.modules) {
+            if (first) {
+                job.mainModuleName = module.moduleName;
+                first = false;
+            }
             for (ModuleItem item : module.moduleItemList) {
                 processModuleItem(item, job);
             }
@@ -501,7 +507,9 @@ public class EdeJarBuilder {
                 javaIdx++;
             } else if ("Verilog Job".equals(job.jobType)) {
                 String verilogInput = job.verilogInputFile != null ? job.verilogInputFile : "";
+                String mainMod = job.mainModuleName != null ? job.mainModuleName : "";
                 sb.append("            guiEde.AddVerilogJob(\"").append(escapeJava(job.jobName))
+                  .append("\", \"").append(escapeJava(mainMod))
                   .append("\", \"\", \"").append(escapeJava(verilogInput))
                   .append("\", \"StandardInput\", \"StandardOutput\", \"StandardError\", false);\n");
             } else if ("Exe Job".equals(job.jobType)) {
