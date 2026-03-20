@@ -278,6 +278,28 @@ public class GuiMachineSpecifier extends JPanel{
         }
         log.log("[PASS] Last job \"" + lastJobName + "\" is a Verilog Job.");
 
+        String verilogPath = lastJob.getVerilogPath();
+        String rootModule = lastJob.getVerilogMainModule();
+        log.log("[CHECK] Root module name: \"" + rootModule + "\"");
+        if (rootModule.isEmpty()) {
+            log.log("[WARN] No root module name specified.");
+        } else if (verilogPath == null || verilogPath.trim().isEmpty()) {
+            log.log("[WARN] Cannot check root module — no Verilog file path specified.");
+        } else {
+            try {
+                java.util.List<String> moduleNames = EdeJarBuilder.getModuleNamesFromFile(verilogPath);
+                log.log("[INFO] Modules found in file: " + moduleNames.toString());
+                if (moduleNames.contains(rootModule)) {
+                    log.log("[PASS] Root module \"" + rootModule + "\" exists in the Verilog file.");
+                } else {
+                    log.log("[ERROR] Root module \"" + rootModule + "\" was not found in the Verilog file.");
+                    return false;
+                }
+            } catch (Exception e) {
+                log.log("[WARN] Could not parse Verilog file to check root module: " + e.getMessage());
+            }
+        }
+
         for (int i = 0; i < lastIndex; i++) {
             GuiJobSpecifier spec = specs.get(i);
             String jobType = spec.getSelectedJobType();

@@ -255,6 +255,15 @@ public class EdeJarBuilder {
         return false;
     }
 
+    public static List<String> getModuleNamesFromFile(String path) throws Exception {
+        VerilogFile vf = parseVerilogFile(path);
+        List<String> names = new ArrayList<>();
+        for (ModuleDeclaration module : vf.modules) {
+            names.add(module.moduleName);
+        }
+        return names;
+    }
+
     private static VerilogFile parseVerilogFile(String path) throws Exception {
         FileReader reader = new FileReader(path);
         Source source = new Source(reader);
