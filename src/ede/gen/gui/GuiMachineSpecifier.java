@@ -15,6 +15,7 @@ import ede.gen.utils.JavaSyntaxHighlighter;
 import ede.gen.utils.EdeJarBuilder;
 
 public class GuiMachineSpecifier extends JPanel{
+    private JButton saveEde;
     private GuiEdeGenField title;
     private GuiEdeGenField ramBytesPerRow;
     private JComboBox<String> registerFormatDropdown;
@@ -63,7 +64,7 @@ public class GuiMachineSpecifier extends JPanel{
         });
         toolBar.add(testEde);
 
-        JButton saveEde = new JButton("Save Ede Environment");
+        saveEde = new JButton("Save Ede Environment");
         saveEde.setPreferredSize(new Dimension((int)(width/3), 40));
         saveEde.addActionListener(new ActionListener() {
             @Override
@@ -320,6 +321,11 @@ public class GuiMachineSpecifier extends JPanel{
     private void saveEdeEnvironment() {
         log.log("--- Save Ede Environment ---");
 
+        if (!validateJobs()) {
+            log.log("[ABORTED] Ede Environment save aborted due to validation errors.");
+            return;
+        }
+
         String edeTitle = title.getInputText();
         if (edeTitle == null || edeTitle.trim().isEmpty()) {
             edeTitle = "Ede Environment";
@@ -381,28 +387,84 @@ public class GuiMachineSpecifier extends JPanel{
 
         String edeStlJarPath = System.getProperty("user.dir") + java.io.File.separator + "lib" + java.io.File.separator + "EdeStl" + java.io.File.separator + "bin" + java.io.File.separator + "EdeStl.jar";
 
-        final String finalEdeTitle = edeTitle;
-        final int finalRamBytesPerRow = ramBytesPerRowVal;
         log.log("[INFO] Building JAR: " + edeTitle + ".jar ...");
 
-        try {
-            java.io.File jarFile = EdeJarBuilder.buildJar(
-                finalEdeTitle, finalRamBytesPerRow,
-                addrFmtName, memFmtName, regFmtName,
-                ioData, jobData, edeStlJarPath, outputDir, genPanel
-            );
-            log.log("[PASS] JAR saved successfully: " + jarFile.getAbsolutePath());
-            JOptionPane.showMessageDialog(this,
-                "Ede JAR saved:\n" + jarFile.getAbsolutePath(),
-                "Save Successful", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception e) {
-            java.io.StringWriter sw = new java.io.StringWriter();
-            e.printStackTrace(new java.io.PrintWriter(sw));
-            log.log("[ERROR] Failed to build JAR: " + e.getMessage());
-            log.log("[TRACE] " + sw.toString());
-            showScrollableDialog("Failed to build JAR:\n\n" + sw.toString(),
-                "Build Error", JOptionPane.ERROR_MESSAGE);
-        }
+        final String finalEdeTitle = edeTitle;
+        final int finalRamBytesPerRow = ramBytesPerRowVal;
+        final java.util.List<EdeJarBuilder.JobData> finalJobData = jobData;
+        final java.util.List<EdeJarBuilder.IoSectionData> finalIoData = ioData;
+        final String finalAddrFmt = addrFmtName;
+        final String finalMemFmt = memFmtName;
+        final String finalRegFmt = regFmtName;
+        final String finalEdeStlJarPath = edeStlJarPath;
+        final java.io.File finalOutputDir = outputDir;
+
+        JDialog progressDialog = new JDialog(
+                (java.awt.Frame) SwingUtilities.getWindowAncestor(this),
+                "Building JAR\u2026", false);
+        JProgressBar progressBar = new JProgressBar(0, 1);
+        progressBar.setStringPainted(true);
+        progressBar.setIndeterminate(true);
+        JLabel statusLabel = new JLabel("Initialising\u2026");
+        statusLabel.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+        JPanel dialogPanel = new JPanel(new BorderLayout(0, 4));
+        dialogPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        dialogPanel.add(progressBar, BorderLayout.CENTER);
+        dialogPanel.add(statusLabel, BorderLayout.SOUTH);
+        progressDialog.setContentPane(dialogPanel);
+        progressDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        progressDialog.pack();
+        progressDialog.setMinimumSize(new Dimension(400, progressDialog.getHeight()));
+        progressDialog.setLocationRelativeTo(this);
+
+        saveEde.setEnabled(false);
+
+        EdeJarBuilder.ProgressListener progressListener = (current, total, message) ->
+            SwingUtilities.invokeLater(() -> {
+                progressBar.setIndeterminate(false);
+                progressBar.setMaximum(total);
+                progressBar.setValue(current);
+                statusLabel.setText(message);
+            });
+
+        SwingWorker<java.io.File, Void> worker = new SwingWorker<java.io.File, Void>() {
+            @Override
+            protected java.io.File doInBackground() throws Exception {
+                return EdeJarBuilder.buildJar(
+                    finalEdeTitle, finalRamBytesPerRow,
+                    finalAddrFmt, finalMemFmt, finalRegFmt,
+                    finalIoData, finalJobData,
+                    finalEdeStlJarPath, finalOutputDir, genPanel,
+                    progressListener
+                );
+            }
+
+            @Override
+            protected void done() {
+                progressDialog.dispose();
+                saveEde.setEnabled(true);
+                try {
+                    java.io.File jarFile = get();
+                    log.log("[PASS] JAR saved successfully: " + jarFile.getAbsolutePath());
+                    JOptionPane.showMessageDialog(GuiMachineSpecifier.this,
+                        "Ede JAR saved:\n" + jarFile.getAbsolutePath(),
+                        "Save Successful", JOptionPane.INFORMATION_MESSAGE);
+                } catch (java.util.concurrent.ExecutionException ee) {
+                    Throwable cause = ee.getCause() != null ? ee.getCause() : ee;
+                    java.io.StringWriter sw = new java.io.StringWriter();
+                    cause.printStackTrace(new java.io.PrintWriter(sw));
+                    log.log("[ERROR] Failed to build JAR: " + cause.getMessage());
+                    log.log("[TRACE] " + sw.toString());
+                    showScrollableDialog("Failed to build JAR:\n\n" + sw.toString(),
+                        "Build Error", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception e) {
+                    log.log("[ERROR] " + e.getMessage());
+                }
+            }
+        };
+
+        worker.execute();
+        progressDialog.setVisible(true);
     }
 
     private void launchEdeEnvironment() {

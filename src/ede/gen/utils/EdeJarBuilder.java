@@ -21,6 +21,25 @@ public class EdeJarBuilder {
         "ede/stl/passes/"
     ));
 
+    public interface ProgressListener {
+        void onProgress(int current, int total, String message);
+    }
+
+    private static void report(ProgressListener listener, int current, int total, String message) {
+        if (listener != null) listener.onProgress(current, total, message);
+    }
+
+    private static int countClassFiles(File dir) {
+        int count = 0;
+        File[] files = dir.listFiles();
+        if (files == null) return 0;
+        for (File f : files) {
+            if (f.isDirectory()) count += countClassFiles(f);
+            else if (f.getName().endsWith(".class")) count++;
+        }
+        return count;
+    }
+
     public static class IoSectionData {
         public String tabName;
         public String sectionTitle;
@@ -80,7 +99,8 @@ public class EdeJarBuilder {
             List<JobData> jobs,
             String edeStlJarPath,
             File outputDir,
-            GuiGenPanel genPanel
+            GuiGenPanel genPanel,
+            ProgressListener listener
     ) throws Exception {
 
         File tmpDir = new File(System.getProperty("java.io.tmpdir"), "edegen_jar_build_" + System.currentTimeMillis());
@@ -88,10 +108,57 @@ public class EdeJarBuilder {
 
         List<String> javaJobClassNames = new ArrayList<>();
         List<File> javaJobSources = new ArrayList<>();
-        boolean hasVerilogJobs = false;
 
         File verilogInstanceDir = new File(System.getProperty("user.dir"), "ede/instance");
         File verilogRootDir = new File(System.getProperty("user.dir"));
+
+        // Pre-determine hasVerilogJobs for accurate step counting
+        boolean hasVerilogJobs = false;
+        for (JobData job : jobs) {
+            if ("Verilog Job".equals(job.jobType) && job.verilogPath != null
+                    && !job.verilogPath.trim().isEmpty() && new File(job.verilogPath).exists()) {
+                hasVerilogJobs = true;
+                break;
+            }
+        }
+
+        // Pre-count STL entries
+        int stlCount = 0;
+        try (JarFile stlJar = new JarFile(edeStlJarPath)) {
+            Enumeration<JarEntry> entries = stlJar.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                String name = entry.getName();
+                if (name.equals("META-INF/MANIFEST.MF") || name.equals("META-INF/")) continue;
+                if (hasVerilogJobs && isExcludedStlEntry(name)) continue;
+                stlCount++;
+            }
+        }
+
+        // Pre-count extra JAR entries
+        int extraCount = 0;
+        for (JobData job : jobs) {
+            if (job.jarPaths != null) {
+                for (String jarPath : job.jarPaths) {
+                    try (JarFile extraJar = new JarFile(jarPath)) {
+                        Enumeration<JarEntry> entries = extraJar.entries();
+                        while (entries.hasMoreElements()) {
+                            JarEntry entry = entries.nextElement();
+                            if (!entry.getName().startsWith("META-INF/")) extraCount++;
+                        }
+                    }
+                }
+            }
+        }
+
+        int verilogJobCount = 0;
+        for (JobData job : jobs) {
+            if ("Verilog Job".equals(job.jobType)) verilogJobCount++;
+        }
+
+        // total grows after compile when we know tmpCount + verilogCount
+        int[] current = {0};
+        int[] total = {verilogJobCount + 1 + stlCount + extraCount};
 
         int javaJobIndex = 0;
         for (JobData job : jobs) {
@@ -108,7 +175,8 @@ public class EdeJarBuilder {
                 if (job.verilogPath != null && !job.verilogPath.trim().isEmpty()) {
                     File vFile = new File(job.verilogPath);
                     if (vFile.exists()) {
-                        hasVerilogJobs = true;
+                        current[0]++;
+                        report(listener, current[0], total[0], "Generating Verilog: " + job.jobName);
                         VerilogFile ast = parseVerilogFile(job.verilogPath);
                         extractVerilogMetadata(ast, job);
                         VerilogToEdeGen gen = new VerilogToEdeGen(69, genPanel, "StandardOutput", "StandardInput");
@@ -154,6 +222,9 @@ public class EdeJarBuilder {
         Iterable<? extends JavaFileObject> compilationUnits =
             fileManager.getJavaFileObjectsFromFiles(allSources);
 
+        current[0]++;
+        report(listener, current[0], total[0], "Compiling Java sources...");
+
         JavaCompiler.CompilationTask task = compiler.getTask(
             null, fileManager, diagnostics, options, null, compilationUnits);
 
@@ -169,6 +240,11 @@ public class EdeJarBuilder {
             throw new RuntimeException(errorMsg.toString());
         }
 
+        // Now we know the real file counts — expand total accordingly
+        int tmpCount = countClassFiles(tmpDir);
+        int verilogCount = hasVerilogJobs ? countClassFiles(verilogInstanceDir) : 0;
+        total[0] += tmpCount + verilogCount;
+
         String jarFileName = edeName.replaceAll("[^a-zA-Z0-9_\\-]", "_") + ".jar";
         File outputJar = new File(outputDir, jarFileName);
 
@@ -179,7 +255,7 @@ public class EdeJarBuilder {
         Set<String> addedEntries = new HashSet<>();
         try (JarOutputStream jos = new JarOutputStream(new FileOutputStream(outputJar), manifest)) {
 
-            addClassFiles(jos, tmpDir, tmpDir, addedEntries);
+            addClassFiles(jos, tmpDir, tmpDir, addedEntries, listener, current, total);
 
             try (JarFile stlJar = new JarFile(edeStlJarPath)) {
                 Enumeration<JarEntry> entries = stlJar.entries();
@@ -205,6 +281,8 @@ public class EdeJarBuilder {
                         }
                     }
                     jos.closeEntry();
+                    current[0]++;
+                    report(listener, current[0], total[0], "Writing: " + name);
                 }
             }
 
@@ -212,7 +290,7 @@ public class EdeJarBuilder {
                 if (!verilogInstanceDir.exists()) {
                     throw new RuntimeException("Compiled Verilog classes not found at: " + verilogInstanceDir.getAbsolutePath());
                 }
-                addClassFiles(jos, verilogInstanceDir, verilogRootDir, addedEntries);
+                addClassFiles(jos, verilogInstanceDir, verilogRootDir, addedEntries, listener, current, total);
             }
 
             for (JobData job : jobs) {
@@ -235,6 +313,8 @@ public class EdeJarBuilder {
                                     }
                                 }
                                 jos.closeEntry();
+                                current[0]++;
+                                report(listener, current[0], total[0], "Writing: " + name);
                             }
                         }
                     }
@@ -553,11 +633,16 @@ public class EdeJarBuilder {
     }
 
     private static void addClassFiles(JarOutputStream jos, File dir, File root, Set<String> addedEntries) throws IOException {
+        addClassFiles(jos, dir, root, addedEntries, null, null, null);
+    }
+
+    private static void addClassFiles(JarOutputStream jos, File dir, File root, Set<String> addedEntries,
+            ProgressListener listener, int[] current, int[] total) throws IOException {
         File[] files = dir.listFiles();
         if (files == null) return;
         for (File file : files) {
             if (file.isDirectory()) {
-                addClassFiles(jos, file, root, addedEntries);
+                addClassFiles(jos, file, root, addedEntries, listener, current, total);
             } else if (file.getName().endsWith(".class")) {
                 String entryName = root.toPath().relativize(file.toPath()).toString().replace(File.separatorChar, '/');
                 if (addedEntries.contains(entryName)) continue;
@@ -571,6 +656,10 @@ public class EdeJarBuilder {
                     }
                 }
                 jos.closeEntry();
+                if (listener != null && current != null && total != null) {
+                    current[0]++;
+                    report(listener, current[0], total[0], "Writing: " + entryName);
+                }
             }
         }
     }
