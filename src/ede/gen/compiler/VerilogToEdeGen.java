@@ -119,11 +119,9 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
     }
 
     protected void codeGenShallowBlockingAssign(BlockingAssignment assign, String funcName, MethodVisitor mv, String modName, ClassVisitor moduleWriter) throws Exception {
-        codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
         if(assign.leftHandSide instanceof Element){
             Element leftHandSide = (Element)assign.leftHandSide;
-            codeGenShallowExpression(leftHandSide.index1, mv, modName, moduleWriter);
-            
+            // Push arr (leftHandDeref) first — matches shallowAssignElemEde(arr, index, rhs)
             if(this.localInScope(leftHandSide.labelIdentifier)){
                  int ptr = this.getFromScope(leftHandSide.labelIdentifier);
                  mv.visitVarInsn(Opcodes.ALOAD, ptr);
@@ -133,14 +131,12 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
             } else {
                  Utils.errorAndExit("Variable " + leftHandSide.labelIdentifier + " does not exist in the current scope", leftHandSide.position);
             }
-
+            codeGenShallowExpression(leftHandSide.index1, mv, modName, moduleWriter);
+            codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "shallowAssignElemEde", "(Lede/stl/values/Value;Lede/stl/values/Value;Lede/stl/values/Value;)V", false);
         } else if(assign.leftHandSide instanceof Slice){
             Slice leftHandSide = (Slice)assign.leftHandSide;
-
-            codeGenShallowExpression(leftHandSide.index1, mv, modName, moduleWriter);
-            codeGenShallowExpression(leftHandSide.index2, mv, modName, moduleWriter);
-
+            // Push arr (leftHandDeref) first — matches shallowAssignSliceEde(arr, startIndex, endIndex, rhs)
             if(this.localInScope(leftHandSide.labelIdentifier)){
                  int ptr = this.getFromScope(leftHandSide.labelIdentifier);
                  mv.visitVarInsn(Opcodes.ALOAD, ptr);
@@ -150,7 +146,9 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
             } else {
                  Utils.errorAndExit("Variable " + leftHandSide.labelIdentifier + " does not exist in the current scope", leftHandSide.position);
             }
-
+            codeGenShallowExpression(leftHandSide.index1, mv, modName, moduleWriter);
+            codeGenShallowExpression(leftHandSide.index2, mv, modName, moduleWriter);
+            codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC,
                  "ede/stl/common/Utils",
                  "shallowAssignSliceEde",
@@ -159,18 +157,23 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
         } else if(assign.leftHandSide instanceof Identifier){
             Identifier leftHandSide = (Identifier)assign.leftHandSide;
             if((leftHandSide.labelIdentifier + "Shallow").equals(funcName) || (leftHandSide.labelIdentifier + "Deep").equals(funcName)){
+                codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
                 mv.visitInsn(Opcodes.ARETURN);
             } else {
                 if(localInScope(leftHandSide.labelIdentifier)){
-                     int ptr = this.getFromScope(leftHandSide.labelIdentifier);
-                     mv.visitVarInsn(Opcodes.ASTORE, ptr);
+                    codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
+                    int ptr = this.getFromScope(leftHandSide.labelIdentifier);
+                    mv.visitVarInsn(Opcodes.ASTORE, ptr);
                 } else if(fieldInScope(leftHandSide.labelIdentifier)){
                     mv.visitVarInsn(Opcodes.ALOAD, 0);
+                    codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
                     mv.visitFieldInsn(Opcodes.PUTFIELD, modName, leftHandSide.labelIdentifier, "Lede/stl/values/Value;");
                 } else {
                     Utils.errorAndExit("Variable " + leftHandSide.labelIdentifier + " does not exist in the current scope", leftHandSide.position);
                 }
             }
+        } else {
+            super.codeGenShallowBlockingAssign(assign, funcName, mv, modName, moduleWriter);
         }
     }
 }
