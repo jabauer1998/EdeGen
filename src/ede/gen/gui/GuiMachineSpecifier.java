@@ -133,30 +133,15 @@ public class GuiMachineSpecifier extends JPanel{
 
         this.ioSections = new ArrayList<>();
 
-        JPanel ioHeaderPanel = new JPanel();
-        ioHeaderPanel.setLayout(new BoxLayout(ioHeaderPanel, BoxLayout.Y_AXIS));
+        JPanel ioHeaderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
         ioHeaderPanel.setAlignmentX(LEFT_ALIGNMENT);
-
-        JPanel ioTopRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
-        ioTopRow.setAlignmentX(LEFT_ALIGNMENT);
+        ioHeaderPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
         JLabel ioLabel = new JLabel("IO Sections:");
         ioLabel.setFont(ioLabel.getFont().deriveFont(Font.BOLD));
         JButton addIoBtn = new JButton("+ Add IO Section");
         addIoBtn.addActionListener(e -> addIoSectionRow(width));
-        ioTopRow.add(ioLabel);
-        ioTopRow.add(addIoBtn);
-
-        JPanel configRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
-        configRow.setAlignmentX(LEFT_ALIGNMENT);
-        JButton saveConfigBtn = new JButton("Save Config");
-        saveConfigBtn.addActionListener(e -> saveConfig());
-        JButton loadConfigBtn = new JButton("Load Config");
-        loadConfigBtn.addActionListener(e -> loadConfig());
-        configRow.add(saveConfigBtn);
-        configRow.add(loadConfigBtn);
-
-        ioHeaderPanel.add(ioTopRow);
-        ioHeaderPanel.add(configRow);
+        ioHeaderPanel.add(ioLabel);
+        ioHeaderPanel.add(addIoBtn);
 
         this.ioListPanel = new JPanel();
         this.ioListPanel.setLayout(new BoxLayout(this.ioListPanel, BoxLayout.Y_AXIS));
@@ -165,9 +150,18 @@ public class GuiMachineSpecifier extends JPanel{
         JScrollPane ioScroll = new JScrollPane(this.ioListPanel);
         ioScroll.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
+        JPanel configRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+        JButton saveConfigBtn = new JButton("Save Config");
+        saveConfigBtn.addActionListener(e -> saveConfig());
+        JButton loadConfigBtn = new JButton("Load Config");
+        loadConfigBtn.addActionListener(e -> loadConfig());
+        configRow.add(saveConfigBtn);
+        configRow.add(loadConfigBtn);
+
         JPanel ioContainer = new JPanel(new BorderLayout());
         ioContainer.add(ioHeaderPanel, BorderLayout.NORTH);
         ioContainer.add(ioScroll, BorderLayout.CENTER);
+        ioContainer.add(configRow, BorderLayout.SOUTH);
 
         this.add(topSection, BorderLayout.NORTH);
         this.add(ioContainer, BorderLayout.CENTER);
