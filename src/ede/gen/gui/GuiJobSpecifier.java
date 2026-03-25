@@ -751,4 +751,55 @@ public class GuiJobSpecifier extends JPanel {
         }
         return paths;
     }
+
+    public void setJobType(String jobType) {
+        jobTypeDropdown.setSelectedItem(jobType);
+        updateContentForJobType();
+    }
+
+    public void setJobName(String name) {
+        jobNameField.setText(name);
+    }
+
+    public void setSyntaxHighlighting(boolean enabled) {
+        syntaxCheckbox.setSelected(enabled);
+        updateKeywordPanelVisibility();
+        updateCodeContextText();
+    }
+
+    public void setImportsText(String text) {
+        importsPane.setText(text);
+    }
+
+    public void setVerilogPath(String path) {
+        pathField.setText(path);
+    }
+
+    public void setVerilogInputFile(String path) {
+        verilogInputField.setText(path);
+    }
+
+    public void setVerilogMainModule(String name) {
+        verilogMainModuleField.setText(name);
+    }
+
+    public void setExePath(String path) {
+        exePathField.setText(path);
+    }
+
+    public void setKeywordFilePath(String path) {
+        javaKeywordFileField.setText(path);
+        exeKeywordFileField.setText(path);
+    }
+
+    public void setJarPaths(List<String> paths) {
+        jarListModel.clear();
+        if (paths != null) {
+            for (String p : paths) {
+                if (p != null && !p.trim().isEmpty()) {
+                    jarListModel.addElement(p);
+                }
+            }
+        }
+    }
 }

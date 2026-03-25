@@ -13,6 +13,7 @@ import ede.stl.gui.GuiIO;
 import ede.gen.utils.JavaJobCompiler;
 import ede.gen.utils.JavaSyntaxHighlighter;
 import ede.gen.utils.EdeJarBuilder;
+import ede.gen.utils.EdeConfigManager;
 
 public class GuiMachineSpecifier extends JPanel{
     private JButton saveEde;
@@ -132,15 +133,30 @@ public class GuiMachineSpecifier extends JPanel{
 
         this.ioSections = new ArrayList<>();
 
-        JPanel ioHeaderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+        JPanel ioHeaderPanel = new JPanel();
+        ioHeaderPanel.setLayout(new BoxLayout(ioHeaderPanel, BoxLayout.Y_AXIS));
         ioHeaderPanel.setAlignmentX(LEFT_ALIGNMENT);
-        ioHeaderPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+
+        JPanel ioTopRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+        ioTopRow.setAlignmentX(LEFT_ALIGNMENT);
         JLabel ioLabel = new JLabel("IO Sections:");
         ioLabel.setFont(ioLabel.getFont().deriveFont(Font.BOLD));
         JButton addIoBtn = new JButton("+ Add IO Section");
         addIoBtn.addActionListener(e -> addIoSectionRow(width));
-        ioHeaderPanel.add(ioLabel);
-        ioHeaderPanel.add(addIoBtn);
+        ioTopRow.add(ioLabel);
+        ioTopRow.add(addIoBtn);
+
+        JPanel configRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+        configRow.setAlignmentX(LEFT_ALIGNMENT);
+        JButton saveConfigBtn = new JButton("Save Config");
+        saveConfigBtn.addActionListener(e -> saveConfig());
+        JButton loadConfigBtn = new JButton("Load Config");
+        loadConfigBtn.addActionListener(e -> loadConfig());
+        configRow.add(saveConfigBtn);
+        configRow.add(loadConfigBtn);
+
+        ioHeaderPanel.add(ioTopRow);
+        ioHeaderPanel.add(configRow);
 
         this.ioListPanel = new JPanel();
         this.ioListPanel.setLayout(new BoxLayout(this.ioListPanel, BoxLayout.Y_AXIS));
@@ -155,6 +171,152 @@ public class GuiMachineSpecifier extends JPanel{
 
         this.add(topSection, BorderLayout.NORTH);
         this.add(ioContainer, BorderLayout.CENTER);
+    }
+
+    private void saveConfig() {
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.setDialogTitle("Save EdeGen Config");
+        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("XML Config Files (*.xml)", "xml"));
+        chooser.setSelectedFile(new java.io.File("ede_config.xml"));
+        int result = chooser.showSaveDialog(this);
+        if (result != javax.swing.JFileChooser.APPROVE_OPTION) return;
+        java.io.File file = chooser.getSelectedFile();
+        if (!file.getName().toLowerCase().endsWith(".xml")) {
+            file = new java.io.File(file.getAbsolutePath() + ".xml");
+        }
+        try {
+            EdeConfigManager.EdeConfig config = new EdeConfigManager.EdeConfig();
+
+            config.machine.title = title.getInputText();
+            config.machine.ramBytesPerRow = ramBytesPerRow.getInputText();
+            config.machine.registerFormat = (String) registerFormatDropdown.getSelectedItem();
+            config.machine.ramAddressFormat = (String) ramAddressFormatDropdown.getSelectedItem();
+            config.machine.ramFormat = (String) ramFormatDropdown.getSelectedItem();
+
+            for (IoSectionEntry entry : ioSections) {
+                EdeConfigManager.IoSectionConfig io = new EdeConfigManager.IoSectionConfig();
+                io.tabName = entry.tabNameField.getText().trim();
+                io.sectionTitle = entry.sectionTitleField.getText().trim();
+                io.readOnly = "Read Only".equals(entry.editableDropdown.getSelectedItem());
+                config.machine.ioSections.add(io);
+            }
+
+            ArrayList<GuiJobSpecifier> specs = jobList.getJobSpecifiers();
+            for (GuiJobSpecifier spec : specs) {
+                EdeConfigManager.JobConfig job = new EdeConfigManager.JobConfig();
+                job.jobTitle = spec.getJobTitle();
+                job.jobName = spec.getJobName();
+                job.jobType = spec.getSelectedJobType();
+                job.syntaxHighlighting = spec.isSyntaxHighlightingEnabled();
+                job.imports = spec.getImportsText();
+                job.code = spec.getText();
+                job.keywordFile = spec.getKeywordFilePath();
+                job.jarPaths = spec.getJarPaths();
+                job.verilogPath = spec.getVerilogPath();
+                job.verilogInputFile = spec.getVerilogInputFile();
+                job.verilogMainModule = spec.getVerilogMainModule();
+                job.exePath = spec.getExePath();
+                config.jobs.add(job);
+            }
+
+            EdeConfigManager.save(file, config);
+            log.log("[INFO] Config saved to: " + file.getAbsolutePath());
+            JOptionPane.showMessageDialog(this,
+                "Config saved:\n" + file.getAbsolutePath(),
+                "Save Successful", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception ex) {
+            log.log("[ERROR] Failed to save config: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this,
+                "Failed to save config:\n" + ex.getMessage(),
+                "Save Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void loadConfig() {
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.setDialogTitle("Load EdeGen Config");
+        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("XML Config Files (*.xml)", "xml"));
+        int result = chooser.showOpenDialog(this);
+        if (result != javax.swing.JFileChooser.APPROVE_OPTION) return;
+        java.io.File file = chooser.getSelectedFile();
+        try {
+            EdeConfigManager.EdeConfig config = EdeConfigManager.load(file);
+
+            title.setInputText(config.machine.title);
+            ramBytesPerRow.setInputText(config.machine.ramBytesPerRow);
+            registerFormatDropdown.setSelectedItem(config.machine.registerFormat);
+            ramAddressFormatDropdown.setSelectedItem(config.machine.ramAddressFormat);
+            ramFormatDropdown.setSelectedItem(config.machine.ramFormat);
+
+            ioSections.clear();
+            ioListPanel.removeAll();
+            double w = getWidth() > 0 ? getWidth() : 600;
+            for (EdeConfigManager.IoSectionConfig io : config.machine.ioSections) {
+                addIoSectionRowWithValues(w, io.tabName, io.sectionTitle, io.readOnly);
+            }
+            ioListPanel.revalidate();
+            ioListPanel.repaint();
+
+            jobList.loadFromConfig(config.jobs);
+
+            log.log("[INFO] Config loaded from: " + file.getAbsolutePath());
+            JOptionPane.showMessageDialog(this,
+                "Config loaded from:\n" + file.getAbsolutePath(),
+                "Load Successful", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception ex) {
+            log.log("[ERROR] Failed to load config: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this,
+                "Failed to load config:\n" + ex.getMessage(),
+                "Load Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void addIoSectionRowWithValues(double width, String tabName, String sectionTitle, boolean readOnly) {
+        JPanel row = new JPanel();
+        row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+        row.setAlignmentX(LEFT_ALIGNMENT);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        row.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
+
+        JLabel tabLabel = new JLabel("Tab: ");
+        JTextField tabField = new JTextField(10);
+        tabField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
+        tabField.setText(tabName);
+
+        JLabel sectionLabel = new JLabel(" Section Title: ");
+        JTextField sectionField = new JTextField(10);
+        sectionField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
+        sectionField.setText(sectionTitle);
+
+        JLabel editLabel = new JLabel(" ");
+        String[] editOptions = {"Editable", "Read Only"};
+        JComboBox<String> editDropdown = new JComboBox<>(editOptions);
+        editDropdown.setMaximumSize(new Dimension(120, 25));
+        editDropdown.setSelectedItem(readOnly ? "Read Only" : "Editable");
+
+        JButton removeBtn = new JButton("X");
+        removeBtn.setMargin(new Insets(0, 4, 0, 4));
+
+        IoSectionEntry entry = new IoSectionEntry(tabField, sectionField, editDropdown, row);
+
+        removeBtn.addActionListener(e -> {
+            ioSections.remove(entry);
+            ioListPanel.remove(row);
+            ioListPanel.revalidate();
+            ioListPanel.repaint();
+        });
+
+        row.add(tabLabel);
+        row.add(tabField);
+        row.add(sectionLabel);
+        row.add(sectionField);
+        row.add(editLabel);
+        row.add(editDropdown);
+        row.add(Box.createHorizontalStrut(4));
+        row.add(removeBtn);
+
+        ioSections.add(entry);
+        ioListPanel.add(row);
     }
 
     private void addIoSectionRow(double width) {

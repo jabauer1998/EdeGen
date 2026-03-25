@@ -25,4 +25,8 @@ public class GuiEdeGenField extends JPanel{
     public String getInputText(){
         return field.getText();
     }
+
+    public void setInputText(String text) {
+        field.setText(text);
+    }
 }

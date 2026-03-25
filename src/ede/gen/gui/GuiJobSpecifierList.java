@@ -5,6 +5,8 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.List;
+import ede.gen.utils.EdeConfigManager;
 
 public class GuiJobSpecifierList extends JPanel {
     private JPanel listPanel;
@@ -112,5 +114,38 @@ public class GuiJobSpecifierList extends JPanel {
 
     public ArrayList<GuiJobSpecifier> getJobSpecifiers() {
         return jobSpecifiers;
+    }
+
+    public void loadFromConfig(List<EdeConfigManager.JobConfig> jobConfigs) {
+        for (GuiJobSpecifier spec : new ArrayList<>(jobSpecifiers)) {
+            removeJobSpecifier(spec);
+        }
+        jobCounter = 0;
+        for (EdeConfigManager.JobConfig cfg : jobConfigs) {
+            jobCounter++;
+            final String title = cfg.jobTitle.isEmpty() ? "Job " + jobCounter : cfg.jobTitle;
+            final GuiJobSpecifier[] holder = new GuiJobSpecifier[1];
+            holder[0] = new GuiJobSpecifier(title, new Runnable() {
+                public void run() {
+                    removeJobSpecifier(holder[0]);
+                }
+            }, genPanel);
+            holder[0].setJobType(cfg.jobType);
+            holder[0].setJobName(cfg.jobName);
+            holder[0].setSyntaxHighlighting(cfg.syntaxHighlighting);
+            holder[0].setImportsText(cfg.imports);
+            holder[0].setText(cfg.code);
+            holder[0].setKeywordFilePath(cfg.keywordFile);
+            holder[0].setJarPaths(cfg.jarPaths);
+            holder[0].setVerilogPath(cfg.verilogPath);
+            holder[0].setVerilogInputFile(cfg.verilogInputFile);
+            holder[0].setVerilogMainModule(cfg.verilogMainModule);
+            holder[0].setExePath(cfg.exePath);
+            jobSpecifiers.add(holder[0]);
+            listPanel.add(holder[0]);
+            listPanel.add(Box.createRigidArea(new Dimension(0, 4)));
+        }
+        listPanel.revalidate();
+        listPanel.repaint();
     }
 }
