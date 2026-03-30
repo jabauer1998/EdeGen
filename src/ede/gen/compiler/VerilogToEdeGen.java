@@ -40,6 +40,11 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                 FieldVisitor fv = moduleWriter.visitField(Opcodes.ACC_PRIVATE, ident.declarationIdentifier, "Lede/stl/values/EdeStatVal;", null, null);
                 if (fv != null) {
                     addField(ident.declarationIdentifier, "Lede/stl/values/EdeStatVal;");
+                    constructor.visitTypeInsn(Opcodes.NEW, "Lede/stl/values/EdeStatVal;");
+                    constructor.visitInsn(Opcodes.DUP);
+                    pushString(ident.declarationIdentifier, constructor);
+                    constructor.visitVarInsn(Opcodes.ALOAD, 1); //ede instance
+                    constructor.visitMethodInsn(Opcodes.INVOKESPECIAL, "ede/stl/values/EdeStatVal", "<init>", "(Ljava/lang/String;Lede/stl/gui/GuiEde;)V", false);
                     fv.visitEnd();
                 }
                 return;
@@ -55,6 +60,11 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                 FieldVisitor fv = moduleWriter.visitField(Opcodes.ACC_PRIVATE, ident.declarationIdentifier, "Lede/stl/values/EdeRegVal;", null, null);
                 if (fv != null) {
                     addField(ident.declarationIdentifier, "Lede/stl/values/EdeRegVal;");
+                    constructor.visitTypeInsn(Opcodes.NEW, "Lede/stl/values/EdeRegVal;");
+                    constructor.visitInsn(Opcodes.DUP);
+                    pushString(ident.declarationIdentifier, constructor);
+                    constructor.visitVarInsn(Opcodes.ALOAD, 1);//ede instance
+                    constructor.visitMethodInsn(Opcodes.INVOKESPECIAL, "ede/stl/values/EdeRegVal", "<init>", "(Ljava/lang/String;Lede/stl/gui/GuiEde;)V", false);
                     fv.visitEnd();
                 }
                 return;
@@ -70,6 +80,10 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                 FieldVisitor fv = moduleWriter.visitField(Opcodes.ACC_PRIVATE, array.declarationIdentifier, "Lede/stl/values/EdeMemVal;", null, null);
                 if (fv != null) {
                     addField(array.declarationIdentifier, "Lede/stl/values/EdeMemVal;");
+                    constructor.visitTypeInsn(Opcodes.NEW, "Lede/stl/values/EdeMemVal;");
+                    constructor.visitInsn(Opcodes.DUP);
+                    constructor.visitVarInsn(Opcodes.ALOAD, 1); //Ede instance 
+                    constructor.visitMethodInsn(Opcodes.INVOKESPECIAL, "ede/stl/values/EdeMemVal", "<init>", "(Lede/stl/gui/GuiEde;)V", false);
                     fv.visitEnd();
                 }
                 return;
