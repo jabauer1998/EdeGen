@@ -145,17 +145,17 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
 	    if(type != null && isEdeType(type)){
 		// Push arr (leftHandDeref) first — matches shallowAssignSliceEde(arr, startIndex, endIndex, rhs)
 	        if(this.fieldInScope(leftHandSide.labelIdentifier)){
-		    mv.visitVarInsn(Opcodes.ALOAD, 0);
-		    mv.visitFieldInsn(Opcodes.GETFIELD, modName, leftHandSide.labelIdentifier, type);
-		    	codeGenShallowExpression(leftHandSide.index1, mv, modName, moduleWriter);
-			codeGenShallowExpression(leftHandSide.index2, mv, modName, moduleWriter);
-			codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC,
-					   "ede/stl/common/Utils",
-					   "shallowAssignSliceEde",
-					   "(Lede/stl/values/Value;Lede/stl/values/Value;Lede/stl/values/Value;Lede/stl/values/Value;)V",
-					   false);
-			return;
+    		    mv.visitVarInsn(Opcodes.ALOAD, 0);
+    		    mv.visitFieldInsn(Opcodes.GETFIELD, modName, leftHandSide.labelIdentifier, type);
+    		    codeGenShallowExpression(leftHandSide.index1, mv, modName, moduleWriter);
+    			codeGenShallowExpression(leftHandSide.index2, mv, modName, moduleWriter);
+    			codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
+    			mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+    					   "ede/stl/common/Utils",
+    					   "shallowAssignSliceEde",
+    					   "(Lede/stl/values/Value;Lede/stl/values/Value;Lede/stl/values/Value;Lede/stl/values/Value;)V",
+    					   false);
+    			return;
 		} else {
 		    Utils.errorAndExit("Variable " + leftHandSide.labelIdentifier + " does not exist in the current scope", leftHandSide.position);
 		}
