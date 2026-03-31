@@ -11,6 +11,7 @@ import ede.stl.ast.Reg;
 import ede.stl.ast.Element;
 import ede.stl.ast.Slice;
 import ede.stl.ast.Identifier;
+import ede.stl.ast.Expression;
 import ede.stl.ast.BlockingAssignment;
 import ede.stl.ast.SystemTaskStatement;
 import ede.stl.ast.TaskStatement;
@@ -40,13 +41,13 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                 FieldVisitor fv = moduleWriter.visitField(Opcodes.ACC_PRIVATE, ident.declarationIdentifier, "Lede/stl/values/EdeStatVal;", null, null);
                 if (fv != null) {
                     addField(ident.declarationIdentifier, "Lede/stl/values/EdeStatVal;");
-		    constructor.visitVarInsn(Opcodes.ALOAD, 0);
+                    constructor.visitVarInsn(Opcodes.ALOAD, 0);
                     constructor.visitTypeInsn(Opcodes.NEW, "ede/stl/values/EdeStatVal");
                     constructor.visitInsn(Opcodes.DUP);
-                    pushString(ident.declarationIdentifier, constructor);
-                    constructor.visitVarInsn(Opcodes.ALOAD, 1); //ede instance
+                    constructor.visitLdcInsn(ident.declarationIdentifier);
+                    constructor.visitVarInsn(Opcodes.ALOAD, 1);
                     constructor.visitMethodInsn(Opcodes.INVOKESPECIAL, "ede/stl/values/EdeStatVal", "<init>", "(Ljava/lang/String;Lede/stl/gui/GuiEde;)V", false);
-		    constructor.visitFieldInsn(Opcodes.PUTFIELD, modName, ident.declarationIdentifier, "Lede/stl/values/EdeStatVal;");
+                    constructor.visitFieldInsn(Opcodes.PUTFIELD, modName, ident.declarationIdentifier, "Lede/stl/values/EdeStatVal;");
                     fv.visitEnd();
                 }
                 return;
@@ -62,13 +63,13 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                 FieldVisitor fv = moduleWriter.visitField(Opcodes.ACC_PRIVATE, ident.declarationIdentifier, "Lede/stl/values/EdeRegVal;", null, null);
                 if (fv != null) {
                     addField(ident.declarationIdentifier, "Lede/stl/values/EdeRegVal;");
-		    constructor.visitVarInsn(Opcodes.ALOAD, 0);
+                    constructor.visitVarInsn(Opcodes.ALOAD, 0);
                     constructor.visitTypeInsn(Opcodes.NEW, "ede/stl/values/EdeRegVal");
                     constructor.visitInsn(Opcodes.DUP);
-                    pushString(ident.declarationIdentifier, constructor);
-                    constructor.visitVarInsn(Opcodes.ALOAD, 1);//ede instance
+                    constructor.visitLdcInsn(ident.declarationIdentifier);
+                    constructor.visitVarInsn(Opcodes.ALOAD, 1);
                     constructor.visitMethodInsn(Opcodes.INVOKESPECIAL, "ede/stl/values/EdeRegVal", "<init>", "(Ljava/lang/String;Lede/stl/gui/GuiEde;)V", false);
-		    constructor.visitFieldInsn(Opcodes.PUTFIELD, modName, ident.declarationIdentifier, "Lede/stl/values/EdeRegVal;");
+                    constructor.visitFieldInsn(Opcodes.PUTFIELD, modName, ident.declarationIdentifier, "Lede/stl/values/EdeRegVal;");
                     fv.visitEnd();
                 }
                 return;
@@ -84,12 +85,12 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                 FieldVisitor fv = moduleWriter.visitField(Opcodes.ACC_PRIVATE, array.declarationIdentifier, "Lede/stl/values/EdeMemVal;", null, null);
                 if (fv != null) {
                     addField(array.declarationIdentifier, "Lede/stl/values/EdeMemVal;");
-		    constructor.visitVarInsn(Opcodes.ALOAD, 0);
+                    constructor.visitVarInsn(Opcodes.ALOAD, 0);
                     constructor.visitTypeInsn(Opcodes.NEW, "ede/stl/values/EdeMemVal");
                     constructor.visitInsn(Opcodes.DUP);
-                    constructor.visitVarInsn(Opcodes.ALOAD, 1); //Ede instance 
+                    constructor.visitVarInsn(Opcodes.ALOAD, 1);
                     constructor.visitMethodInsn(Opcodes.INVOKESPECIAL, "ede/stl/values/EdeMemVal", "<init>", "(Lede/stl/gui/GuiEde;)V", false);
-		    constructor.visitFieldInsn(Opcodes.PUTFIELD, modName, array.declarationIdentifier, "Lede/stl/values/EdeMemVal;");
+                    constructor.visitFieldInsn(Opcodes.PUTFIELD, modName, array.declarationIdentifier, "Lede/stl/values/EdeMemVal;");
                     fv.visitEnd();
                 }
                 return;
@@ -102,8 +103,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
         String annotationLexeme = taskCall.annotationLexeme;
         if(annotationLexeme != null){
             if(annotationLexeme.toLowerCase().equals("@breakpoint")){
-                mv.visitVarInsn(Opcodes.ALOAD, 0);
-                mv.visitFieldInsn(Opcodes.GETFIELD, modName, "guiInstance", "Lede/stl/gui/GuiEde;");
+                mv.visitVarInsn(Opcodes.ALOAD, 1);
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "isDebuggerEnabled", "()Z", false);
                 Label l0 = new Label();
                 mv.visitJumpInsn(Opcodes.IFEQ, l0);
@@ -138,160 +138,131 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
         super.codeGenShallowSystemTaskCall(taskCall, mv, modName, moduleWriter);
     }
 
-    private static boolean isEdeType(String isEdeType){
-	return (isEdeType.equals("Lede/stl/values/EdeStatVal;") || isEdeType.equals("Lede/stl/values/EdeRegVal;") || isEdeType.equals("Lede/stl/values/EdeMemVal;"));
+    private static boolean isEdeType(String type){
+        return (type.equals("Lede/stl/values/EdeStatVal;") || type.equals("Lede/stl/values/EdeRegVal;") || type.equals("Lede/stl/values/EdeMemVal;"));
+    }
+
+    protected void codeGenShallowExpression(Expression exp, MethodVisitor method, String moduleName, ClassVisitor module) throws Exception {
+        if(exp instanceof Identifier){
+            Identifier ident = (Identifier)exp;
+            String type = getTypeFromFieldScope(ident.labelIdentifier);
+            if(type != null && isEdeType(type)){
+                if(fieldInScope(ident.labelIdentifier)){
+                    method.visitVarInsn(Opcodes.ALOAD, 0);
+                    method.visitFieldInsn(Opcodes.GETFIELD, moduleName, ident.labelIdentifier, type);
+                    method.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "toLongValue", "(Lede/stl/values/Value;)Lede/stl/values/Value;", false);
+                    return;
+                } else {
+                    Utils.errorAndExit("Error identifier " + ident.labelIdentifier + " not found in scope!!!");
+                }
+            }
+        } else if(exp instanceof Slice){
+            Slice slice = (Slice)exp;
+            String type = getTypeFromFieldScope(slice.labelIdentifier);
+            if(type != null && isEdeType(type)){
+                if(fieldInScope(slice.labelIdentifier)){
+                    if(type.equals("Lede/stl/values/EdeRegVal;")){
+                        method.visitTypeInsn(Opcodes.NEW, "ede/stl/values/LongVal");
+                        method.visitInsn(Opcodes.DUP);
+                        method.visitVarInsn(Opcodes.ALOAD, 0);
+                        method.visitFieldInsn(Opcodes.GETFIELD, moduleName, slice.labelIdentifier, type);
+                        codeGenShallowExpression(slice.index1, method, moduleName, module);
+                        method.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ede/stl/values/Value", "intValue", "()I", true);
+                        codeGenShallowExpression(slice.index2, method, moduleName, module);
+                        method.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ede/stl/values/Value", "intValue", "()I", true);
+                        method.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/values/EdeRegVal", "getBitsInRange", "(II)J", false);
+                        method.visitMethodInsn(Opcodes.INVOKESPECIAL, "ede/stl/values/LongVal", "<init>", "(J)V", false);
+                        return;
+                    }
+                } else {
+                    Utils.errorAndExit("Error variable " + slice.labelIdentifier + " is not found!!!\nin module " + moduleName + "\nat position " + slice.position.toString());
+                }
+            }
+        } else if(exp instanceof Element){
+            Element elem = (Element)exp;
+            String type = getTypeFromFieldScope(elem.labelIdentifier);
+            if(type != null && isEdeType(type)){
+                if(fieldInScope(elem.labelIdentifier)){
+                    if(type.equals("Lede/stl/values/EdeRegVal;")){
+                        method.visitTypeInsn(Opcodes.NEW, "ede/stl/values/LongVal");
+                        method.visitInsn(Opcodes.DUP);
+                        method.visitVarInsn(Opcodes.ALOAD, 0);
+                        method.visitFieldInsn(Opcodes.GETFIELD, moduleName, elem.labelIdentifier, type);
+                        codeGenShallowExpression(elem.index1, method, moduleName, module);
+                        method.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ede/stl/values/Value", "intValue", "()I", true);
+                        method.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/values/EdeRegVal", "getBitAtIndex", "(I)J", false);
+                        method.visitMethodInsn(Opcodes.INVOKESPECIAL, "ede/stl/values/LongVal", "<init>", "(J)V", false);
+                        return;
+                    } else if(type.equals("Lede/stl/values/EdeMemVal;")){
+                        method.visitTypeInsn(Opcodes.NEW, "ede/stl/values/LongVal");
+                        method.visitInsn(Opcodes.DUP);
+                        method.visitVarInsn(Opcodes.ALOAD, 0);
+                        method.visitFieldInsn(Opcodes.GETFIELD, moduleName, elem.labelIdentifier, type);
+                        codeGenShallowExpression(elem.index1, method, moduleName, module);
+                        method.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ede/stl/values/Value", "intValue", "()I", true);
+                        method.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/values/EdeMemVal", "elemAtIndex", "(I)J", false);
+                        method.visitMethodInsn(Opcodes.INVOKESPECIAL, "ede/stl/values/LongVal", "<init>", "(J)V", false);
+                        return;
+                    }
+                } else {
+                    Utils.errorAndExit("Error cant find elem from identifier " + elem.labelIdentifier);
+                }
+            }
+        }
+        super.codeGenShallowExpression(exp, method, moduleName, module);
     }
 
     protected void codeGenShallowBlockingAssign(BlockingAssignment assign, String funcName, MethodVisitor mv, String modName, ClassVisitor moduleWriter) throws Exception {
         if(assign.leftHandSide instanceof Element){
             Element leftHandSide = (Element)assign.leftHandSide;
-            // Push arr (leftHandDeref) first — matches shallowAssignElemEde(arr, index, rhs)
-	    String type = getTypeFromFieldScope(leftHandSide.labelIdentifier);
-	    if(type != null && isEdeType(type)){
-		 if(this.fieldInScope(leftHandSide.labelIdentifier)){
-		     mv.visitVarInsn(Opcodes.ALOAD, 0);
-		     mv.visitFieldInsn(Opcodes.GETFIELD, modName, leftHandSide.labelIdentifier, type);
-		     codeGenShallowExpression(leftHandSide.index1, mv, modName, moduleWriter);
-		     codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
-		     mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "shallowAssignElemEde", "(Lede/stl/values/Value;Lede/stl/values/Value;Lede/stl/values/Value;)V", false);
-		     return;
-		 } else {
-		     Utils.errorAndExit("Variable " + leftHandSide.labelIdentifier + " does not exist in the current scope", leftHandSide.position);
-		 }
-	    }
+            String type = getTypeFromFieldScope(leftHandSide.labelIdentifier);
+            if(type != null && isEdeType(type)){
+                 if(this.fieldInScope(leftHandSide.labelIdentifier)){
+                     mv.visitVarInsn(Opcodes.ALOAD, 0);
+                     mv.visitFieldInsn(Opcodes.GETFIELD, modName, leftHandSide.labelIdentifier, type);
+                     codeGenShallowExpression(leftHandSide.index1, mv, modName, moduleWriter);
+                     codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
+                     mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "shallowAssignElemEde", "(Lede/stl/values/Value;Lede/stl/values/Value;Lede/stl/values/Value;)V", false);
+                     return;
+                 } else {
+                     Utils.errorAndExit("Variable " + leftHandSide.labelIdentifier + " does not exist in the current scope", leftHandSide.position);
+                 }
+            }
         } else if(assign.leftHandSide instanceof Slice){
             Slice leftHandSide = (Slice)assign.leftHandSide;
-	    String type = getTypeFromFieldScope(leftHandSide.labelIdentifier);
-	    if(type != null && isEdeType(type)){
-		// Push arr (leftHandDeref) first — matches shallowAssignSliceEde(arr, startIndex, endIndex, rhs)
-	        if(this.fieldInScope(leftHandSide.labelIdentifier)){
-    		    mv.visitVarInsn(Opcodes.ALOAD, 0);
-    		    mv.visitFieldInsn(Opcodes.GETFIELD, modName, leftHandSide.labelIdentifier, type);
-    		    codeGenShallowExpression(leftHandSide.index1, mv, modName, moduleWriter);
-    			codeGenShallowExpression(leftHandSide.index2, mv, modName, moduleWriter);
-    			codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
-    			mv.visitMethodInsn(Opcodes.INVOKESTATIC,
-    					   "ede/stl/common/Utils",
-    					   "shallowAssignSliceEde",
-    					   "(Lede/stl/values/Value;Lede/stl/values/Value;Lede/stl/values/Value;Lede/stl/values/Value;)V",
-    					   false);
-    			return;
-		} else {
-		    Utils.errorAndExit("Variable " + leftHandSide.labelIdentifier + " does not exist in the current scope", leftHandSide.position);
-		}
-	    }
-        } else if(assign.leftHandSide instanceof Identifier){
-            Identifier leftHandSide = (Identifier)assign.leftHandSide;
-	    String type = getTypeFromFieldScope(leftHandSide.labelIdentifier);
-
-	    if(type != null && isEdeType(type)){
-		if(fieldInScope(leftHandSide.labelIdentifier)){
-			mv.visitVarInsn(Opcodes.ALOAD, 0);
-			mv.visitFieldInsn(Opcodes.GETFIELD, modName, leftHandSide.labelIdentifier, type);
-			codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "setValueOfIdent", "(Lede/stl/values/Value;Lede/stl/values/Value;)V", false);
-			return;
-		} else {
-		    Utils.errorAndExit("Variable " + leftHandSide.labelIdentifier + " does not exist in the current scope", leftHandSide.position);
-		}
-	    }
-	}
-        super.codeGenShallowBlockingAssign(assign, funcName, mv, modName, moduleWriter);
-    }
-
-     private void codeGenShallowIdentifier(Identifier ident, MethodVisitor method, String moduleName, ClassVisitor module) throws Exception{
-                String type = getTypeFromFieldScope(ident.labelIdentifier);
+            String type = getTypeFromFieldScope(leftHandSide.labelIdentifier);
             if(type != null && isEdeType(type)){
-                if(this.fieldInScope(ident.labelIdentifier)){
-                    if(type.equals("Lede/stl/values/EdeStatVal;")){
-                        method.visitVarInsn(Opcodes.ALOAD, 0);
-                        method.visitFieldInsn(Opcodes.GETFIELD, 
-                        moduleName, // Owner class internal name
-                        ident.labelIdentifier,           // Field name
-                        type);
-                        method.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "toLongValue","(Lede/stl/values/Value;)Lede/stl/values/Value;", false);
-			return;
-                    } else if(type.equals("Lede/stl/values/EdeRegVal;")){
-                        method.visitVarInsn(Opcodes.ALOAD, 0);
-                        method.visitFieldInsn(Opcodes.GETFIELD, 
-                        moduleName, // Owner class internal name
-                        ident.labelIdentifier,           // Field name
-                        type);
-                        method.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "toLongValue","(Lede/stl/values/Value;)Lede/stl/values/Value;", false);
-			return;
-                    }
+                if(this.fieldInScope(leftHandSide.labelIdentifier)){
+                    mv.visitVarInsn(Opcodes.ALOAD, 0);
+                    mv.visitFieldInsn(Opcodes.GETFIELD, modName, leftHandSide.labelIdentifier, type);
+                    codeGenShallowExpression(leftHandSide.index1, mv, modName, moduleWriter);
+                    codeGenShallowExpression(leftHandSide.index2, mv, modName, moduleWriter);
+                    codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
+                    mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+                                       "ede/stl/common/Utils",
+                                       "shallowAssignSliceEde",
+                                       "(Lede/stl/values/Value;Lede/stl/values/Value;Lede/stl/values/Value;Lede/stl/values/Value;)V",
+                                       false);
+                    return;
                 } else {
-                    Utils.errorAndExit("Error identifier " + ident.labelIdentifier + " not found in scope!!!");
+                    Utils.errorAndExit("Variable " + leftHandSide.labelIdentifier + " does not exist in the current scope", leftHandSide.position);
                 }
             }
-            super.codeGenShallowIdentifier(ident, method, moduleName, module);
+        } else if(assign.leftHandSide instanceof Identifier){
+            Identifier leftHandSide = (Identifier)assign.leftHandSide;
+            String type = getTypeFromFieldScope(leftHandSide.labelIdentifier);
+            if(type != null && isEdeType(type)){
+                if(fieldInScope(leftHandSide.labelIdentifier)){
+                    mv.visitVarInsn(Opcodes.ALOAD, 0);
+                    mv.visitFieldInsn(Opcodes.GETFIELD, modName, leftHandSide.labelIdentifier, type);
+                    codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
+                    mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "setValueOfIdent", "(Lede/stl/values/Value;Lede/stl/values/Value;)V", false);
+                    return;
+                } else {
+                    Utils.errorAndExit("Variable " + leftHandSide.labelIdentifier + " does not exist in the current scope", leftHandSide.position);
+                }
+            }
         }
-
-    private void codeGenShallowSlice(Slice slice, MethodVisitor method, String moduleName, ClassVisitor module) throws Exception{
-	        String type = getTypeFromFieldScope(ident.labelIdentifier);
-		if(type != null && isEdeType(type)){   
-		    if(fieldInScope(slice.labelIdentifier)) {
-                        if(type.equals("Lede/stl/values/EdeRegVal;")){
-			     method.visitTypeInsn(Opcodes.NEW, "ede/stl/values/LongVal");
-			     method.visitInsn(Opcodes.DUP);
-			     method.visitVarInsn(Opcodes.ALOAD, 0);
-			     method.visitFieldInsn(Opcodes.GETFIELD, 
-						   moduleName, // Owner class internal name
-						   slice.labelIdentifier,           // Field name
-						   type);
-			     codeGenShallowExpression(slice.index1, method, moduleName, module);
-			     method.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ede/stl/values/Value", "intValue", "()I", true);
-			     codeGenShallowExpression(slice.index2, method, moduleName, module);
-			     method.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ede/stl/values/Value", "intValue", "()I", true);
-			     method.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/values/EdeRegVal", "getBitsInRange", "(II)J", false);
-			     method.visitMethodInsn(Opcodes.INVOKESPECIAL, "ede/stl/values/LongVal", "<init>", "(J)V", false);
-			     method.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "toLongValue", "(Lede/stl/values/Value;)Lede/stl/values/Value;", false);
-			     return;
-			}
-		    } else {
-                        Utils.errorAndExit("Error variable " + slice.labelIdentifier + " is not found!!!\nin module " + moduleName + "\nat position " + slice.position.toString());
-		    }
-		}
-		super.codeGenShallowSlice(slice, method, moduleName, module);
-        }
-
-         private void codeGenShallowElement(Element elem, MethodVisitor method, String moduleName, ClassVisitor module) throws Exception{
-	        String type = getTypeFromFieldScope(elem.labelIdentifier);
-                if(type != null && isEdeType(type)){
-		    if(this.fieldInScope(elem.labelIdentifier)){
-			if(type.equals("Lede/stl/values/EdeRegVal;")){
-			    method.visitTypeInsn(Opcodes.NEW, "ede/stl/values/LongVal");
-			    method.visitInsn(Opcodes.DUP);
-			    method.visitVarInsn(Opcodes.ALOAD, 0);
-			    method.visitFieldInsn(Opcodes.GETFIELD, 
-						  moduleName, // Owner class internal name
-						  elem.labelIdentifier,           // Field name
-						  type);
-			     codeGenShallowExpression(slice.index1, method, moduleName, module);
-			     method.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ede/stl/values/Value", "intValue", "()I", true);
-			     method.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/values/EdeMemVal", "getBitAtIndex", "(I)J", false);
-			     method.visitMethodInsn(Opcodes.INVOKESPECIAL, "ede/stl/values/LongVal", "<init>", "(J)V", false);
-			     method.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "toLongValue", "(Lede/stl/values/Value;)Lede/stl/values/Value;", false);
-			     return;
-			} else if(type.equals("Lede/stl/values/EdeMemVal;")){
-			    method.visitTypeInsn(Opcodes.NEW, "ede/stl/values/LongVal");
-			    method.visitInsn(Opcodes.DUP);
-			    method.visitVarInsn(Opcodes.ALOAD, 0);
-			    method.visitFieldInsn(Opcodes.GETFIELD, 
-						  moduleName, // Owner class internal name
-						  elem.labelIdentifier,           // Field name
-						  type);
-			    codeGenShallowExpression(slice.index1, method, moduleName, module);
-			    method.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ede/stl/values/Value", "intValue", "()I", true);
-			    method.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/values/EdeMemVal", "elemAtIndex", "(I)J", false);
-			    method.visitMethodInsn(Opcodes.INVOKESPECIAL, "ede/stl/values/LongVal", "<init>", "(J)V", false);
-			    method.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "toLongValue", "(Lede/stl/values/Value;)Lede/stl/values/Value;", false);
-			    return;
-			}
-		    } else {
-                        Utils.errorAndExit("Error cant find elem from identifier " + elem.labelIdentifier);
-		    }
-		}
-		super.codeGenShallowElement(elem, method, moduleName, module);
-	 }
+        super.codeGenShallowBlockingAssign(assign, funcName, mv, modName, moduleWriter);
+    }
 }
