@@ -41,6 +41,7 @@ if($javaExists -ne ""){
 	    jar cfe "./bin/EdeGen.jar" "ede.gen.driver.EdeGenerator" -C "./tmp" "."
 	    Remove-Item -Path ./tmp/* -Recurse -Force
 	} elseif ($command -eq "clean"){
+	    ./lib/EdeStl/build/WindowsBuild.ps1 clean
 	    Get-ChildItem -Path './src' -Include *.class -Recurse | Remove-Item -Force
 	    Get-ChildItem -Path './bin' -Include *.class -Recurse | Remove-Item -Force
 	    Remove-Item -Recurse -Force "*~"
