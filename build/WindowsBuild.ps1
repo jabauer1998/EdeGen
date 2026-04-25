@@ -18,7 +18,12 @@ if($javaExists -ne ""){
 	if($command -eq "build"){
 	    Write-Host "Building SubModule -EdeStl.jar..."
 	    ./lib/EdeStl/build/WindowsBuild.ps1 build
+	     if ($LASTEXITCODE -ne 0) { 
+		Write-Error "Java execution failed with exit code $LASTEXITCODE"
+		exit $LASTEXITCODE 
+	    }
 	    Write-Host "Built SubModule -EdeStl.jar..."
+	   
 	    $srcRoot = Get-Location
 	    if(Test-Path -Path build\BuildList.txt){
 		Remove-Item -Force build\BuildList.txt
