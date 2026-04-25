@@ -256,7 +256,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                     mv.visitVarInsn(Opcodes.ALOAD, 0);
                     mv.visitFieldInsn(Opcodes.GETFIELD, modName, leftHandSide.labelIdentifier, type);
                     codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
-                    mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "setValueOfIdent", "(Lede/stl/values/Value;Lede/stl/values/Value;)V", false);
+                    mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ede/stl/values/Value", "setValue", "(Lede/stl/values/Value;)V", true);
                     return;
                 } else {
                     Utils.errorAndExit("Variable " + leftHandSide.labelIdentifier + " does not exist in the current scope", leftHandSide.position);
