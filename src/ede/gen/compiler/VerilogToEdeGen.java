@@ -133,6 +133,13 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "formatString", "(Lede/stl/values/Value;[Lede/stl/values/Value;)Ljava/lang/String;", false);
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "appendIoText", "(Ljava/lang/String;Ljava/lang/String;)V", false);
                 return;
+            } else if(taskCall.argumentList.size() == 1){
+                mv.visitVarInsn(Opcodes.ALOAD, 1);
+                mv.visitLdcInsn("StandardOutput");
+                codeGenShallowExpression(taskCall.argumentList.get(0), mv, modName, moduleWriter);
+                mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ede/stl/values/Value", "toString", "()Ljava/lang/String;", true);
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "appendIoText", "(Ljava/lang/String;Ljava/lang/String;)V", false);
+                return;
             }
         }
         super.codeGenShallowSystemTaskCall(taskCall, mv, modName, moduleWriter);
