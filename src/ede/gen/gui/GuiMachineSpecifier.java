@@ -16,7 +16,6 @@ import ede.gen.utils.EdeJarBuilder;
 import ede.gen.utils.EdeConfigManager;
 
 public class GuiMachineSpecifier extends JPanel{
-    private JButton saveEde;
     private GuiEdeGenField title;
     private GuiEdeGenField ramBytesPerRow;
     private JComboBox<String> registerFormatDropdown;
@@ -51,40 +50,6 @@ public class GuiMachineSpecifier extends JPanel{
 
         JPanel topSection = new JPanel();
         topSection.setLayout(new BoxLayout(topSection, BoxLayout.Y_AXIS));
-
-        JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 4));
-        toolBar.setAlignmentX(LEFT_ALIGNMENT);
-        toolBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
-
-        JButton testEde = new JButton("Test Ede Environment");
-        testEde.setPreferredSize(new Dimension((int)(width/3), 40));
-        testEde.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event){
-                launchEdeEnvironment();
-            }
-        });
-        toolBar.add(testEde);
-
-        saveEde = new JButton("Save Ede Environment");
-        saveEde.setPreferredSize(new Dimension((int)(width/3), 40));
-        saveEde.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event){
-                saveEdeEnvironment();
-            }
-        });
-        toolBar.add(saveEde);
-
-        JButton clearLog = new JButton("Clear Log");
-        clearLog.setPreferredSize(new Dimension((int)(width/6), 40));
-        clearLog.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event){
-                log.setText("");
-            }
-        });
-        toolBar.add(clearLog);
 
         this.title = new GuiEdeGenField("Title of Ede Environment: ", width, 30);
         this.title.setAlignmentX(LEFT_ALIGNMENT);
@@ -125,7 +90,6 @@ public class GuiMachineSpecifier extends JPanel{
         ramFormatPanel.add(this.ramFormatDropdown);
         ramFormatPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
 
-        topSection.add(toolBar);
         topSection.add(title);
         topSection.add(ramBytesPerRow);
         topSection.add(registerFormatPanel);
@@ -475,7 +439,11 @@ public class GuiMachineSpecifier extends JPanel{
         return true;
     }
 
-    private void saveEdeEnvironment() {
+    void clearLog() {
+        log.setText("");
+    }
+
+    void saveEdeEnvironment(boolean runAfterSave) {
         log.log("--- Save Ede Environment ---");
 
         if (!validateJobs()) {
@@ -574,8 +542,6 @@ public class GuiMachineSpecifier extends JPanel{
         progressDialog.setMinimumSize(new Dimension(400, progressDialog.getHeight()));
         progressDialog.setLocationRelativeTo(this);
 
-        saveEde.setEnabled(false);
-
         EdeJarBuilder.ProgressListener progressListener = (current, total, message) ->
             SwingUtilities.invokeLater(() -> {
                 progressBar.setIndeterminate(false);
@@ -599,13 +565,30 @@ public class GuiMachineSpecifier extends JPanel{
             @Override
             protected void done() {
                 progressDialog.dispose();
-                saveEde.setEnabled(true);
                 try {
                     java.io.File jarFile = get();
                     log.log("[PASS] JAR saved successfully: " + jarFile.getAbsolutePath());
-                    JOptionPane.showMessageDialog(GuiMachineSpecifier.this,
-                        "Ede JAR saved:\n" + jarFile.getAbsolutePath(),
-                        "Save Successful", JOptionPane.INFORMATION_MESSAGE);
+                    if (runAfterSave) {
+                        log.log("[INFO] Launching JAR: " + jarFile.getAbsolutePath());
+                        try {
+                            String javaExe = System.getProperty("java.home")
+                                + java.io.File.separator + "bin"
+                                + java.io.File.separator + "java";
+                            new ProcessBuilder(javaExe, "-jar", jarFile.getAbsolutePath())
+                                .inheritIO()
+                                .start();
+                            log.log("[INFO] JAR launched.");
+                        } catch (Exception launchEx) {
+                            log.log("[ERROR] Failed to launch JAR: " + launchEx.getMessage());
+                            JOptionPane.showMessageDialog(GuiMachineSpecifier.this,
+                                "JAR saved but could not be launched:\n" + launchEx.getMessage(),
+                                "Launch Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(GuiMachineSpecifier.this,
+                            "Ede JAR saved:\n" + jarFile.getAbsolutePath(),
+                            "Save Successful", JOptionPane.INFORMATION_MESSAGE);
+                    }
                 } catch (java.util.concurrent.ExecutionException ee) {
                     Throwable cause = ee.getCause() != null ? ee.getCause() : ee;
                     java.io.StringWriter sw = new java.io.StringWriter();
@@ -624,7 +607,7 @@ public class GuiMachineSpecifier extends JPanel{
         progressDialog.setVisible(true);
     }
 
-    private void launchEdeEnvironment() {
+    void launchEdeEnvironment() {
         log.log("--- Test Ede Environment ---");
 
         if (!validateJobs()) {

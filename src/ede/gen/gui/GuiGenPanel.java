@@ -2,6 +2,7 @@ package ede.gen.gui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -43,7 +44,36 @@ public class GuiGenPanel extends JPanel {
 
         tabbedPane.addTab("Home", verticalSplit);
 
+        this.add(buildMenuToolbar(), BorderLayout.NORTH);
         this.add(tabbedPane, BorderLayout.CENTER);
+    }
+
+    private JMenuBar buildMenuToolbar() {
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
+
+        JMenu testMenu = new JMenu("Test");
+        testMenu.add(linkItem("Test Ede Environment", e -> machine.launchEdeEnvironment()));
+        menuBar.add(testMenu);
+
+        JMenu saveMenu = new JMenu("Save");
+        saveMenu.add(linkItem("Save Ede As", e -> machine.saveEdeEnvironment(false)));
+        saveMenu.add(linkItem("Save And Run Ede", e -> machine.saveEdeEnvironment(true)));
+        menuBar.add(saveMenu);
+
+        JMenu cleanMenu = new JMenu("Clean");
+        cleanMenu.add(linkItem("Clear Ede Log", e -> machine.clearLog()));
+        menuBar.add(cleanMenu);
+
+        return menuBar;
+    }
+
+    private JMenuItem linkItem(String text, ActionListener action) {
+        JMenuItem item = new JMenuItem("<html><u>" + text + "</u></html>");
+        item.setForeground(new Color(0, 102, 204));
+        item.setBorderPainted(false);
+        item.addActionListener(action);
+        return item;
     }
 
     public void addLog(String text){
