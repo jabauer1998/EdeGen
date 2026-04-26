@@ -27,6 +27,12 @@ The application uses a standard Java Swing look and feel. The GUI features dynam
 - **Save/Load Config**: Functionality to persist and retrieve the entire application configuration via XML.
 - **Executable JAR Generation**: Ability to create self-contained JARs including all necessary components for the defined emulator environment.
 
+## Recent Changes
+- 2026-04-26: Fixed VectorVal.setValue(Value) index traversal bug: the previous position-based walk (from index1 downward) was mapping MSB-of-this to MSB-of-vec; when assigning a scalar (e.g. R15 = R15 + 4 → LongVal(4).asVector() = [63:0]) to a [31:0] register, bits 63-32 (all zero) were copied instead of bits 31-0, making register updates silently produce zero. Fixed by walking from getStart() (minimum/LSB index) upward for each vector independently, matching Utils.shallowAssign(VectorVal, VectorVal) semantics. This was the root cause of the INSTR-never-updating / infinite-loop bug.
+- 2026-04-26: VectorVal.setValue(Value) rewritten to use asVector() + per-bit signal copy via getStateSignal()/setSignal() instead of Utils.shallowAssign(this, exp.longValue()); preserves circuit signal topology; removed unused Utils import.
+- 2026-04-26: Fixed caseBoolean descriptor B→Z in VerilogToJavaGen codeGenShallowCaseStatement and codeGenCaseZStatement (NoSuchMethodError crash fix); changed blocking/non-blocking identifier assignment in VerilogToJavaGen from ASTORE/shallowAssignValue to INVOKEINTERFACE Value.setValue; fixed non-blocking field case SWAP+GETFIELD stack ordering bug; VerilogToEdeGen EDE-typed field assignment changed from setValueOfIdent to setValue.
+- 2026-04-25: Removed Pointer<Value> from all interpreter symbol tables; lookupVariable() returns Value directly; all Ptr.deRefrence()/Ptr.assign() calls replaced with value.setValue(exp); fixed setValue implementations on VectorVal, Node, EdeStatVal, EdeRegVal.
+
 ## External Dependencies
 - **EdeStl**: Git submodule (`lib/EdeStl/`) providing core emulator framework functionalities.
 - **ASM 9.6**: Bytecode manipulation framework, specifically `asm-9.6.jar`, `asm-util-9.6.jar`, `asm-tree-9.6.jar`, `asm-analysis-9.6.jar` (used by EdeStl for Verilog compilation).
