@@ -115,24 +115,15 @@ public class GuiMachineSpecifier extends JPanel{
         JScrollPane ioScroll = new JScrollPane(this.ioListPanel);
         ioScroll.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-        JPanel configRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
-        JButton saveConfigBtn = new JButton("Save Config");
-        saveConfigBtn.addActionListener(e -> saveConfig());
-        JButton loadConfigBtn = new JButton("Load Config");
-        loadConfigBtn.addActionListener(e -> loadConfig());
-        configRow.add(saveConfigBtn);
-        configRow.add(loadConfigBtn);
-
         JPanel ioContainer = new JPanel(new BorderLayout());
         ioContainer.add(ioHeaderPanel, BorderLayout.NORTH);
         ioContainer.add(ioScroll, BorderLayout.CENTER);
-        ioContainer.add(configRow, BorderLayout.SOUTH);
 
         this.add(topSection, BorderLayout.NORTH);
         this.add(ioContainer, BorderLayout.CENTER);
     }
 
-    private void saveConfig() {
+    void saveConfig() {
         javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
         chooser.setDialogTitle("Save EdeGen Config");
         chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("XML Config Files (*.xml)", "xml"));
@@ -191,7 +182,7 @@ public class GuiMachineSpecifier extends JPanel{
         }
     }
 
-    private void loadConfig() {
+    void loadConfig() {
         javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
         chooser.setDialogTitle("Load EdeGen Config");
         chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("XML Config Files (*.xml)", "xml"));

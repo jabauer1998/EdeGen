@@ -65,6 +65,11 @@ public class GuiGenPanel extends JPanel {
         cleanMenu.add(linkItem("Clear Ede Log", e -> machine.clearLog()));
         menuBar.add(cleanMenu);
 
+        JMenu configMenu = new JMenu("Config");
+        configMenu.add(linkItem("Save Config", e -> machine.saveConfig()));
+        configMenu.add(linkItem("Load Config", e -> machine.loadConfig()));
+        menuBar.add(configMenu);
+
         return menuBar;
     }
 
