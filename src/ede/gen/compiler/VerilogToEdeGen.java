@@ -128,8 +128,6 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                         mv.visitInsn(Opcodes.AASTORE); 
                 }
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "formatString", "(Lede/stl/values/Value;[Lede/stl/values/Value;)Ljava/lang/String;", false);
-                mv.visitInsn(Opcodes.DUP);
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "display", "(Ljava/lang/String;)V", false);
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "appendIoText", "(Ljava/lang/String;Ljava/lang/String;)V", false);
                 return;
             } else if(taskCall.argumentList.size() == 1){
@@ -137,8 +135,6 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                 mv.visitLdcInsn("StandardOutput");
                 codeGenShallowExpression(taskCall.argumentList.get(0), mv, modName, moduleWriter);
                 mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ede/stl/values/Value", "toString", "()Ljava/lang/String;", true);
-                mv.visitInsn(Opcodes.DUP);
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "display", "(Ljava/lang/String;)V", false);
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "appendIoText", "(Ljava/lang/String;Ljava/lang/String;)V", false);
                 return;
             }
