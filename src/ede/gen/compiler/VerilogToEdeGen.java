@@ -101,19 +101,16 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
 
     protected void codeGenShallowTaskCall(TaskStatement taskCall, MethodVisitor mv, String modName, ClassVisitor moduleWriter) throws Exception{
         String annotationLexeme = taskCall.annotationLexeme;
-        if(annotationLexeme != null){
-            if(annotationLexeme.toLowerCase().equals("@breakpoint")){
-                mv.visitVarInsn(Opcodes.ALOAD, 1);
-                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "isDebuggerEnabled", "()Z", false);
-                Label l0 = new Label();
-                mv.visitJumpInsn(Opcodes.IFEQ, l0);
-                mv.visitVarInsn(Opcodes.ALOAD, 1);
-                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "waitForStep", "()V", false);
-                mv.visitLabel(l0);
-            }
-        } else {
-            super.codeGenShallowTaskCall(taskCall, mv, modName, moduleWriter);
+        if(annotationLexeme != null && annotationLexeme.toLowerCase().equals("@breakpoint")){
+            mv.visitVarInsn(Opcodes.ALOAD, 1);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "isDebuggerEnabled", "()Z", false);
+            Label l0 = new Label();
+            mv.visitJumpInsn(Opcodes.IFEQ, l0);
+            mv.visitVarInsn(Opcodes.ALOAD, 1);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "waitForStep", "()V", false);
+            mv.visitLabel(l0);
         }
+        super.codeGenShallowTaskCall(taskCall, mv, modName, moduleWriter);
     }
 
     protected void codeGenShallowSystemTaskCall(SystemTaskStatement taskCall, MethodVisitor mv, String modName, ClassVisitor moduleWriter) throws Exception {
