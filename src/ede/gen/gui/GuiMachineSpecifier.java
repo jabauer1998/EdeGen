@@ -27,6 +27,7 @@ public class GuiMachineSpecifier extends JPanel{
     private JPanel ioListPanel;
     private ArrayList<IoSectionEntry> ioSections;
     private GuiGenPanel genPanel;
+    private JFrame activeEdeFrame;
 
     private static class IoSectionEntry {
         JTextField tabNameField;
@@ -752,12 +753,25 @@ public class GuiMachineSpecifier extends JPanel{
         final String frameTitle = edeTitle;
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                if (activeEdeFrame != null) {
+                    activeEdeFrame.dispose();
+                    activeEdeFrame = null;
+                }
                 JFrame frame = new JFrame(frameTitle);
                 frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                frame.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosed(java.awt.event.WindowEvent e) {
+                        if (activeEdeFrame == frame) {
+                            activeEdeFrame = null;
+                        }
+                    }
+                });
                 frame.add(guiEde);
                 frame.setPreferredSize(screenSize);
                 frame.pack();
                 frame.setVisible(true);
+                activeEdeFrame = frame;
             }
         });
     }
