@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<EdeConfig>
+  <Machine>
+    <Title>MyEdeConfig</Title>
+    <RamBytesPerRow>4</RamBytesPerRow>
+    <RegisterFormat>Binary</RegisterFormat>
+    <RamAddressFormat>Decimal</RamAddressFormat>
+    <RamFormat>Binary</RamFormat>
+    <IoSections/>
+  </Machine>
+  <Jobs>
+    <Job>
+      <JobTitle>Job 1</JobTitle>
+      <JobName>Assemble</JobName>
+      <JobType>Java Job</JobType>
+      <SyntaxHighlighting>false</SyntaxHighlighting>
+      <Imports>import declan.backend.assembler.ArmAssemblerParser;&#13;
+import declan.backend.assembler.ArmAssemblerParser.ProgramContext;&#13;
+import declan.backend.assembler.ArmAssemblerLexer;&#13;
+import declan.backend.assembler.AssemblerVisitor;&#13;
+import java.util.List;&#13;
+import org.antlr.v4.runtime.CharStreams;&#13;
+import org.antlr.v4.runtime.CharStream;&#13;
+import org.antlr.v4.runtime.CommonTokenStream;</Imports>
+      <Code>	CharStream byteStream = CharStreams.fromString(input);
+                                ArmAssemblerLexer lex = new ArmAssemblerLexer(byteStream);
+                                CommonTokenStream tokStream = new CommonTokenStream(lex);
+                                ArmAssemblerParser parse = new ArmAssemblerParser(tokStream);
+                                ProgramContext ctx = parse.program();
+                                AssemblerVisitor visitor = new AssemblerVisitor();
+                                List&lt;Integer&gt; assembledCode = visitor.assembleCode(ctx);
+
+                                StringBuilder output = new StringBuilder();
+                                for(Integer assembledCodeInstr : assembledCode){
+                                        StringBuilder resultBuilder = new StringBuilder();
+                                        String rawBinaryString = Integer.toBinaryString(assembledCodeInstr);
+                                        if(rawBinaryString.length() &gt; 32){
+                                                rawBinaryString = rawBinaryString.substring(rawBinaryString.length() - 32);
+                                        }
+                                        
+                                        if(rawBinaryString.length() &lt; 32){
+                                                for(int i = 0; i &lt; 32 - rawBinaryString.length(); i++){
+                                                        resultBuilder.append('0');
+                                                }
+                                                resultBuilder.append(rawBinaryString);
+                                                rawBinaryString = resultBuilder.toString();
+                                        }
+
+                                        output.append(rawBinaryString);
+                                        output.append('\n');
+                                }
+                                return output.toString();</Code>
+      <KeywordFile/>
+      <JarPaths/>
+      <VerilogPath/>
+      <VerilogInputFile/>
+      <VerilogMainModule/>
+      <ExePath/>
+    </Job>
+    <Job>
+      <JobTitle>Job 2</JobTitle>
+      <JobName>Execute</JobName>
+      <JobType>Verilog Job</JobType>
+      <SyntaxHighlighting>false</SyntaxHighlighting>
+      <Imports/>
+      <Code>	</Code>
+      <KeywordFile/>
+      <JarPaths/>
+      <VerilogPath>/home/runner/workspace/lib/EdeStl/sample/processor/ARM7TDMIS.v</VerilogPath>
+      <VerilogInputFile>default</VerilogInputFile>
+      <VerilogMainModule>Arm</VerilogMainModule>
+      <ExePath/>
+    </Job>
+  </Jobs>
+</EdeConfig>
