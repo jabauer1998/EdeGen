@@ -101,19 +101,16 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
 
     protected void codeGenShallowTaskCall(TaskStatement taskCall, MethodVisitor mv, String modName, ClassVisitor moduleWriter) throws Exception{
         String annotationLexeme = taskCall.annotationLexeme;
-        if(annotationLexeme != null){
-            if(annotationLexeme.toLowerCase().equals("@breakpoint")){
-                mv.visitVarInsn(Opcodes.ALOAD, 1);
-                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "isDebuggerEnabled", "()Z", false);
-                Label l0 = new Label();
-                mv.visitJumpInsn(Opcodes.IFEQ, l0);
-                mv.visitVarInsn(Opcodes.ALOAD, 1);
-                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "waitForStep", "()V", false);
-                mv.visitLabel(l0);
-            }
-        } else {
-            super.codeGenShallowTaskCall(taskCall, mv, modName, moduleWriter);
+        if(annotationLexeme != null && annotationLexeme.toLowerCase().equals("@breakpoint")){
+            mv.visitVarInsn(Opcodes.ALOAD, 1);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "isDebuggerEnabled", "()Z", false);
+            Label l0 = new Label();
+            mv.visitJumpInsn(Opcodes.IFEQ, l0);
+            mv.visitVarInsn(Opcodes.ALOAD, 1);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "waitForStep", "()V", false);
+            mv.visitLabel(l0);
         }
+        super.codeGenShallowTaskCall(taskCall, mv, modName, moduleWriter);
     }
 
     protected void codeGenShallowSystemTaskCall(SystemTaskStatement taskCall, MethodVisitor mv, String modName, ClassVisitor moduleWriter) throws Exception {
@@ -131,6 +128,13 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                         mv.visitInsn(Opcodes.AASTORE); 
                 }
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "formatString", "(Lede/stl/values/Value;[Lede/stl/values/Value;)Ljava/lang/String;", false);
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "appendIoText", "(Ljava/lang/String;Ljava/lang/String;)V", false);
+                return;
+            } else if(taskCall.argumentList.size() == 1){
+                mv.visitVarInsn(Opcodes.ALOAD, 1);
+                mv.visitLdcInsn("StandardOutput");
+                codeGenShallowExpression(taskCall.argumentList.get(0), mv, modName, moduleWriter);
+                mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ede/stl/values/Value", "toString", "()Ljava/lang/String;", true);
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ede/stl/gui/GuiEde", "appendIoText", "(Ljava/lang/String;Ljava/lang/String;)V", false);
                 return;
             }
@@ -256,7 +260,7 @@ public class VerilogToEdeGen extends VerilogToJavaGen{
                     mv.visitVarInsn(Opcodes.ALOAD, 0);
                     mv.visitFieldInsn(Opcodes.GETFIELD, modName, leftHandSide.labelIdentifier, type);
                     codeGenShallowExpression(assign.rightHandSide, mv, modName, moduleWriter);
-                    mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ede/stl/common/Utils", "setValueOfIdent", "(Lede/stl/values/Value;Lede/stl/values/Value;)V", false);
+                    mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ede/stl/values/Value", "setValue", "(Lede/stl/values/Value;)V", true);
                     return;
                 } else {
                     Utils.errorAndExit("Variable " + leftHandSide.labelIdentifier + " does not exist in the current scope", leftHandSide.position);

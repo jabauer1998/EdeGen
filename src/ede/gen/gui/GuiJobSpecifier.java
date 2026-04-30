@@ -43,6 +43,7 @@ public class GuiJobSpecifier extends JPanel {
     private String previousJobType;
     private JTextArea codeHeaderText;
     private JTextArea codeFooterText;
+    private JLabel dragHandle;
 
     public GuiJobSpecifier(String title, Runnable onRemove, GuiGenPanel genPanel) {
         this.jobTitle = title;
@@ -58,6 +59,14 @@ public class GuiJobSpecifier extends JPanel {
 
         JPanel headerBar = new JPanel(new BorderLayout(4, 0));
         headerBar.setOpaque(false);
+
+        dragHandle = new JLabel("⠿");
+        dragHandle.setFont(dragHandle.getFont().deriveFont(Font.BOLD, 16f));
+        dragHandle.setForeground(Color.GRAY);
+        dragHandle.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+        dragHandle.setToolTipText("Drag to reorder");
+        dragHandle.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 6));
+        headerBar.add(dragHandle, BorderLayout.WEST);
 
         jobTypeDropdown = new JComboBox<String>(JOB_TYPES);
         jobTypeDropdown.setToolTipText("Select job type");
@@ -706,6 +715,10 @@ public class GuiJobSpecifier extends JPanel {
         if (genPanel != null && "Java Job".equals(getSelectedJobType())) {
             genPanel.updateJavaTabTitle(this);
         }
+    }
+
+    JLabel getDragHandle() {
+        return dragHandle;
     }
 
     public String getText() {
