@@ -61,10 +61,10 @@ public class GuiJobSpecifier extends JPanel {
         JPanel headerBar = new JPanel(new BorderLayout(4, 0));
         headerBar.setOpaque(false);
 
-        dragHandle = new JLabel("⠿");
+        dragHandle = new JLabel("\u2195");
         dragHandle.setFont(dragHandle.getFont().deriveFont(Font.BOLD, 16f));
         dragHandle.setForeground(Color.GRAY);
-        dragHandle.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+        dragHandle.setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
         dragHandle.setToolTipText("Drag to reorder");
         dragHandle.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 6));
         headerBar.add(dragHandle, BorderLayout.WEST);
