@@ -1,6 +1,7 @@
 package ede.gen.gui;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -47,6 +48,10 @@ public class GuiMachineSpecifier extends JPanel{
         this.log = log;
         this.genPanel = genPanel;
         this.setLayout(new BorderLayout());
+
+        TitledBorder outerBorder = new TitledBorder("Ede Machine Specification");
+        outerBorder.setTitleColor(Color.BLACK);
+        setBorder(outerBorder);
 
         JPanel topSection = new JPanel();
         topSection.setLayout(new BoxLayout(topSection, BoxLayout.Y_AXIS));
