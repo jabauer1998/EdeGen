@@ -28,7 +28,7 @@ public class GuiMachineSpecifier extends JPanel{
     private GuiEdeLog log;
     private JPanel ioListPanel;
     private ArrayList<IoSectionEntry> ioSections;
-    private GuiGenPanel genPanel;
+    private GuiGenFrame genPanel;
     private JFrame activeEdeFrame;
 
     private static class IoSectionEntry {
@@ -47,7 +47,7 @@ public class GuiMachineSpecifier extends JPanel{
         }
     }
     
-    public GuiMachineSpecifier(double width, double height, GuiJobSpecifierList jobList, GuiEdeLog log, GuiGenPanel genPanel){
+    public GuiMachineSpecifier(double width, double height, GuiJobSpecifierList jobList, GuiEdeLog log, GuiGenFrame genPanel){
         this.jobList = jobList;
         this.log = log;
         this.genPanel = genPanel;

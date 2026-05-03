@@ -16,14 +16,14 @@ import ede.stl.ast.BlockingAssignment;
 import ede.stl.ast.SystemTaskStatement;
 import ede.stl.ast.TaskStatement;
 import ede.stl.compiler.VerilogToJavaGen;
-import ede.gen.gui.GuiGenPanel;
+import ede.gen.gui.GuiGenFrame;
 
 public class VerilogToEdeGen extends VerilogToJavaGen{
-    private GuiGenPanel gen;
+    private GuiGenFrame gen;
     private String standardOutputPane;
     private String standardInputPane;
     
-    public VerilogToEdeGen(int javaVersion, GuiGenPanel gen,  String standardOutputPane, String standardInputPane){
+    public VerilogToEdeGen(int javaVersion, GuiGenFrame gen,  String standardOutputPane, String standardInputPane){
         super(javaVersion);
         this.gen = gen;
         this.standardOutputPane = standardOutputPane;

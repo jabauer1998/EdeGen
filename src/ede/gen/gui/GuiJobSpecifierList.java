@@ -13,13 +13,13 @@ public class GuiJobSpecifierList extends JPanel {
     private ArrayList<GuiJobSpecifier> jobSpecifiers;
     private int jobCounter;
     private JScrollPane scrollPane;
-    private GuiGenPanel genPanel;
+    private GuiGenFrame genPanel;
 
     private int dragSourceIdx = -1;
     private int dropTargetIdx = -1;
     private GuiJobSpecifier draggingSpec = null;
 
-    public GuiJobSpecifierList(double width, double height, GuiGenPanel genPanel) {
+    public GuiJobSpecifierList(double width, double height, GuiGenFrame genPanel) {
         this.genPanel = genPanel;
         jobSpecifiers = new ArrayList<GuiJobSpecifier>();
         jobCounter = 0;

@@ -40,13 +40,13 @@ public class GuiJobSpecifier extends JPanel {
     private JPanel exeKeywordPanel;
     private int currentHeight = 300;
     private JSplitPane editorSplitPane;
-    private GuiGenPanel genPanel;
+    private GuiGenFrame genPanel;
     private String previousJobType;
     private JTextArea codeHeaderText;
     private JTextArea codeFooterText;
     private JLabel dragHandle;
 
-    public GuiJobSpecifier(String title, Runnable onRemove, GuiGenPanel genPanel) {
+    public GuiJobSpecifier(String title, Runnable onRemove, GuiGenFrame genPanel) {
         this.jobTitle = title;
         this.collapsed = false;
         this.genPanel = genPanel;

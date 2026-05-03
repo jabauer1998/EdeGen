@@ -10,7 +10,7 @@ import ede.stl.ast.*;
 import ede.stl.common.*;
 import ede.stl.parser.*;
 import ede.gen.compiler.VerilogToEdeGen;
-import ede.gen.gui.GuiGenPanel;
+import ede.gen.gui.GuiGenFrame;
 
 public class EdeJarBuilder {
 
@@ -99,7 +99,7 @@ public class EdeJarBuilder {
             List<JobData> jobs,
             String edeStlJarPath,
             File outputDir,
-            GuiGenPanel genPanel,
+            GuiGenFrame genPanel,
             ProgressListener listener
     ) throws Exception {
 

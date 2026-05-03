@@ -6,16 +6,20 @@ import java.awt.event.ActionListener;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class GuiGenPanel extends JPanel {
+public class GuiGenFrame extends JFrame {
+    private JPanel panel;
     private GuiJobSpecifierList jobs;
     private GuiMachineSpecifier machine;
     private GuiEdeLog log;
     private JTabbedPane tabbedPane;
     private Map<GuiJobSpecifier, JPanel> javaTabPanels;
 
-    public GuiGenPanel(double width, double height) {
-        this.setLayout(new BorderLayout());
-        this.setPreferredSize(new Dimension((int) width, (int) height));
+    public GuiGenFrame(double width, double height) {
+        super("Emulator Development Environment Generator Tool");
+
+        this.panel = new JPanel();
+        this.panel.setLayout(new BorderLayout());
+        this.panel.setPreferredSize(new Dimension((int) width, (int) height));
 
         tabbedPane = new JTabbedPane();
         javaTabPanels = new LinkedHashMap<>();
@@ -44,8 +48,14 @@ public class GuiGenPanel extends JPanel {
 
         tabbedPane.addTab("Home", verticalSplit);
 
-        this.add(buildMenuToolbar(), BorderLayout.NORTH);
-        this.add(tabbedPane, BorderLayout.CENTER);
+        this.panel.add(buildMenuToolbar(), BorderLayout.NORTH);
+        this.panel.add(tabbedPane, BorderLayout.CENTER);
+
+        this.setContentPane(this.panel);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setPreferredSize(new Dimension((int) width, (int) height));
+        this.pack();
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     private JMenuBar buildMenuToolbar() {
@@ -79,6 +89,10 @@ public class GuiGenPanel extends JPanel {
         item.setBorderPainted(false);
         item.addActionListener(action);
         return item;
+    }
+
+    public JPanel getPanel() {
+        return panel;
     }
 
     public void addLog(String text){
