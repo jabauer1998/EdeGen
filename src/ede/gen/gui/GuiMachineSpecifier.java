@@ -18,7 +18,7 @@ import ede.gen.utils.EdeConfigManager;
 
 public class GuiMachineSpecifier extends JPanel{
     private GuiEdeGenField title;
-    private GuiEdeGenField ramBytesPerRow;
+    private GuiEdeGenSpinnerField ramBytesPerRow;
     private JComboBox<String> registerFormatDropdown;
     private JComboBox<String> ramAddressFormatDropdown;
     private JComboBox<String> ramFormatDropdown;
@@ -61,7 +61,7 @@ public class GuiMachineSpecifier extends JPanel{
         this.title = new GuiEdeGenField("Title of Ede Environment: ", width, 30);
         this.title.setAlignmentX(LEFT_ALIGNMENT);
         this.title.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        this.ramBytesPerRow = new GuiEdeGenField("Number of Bytes per Row in Ram: ", width, 30);
+        this.ramBytesPerRow = new GuiEdeGenSpinnerField("Number of Bytes per Row in Ram: ", width, 30, 16, 1, 1024, 1);
         this.ramBytesPerRow.setAlignmentX(LEFT_ALIGNMENT);
         this.ramBytesPerRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
 
