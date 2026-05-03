@@ -541,10 +541,6 @@ public class EdeJarBuilder {
         sb.append("            GuiEde guiEde = new GuiEde(edeWidth, edeHeight, ").append(ramBytesPerRow).append(", addrFmt, memFmt);\n");
         sb.append("\n");
 
-        sb.append("            guiEde.AddIoSection(\"IO\", \"StandardOutput\", GuiIO.Editable.READ_ONLY);\n");
-        sb.append("            guiEde.AddIoSection(\"IO\", \"StandardInput\", GuiIO.Editable.EDITABLE);\n");
-        sb.append("            guiEde.AddIoSection(\"Errors\", \"StandardError\", GuiIO.Editable.READ_ONLY);\n");
-
         for (IoSectionData io : ioSections) {
             String editable = io.readOnly ? "GuiIO.Editable.READ_ONLY" : "GuiIO.Editable.EDITABLE";
             sb.append("            guiEde.AddIoSection(\"").append(escapeJava(io.tabName)).append("\", \"")

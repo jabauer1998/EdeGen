@@ -34,12 +34,14 @@ public class GuiMachineSpecifier extends JPanel{
         JTextField sectionTitleField;
         JComboBox<String> editableDropdown;
         JPanel panel;
+        boolean removable;
 
-        IoSectionEntry(JTextField tab, JTextField section, JComboBox<String> editable, JPanel panel) {
+        IoSectionEntry(JTextField tab, JTextField section, JComboBox<String> editable, JPanel panel, boolean removable) {
             this.tabNameField = tab;
             this.sectionTitleField = section;
             this.editableDropdown = editable;
             this.panel = panel;
+            this.removable = removable;
         }
     }
     
@@ -103,6 +105,12 @@ public class GuiMachineSpecifier extends JPanel{
 
         this.ioSections = new ArrayList<>();
 
+        this.ioListPanel = new JPanel();
+        this.ioListPanel.setLayout(new BoxLayout(this.ioListPanel, BoxLayout.Y_AXIS));
+        this.ioListPanel.setAlignmentX(LEFT_ALIGNMENT);
+
+        addDefaultIoSections(width);
+
         JPanel ioHeaderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
         ioHeaderPanel.setAlignmentX(LEFT_ALIGNMENT);
         ioHeaderPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
@@ -112,10 +120,6 @@ public class GuiMachineSpecifier extends JPanel{
         addIoBtn.addActionListener(e -> addIoSectionRow(width));
         ioHeaderPanel.add(ioLabel);
         ioHeaderPanel.add(addIoBtn);
-
-        this.ioListPanel = new JPanel();
-        this.ioListPanel.setLayout(new BoxLayout(this.ioListPanel, BoxLayout.Y_AXIS));
-        this.ioListPanel.setAlignmentX(LEFT_ALIGNMENT);
 
         JScrollPane ioScroll = new JScrollPane(this.ioListPanel);
         ioScroll.setBorder(BorderFactory.createLineBorder(Color.GRAY));
@@ -149,6 +153,7 @@ public class GuiMachineSpecifier extends JPanel{
             config.machine.ramFormat = (String) ramFormatDropdown.getSelectedItem();
 
             for (IoSectionEntry entry : ioSections) {
+                if (!entry.removable) continue;
                 EdeConfigManager.IoSectionConfig io = new EdeConfigManager.IoSectionConfig();
                 io.tabName = entry.tabNameField.getText().trim();
                 io.sectionTitle = entry.sectionTitleField.getText().trim();
@@ -203,10 +208,16 @@ public class GuiMachineSpecifier extends JPanel{
             ramAddressFormatDropdown.setSelectedItem(config.machine.ramAddressFormat);
             ramFormatDropdown.setSelectedItem(config.machine.ramFormat);
 
-            ioSections.clear();
-            ioListPanel.removeAll();
+            for (java.util.Iterator<IoSectionEntry> it = ioSections.iterator(); it.hasNext();) {
+                IoSectionEntry entry = it.next();
+                if (entry.removable) {
+                    ioListPanel.remove(entry.panel);
+                    it.remove();
+                }
+            }
             double w = getWidth() > 0 ? getWidth() : 600;
             for (EdeConfigManager.IoSectionConfig io : config.machine.ioSections) {
+                if (isDefaultIoSection(io.tabName, io.sectionTitle)) continue;
                 addIoSectionRowWithValues(w, io.tabName, io.sectionTitle, io.readOnly);
             }
             ioListPanel.revalidate();
@@ -226,7 +237,25 @@ public class GuiMachineSpecifier extends JPanel{
         }
     }
 
+    private boolean isDefaultIoSection(String tabName, String sectionTitle) {
+        String t = tabName == null ? "" : tabName.trim();
+        String s = sectionTitle == null ? "" : sectionTitle.trim();
+        return ("Errors".equals(t) && "StandardError".equals(s))
+            || ("IO".equals(t) && "StandardOutput".equals(s))
+            || ("IO".equals(t) && "StandardInput".equals(s));
+    }
+
+    private void addDefaultIoSections(double width) {
+        addIoSectionRowWithValues(width, "Errors", "StandardError", true, false);
+        addIoSectionRowWithValues(width, "IO", "StandardOutput", true, false);
+        addIoSectionRowWithValues(width, "IO", "StandardInput", false, false);
+    }
+
     private void addIoSectionRowWithValues(double width, String tabName, String sectionTitle, boolean readOnly) {
+        addIoSectionRowWithValues(width, tabName, sectionTitle, readOnly, true);
+    }
+
+    private void addIoSectionRowWithValues(double width, String tabName, String sectionTitle, boolean readOnly, boolean removable) {
         JPanel row = new JPanel();
         row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
         row.setAlignmentX(LEFT_ALIGNMENT);
@@ -249,17 +278,7 @@ public class GuiMachineSpecifier extends JPanel{
         editDropdown.setMaximumSize(new Dimension(120, 25));
         editDropdown.setSelectedItem(readOnly ? "Read Only" : "Editable");
 
-        JButton removeBtn = new JButton("X");
-        removeBtn.setMargin(new Insets(0, 4, 0, 4));
-
-        IoSectionEntry entry = new IoSectionEntry(tabField, sectionField, editDropdown, row);
-
-        removeBtn.addActionListener(e -> {
-            ioSections.remove(entry);
-            ioListPanel.remove(row);
-            ioListPanel.revalidate();
-            ioListPanel.repaint();
-        });
+        IoSectionEntry entry = new IoSectionEntry(tabField, sectionField, editDropdown, row, removable);
 
         row.add(tabLabel);
         row.add(tabField);
@@ -268,55 +287,32 @@ public class GuiMachineSpecifier extends JPanel{
         row.add(editLabel);
         row.add(editDropdown);
         row.add(Box.createHorizontalStrut(4));
-        row.add(removeBtn);
+
+        if (removable) {
+            JButton removeBtn = new JButton("X");
+            removeBtn.setMargin(new Insets(0, 4, 0, 4));
+            removeBtn.addActionListener(e -> {
+                ioSections.remove(entry);
+                ioListPanel.remove(row);
+                ioListPanel.revalidate();
+                ioListPanel.repaint();
+            });
+            row.add(removeBtn);
+        } else {
+            tabField.setEditable(false);
+            sectionField.setEditable(false);
+            editDropdown.setEnabled(false);
+            JLabel lockLabel = new JLabel("\uD83D\uDD12");
+            lockLabel.setToolTipText("Default IO section (cannot be removed)");
+            row.add(lockLabel);
+        }
 
         ioSections.add(entry);
         ioListPanel.add(row);
     }
 
     private void addIoSectionRow(double width) {
-        JPanel row = new JPanel();
-        row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
-        row.setAlignmentX(LEFT_ALIGNMENT);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        row.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
-
-        JLabel tabLabel = new JLabel("Tab: ");
-        JTextField tabField = new JTextField(10);
-        tabField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
-
-        JLabel sectionLabel = new JLabel(" Section Title: ");
-        JTextField sectionField = new JTextField(10);
-        sectionField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
-
-        JLabel editLabel = new JLabel(" ");
-        String[] editOptions = {"Editable", "Read Only"};
-        JComboBox<String> editDropdown = new JComboBox<>(editOptions);
-        editDropdown.setMaximumSize(new Dimension(120, 25));
-
-        JButton removeBtn = new JButton("X");
-        removeBtn.setMargin(new Insets(0, 4, 0, 4));
-
-        IoSectionEntry entry = new IoSectionEntry(tabField, sectionField, editDropdown, row);
-
-        removeBtn.addActionListener(e -> {
-            ioSections.remove(entry);
-            ioListPanel.remove(row);
-            ioListPanel.revalidate();
-            ioListPanel.repaint();
-        });
-
-        row.add(tabLabel);
-        row.add(tabField);
-        row.add(sectionLabel);
-        row.add(sectionField);
-        row.add(editLabel);
-        row.add(editDropdown);
-        row.add(Box.createHorizontalStrut(4));
-        row.add(removeBtn);
-
-        ioSections.add(entry);
-        ioListPanel.add(row);
+        addIoSectionRowWithValues(width, "", "", false, true);
         ioListPanel.revalidate();
         ioListPanel.repaint();
     }
@@ -636,10 +632,6 @@ public class GuiMachineSpecifier extends JPanel{
         log.log("[INFO] Creating GuiEde: title=\"" + edeTitle + "\", bytesPerRow=" + ramBytesPerRowVal);
 
         GuiEde guiEde = new GuiEde(edeWidth, edeHeight, ramBytesPerRowVal, addrFmt, memFmt);
-
-        guiEde.AddIoSection("IO", "StandardOutput", GuiIO.Editable.READ_ONLY);
-        guiEde.AddIoSection("IO", "StandardInput", GuiIO.Editable.EDITABLE);
-        guiEde.AddIoSection("Errors", "StandardError", GuiIO.Editable.READ_ONLY);
 
         for (IoSectionEntry entry : ioSections) {
             String tabName = entry.tabNameField.getText().trim();
