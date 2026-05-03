@@ -17,7 +17,9 @@ import ede.gen.utils.EdeJarBuilder;
 import ede.gen.utils.EdeConfigManager;
 
 public class GuiMachineSpecifier extends JPanel{
-    private GuiEdeGenField title;
+    private JTextField titleField;
+    private JSpinner majorVersionSpinner;
+    private JSpinner minorVersionSpinner;
     private GuiEdeGenSpinnerField ramBytesPerRow;
     private JComboBox<String> registerFormatDropdown;
     private JComboBox<String> ramAddressFormatDropdown;
@@ -58,9 +60,24 @@ public class GuiMachineSpecifier extends JPanel{
         JPanel topSection = new JPanel();
         topSection.setLayout(new BoxLayout(topSection, BoxLayout.Y_AXIS));
 
-        this.title = new GuiEdeGenField("Title of Ede Environment: ", width, 30);
-        this.title.setAlignmentX(LEFT_ALIGNMENT);
-        this.title.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        JPanel titleRow = new JPanel(new GridLayout(2, 3, 6, 2));
+        titleRow.setAlignmentX(LEFT_ALIGNMENT);
+        titleRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+
+        JLabel titleLbl = new JLabel("Title of Ede Environment");
+        JLabel majorLbl = new JLabel("Major");
+        JLabel minorLbl = new JLabel("Minor");
+
+        this.titleField = new JTextField();
+        this.majorVersionSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 9999, 1));
+        this.minorVersionSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9999, 1));
+
+        titleRow.add(titleLbl);
+        titleRow.add(majorLbl);
+        titleRow.add(minorLbl);
+        titleRow.add(this.titleField);
+        titleRow.add(this.majorVersionSpinner);
+        titleRow.add(this.minorVersionSpinner);
         this.ramBytesPerRow = new GuiEdeGenSpinnerField("Number of Bytes per Row in Ram: ", width, 30, 16, 1, 1024, 1);
         this.ramBytesPerRow.setAlignmentX(LEFT_ALIGNMENT);
         this.ramBytesPerRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
@@ -97,7 +114,7 @@ public class GuiMachineSpecifier extends JPanel{
         ramFormatPanel.add(this.ramFormatDropdown);
         ramFormatPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
 
-        topSection.add(title);
+        topSection.add(titleRow);
         topSection.add(ramBytesPerRow);
         topSection.add(registerFormatPanel);
         topSection.add(ramAddressFormatPanel);
@@ -146,7 +163,9 @@ public class GuiMachineSpecifier extends JPanel{
         try {
             EdeConfigManager.EdeConfig config = new EdeConfigManager.EdeConfig();
 
-            config.machine.title = title.getInputText();
+            config.machine.title = titleField.getText();
+            config.machine.majorVersion = ((Number) majorVersionSpinner.getValue()).intValue();
+            config.machine.minorVersion = ((Number) minorVersionSpinner.getValue()).intValue();
             config.machine.ramBytesPerRow = ramBytesPerRow.getInputText();
             config.machine.registerFormat = (String) registerFormatDropdown.getSelectedItem();
             config.machine.ramAddressFormat = (String) ramAddressFormatDropdown.getSelectedItem();
@@ -202,7 +221,9 @@ public class GuiMachineSpecifier extends JPanel{
         try {
             EdeConfigManager.EdeConfig config = EdeConfigManager.load(file);
 
-            title.setInputText(config.machine.title);
+            titleField.setText(config.machine.title);
+            majorVersionSpinner.setValue(Math.max(0, Math.min(9999, config.machine.majorVersion)));
+            minorVersionSpinner.setValue(Math.max(0, Math.min(9999, config.machine.minorVersion)));
             ramBytesPerRow.setInputText(config.machine.ramBytesPerRow);
             registerFormatDropdown.setSelectedItem(config.machine.registerFormat);
             ramAddressFormatDropdown.setSelectedItem(config.machine.ramAddressFormat);
@@ -235,6 +256,18 @@ public class GuiMachineSpecifier extends JPanel{
                 "Failed to load config:\n" + ex.getMessage(),
                 "Load Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private String composeVersionedTitle() {
+        String base = titleField.getText();
+        if (base == null || base.trim().isEmpty()) {
+            base = "Ede Environment";
+        } else {
+            base = base.trim();
+        }
+        int major = ((Number) majorVersionSpinner.getValue()).intValue();
+        int minor = ((Number) minorVersionSpinner.getValue()).intValue();
+        return base + "-" + major + "." + minor;
     }
 
     private boolean isDefaultIoSection(String tabName, String sectionTitle) {
@@ -443,10 +476,7 @@ public class GuiMachineSpecifier extends JPanel{
             return;
         }
 
-        String edeTitle = title.getInputText();
-        if (edeTitle == null || edeTitle.trim().isEmpty()) {
-            edeTitle = "Ede Environment";
-        }
+        String edeTitle = composeVersionedTitle();
 
         int ramBytesPerRowVal = 16;
         try {
@@ -607,10 +637,7 @@ public class GuiMachineSpecifier extends JPanel{
             return;
         }
 
-        String edeTitle = title.getInputText();
-        if (edeTitle == null || edeTitle.trim().isEmpty()) {
-            edeTitle = "Ede Environment";
-        }
+        String edeTitle = composeVersionedTitle();
 
         int ramBytesVal = 256;
 

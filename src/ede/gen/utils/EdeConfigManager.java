@@ -47,6 +47,8 @@ public class EdeConfigManager {
 
     public static class MachineConfig {
         public String title = "";
+        public int majorVersion = 1;
+        public int minorVersion = 0;
         public String ramBytesPerRow = "16";
         public String registerFormat = "Binary";
         public String ramAddressFormat = "Binary";
@@ -70,6 +72,8 @@ public class EdeConfigManager {
         Element machineEl = doc.createElement("Machine");
         root.appendChild(machineEl);
         appendText(doc, machineEl, "Title", config.machine.title);
+        appendText(doc, machineEl, "MajorVersion", String.valueOf(config.machine.majorVersion));
+        appendText(doc, machineEl, "MinorVersion", String.valueOf(config.machine.minorVersion));
         appendText(doc, machineEl, "RamBytesPerRow", config.machine.ramBytesPerRow);
         appendText(doc, machineEl, "RegisterFormat", config.machine.registerFormat);
         appendText(doc, machineEl, "RamAddressFormat", config.machine.ramAddressFormat);
@@ -127,6 +131,8 @@ public class EdeConfigManager {
         Element machineEl = firstChild(root, "Machine");
         if (machineEl != null) {
             config.machine.title = text(machineEl, "Title", "");
+            try { config.machine.majorVersion = Integer.parseInt(text(machineEl, "MajorVersion", "1").trim()); } catch (NumberFormatException e) { config.machine.majorVersion = 1; }
+            try { config.machine.minorVersion = Integer.parseInt(text(machineEl, "MinorVersion", "0").trim()); } catch (NumberFormatException e) { config.machine.minorVersion = 0; }
             config.machine.ramBytesPerRow = text(machineEl, "RamBytesPerRow", "16");
             config.machine.registerFormat = text(machineEl, "RegisterFormat", "Binary");
             config.machine.ramAddressFormat = text(machineEl, "RamAddressFormat", "Binary");
