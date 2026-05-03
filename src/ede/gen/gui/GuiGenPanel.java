@@ -21,8 +21,8 @@ public class GuiGenPanel extends JPanel {
         javaTabPanels = new LinkedHashMap<>();
 
         this.log = new GuiEdeLog();
-        this.jobs = new GuiJobSpecifierList(width / 2, 5 * height / 6, this);
-        this.machine = new GuiMachineSpecifier(width / 2, 5 * height / 6, this.jobs, this.log, this);
+        this.jobs = new GuiJobSpecifierList(width / 2, 2 * height / 3, this);
+        this.machine = new GuiMachineSpecifier(width / 2, 2 * height / 3, this.jobs, this.log, this);
 
         JSplitPane horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, this.jobs, this.machine);
         horizontalSplit.setResizeWeight(0.5);
@@ -38,8 +38,8 @@ public class GuiGenPanel extends JPanel {
         logPanel.add(logScroll, BorderLayout.CENTER);
 
         JSplitPane verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, horizontalSplit, logPanel);
-        verticalSplit.setResizeWeight(0.85);
-        verticalSplit.setDividerLocation((int) (5 * height / 6));
+        verticalSplit.setResizeWeight(2.0 / 3.0);
+        verticalSplit.setDividerLocation((int) (2 * height / 3));
         verticalSplit.setContinuousLayout(true);
 
         tabbedPane.addTab("Home", verticalSplit);
