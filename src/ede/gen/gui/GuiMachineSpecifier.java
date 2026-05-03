@@ -191,6 +191,7 @@ public class GuiMachineSpecifier extends JPanel{
                 job.code = spec.getText();
                 job.keywordFile = spec.getKeywordFilePath();
                 job.jarPaths = spec.getJarPaths();
+                job.jarStrategies = spec.getJarStrategies();
                 job.verilogPath = spec.getVerilogPath();
                 job.verilogInputFile = spec.getVerilogInputFile();
                 job.verilogMainModule = spec.getVerilogMainModule();
@@ -508,6 +509,7 @@ public class GuiMachineSpecifier extends JPanel{
                 jd.code = spec.getText();
                 jd.imports = spec.getImportsText();
                 jd.jarPaths = spec.getJarPaths();
+                jd.jarStrategies = spec.getJarStrategies();
                 jd.keywords = spec.loadKeywords();
                 jd.syntaxHighlighting = spec.isSyntaxHighlightingEnabled();
             } else if ("Verilog Job".equals(jobType)) {

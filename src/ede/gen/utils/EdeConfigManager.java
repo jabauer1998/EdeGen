@@ -39,6 +39,7 @@ public class EdeConfigManager {
         public String code = "";
         public String keywordFile = "";
         public List<String> jarPaths = new ArrayList<>();
+        public List<String> jarStrategies = new ArrayList<>();
         public String verilogPath = "";
         public String verilogInputFile = "";
         public String verilogMainModule = "";
@@ -101,8 +102,13 @@ public class EdeConfigManager {
             appendText(doc, jobEl, "Code", job.code);
             appendText(doc, jobEl, "KeywordFile", job.keywordFile);
             Element jarPathsEl = doc.createElement("JarPaths");
-            for (String jar : job.jarPaths) {
-                appendText(doc, jarPathsEl, "JarPath", jar);
+            for (int j = 0; j < job.jarPaths.size(); j++) {
+                Element jpEl = doc.createElement("JarPath");
+                jpEl.setTextContent(job.jarPaths.get(j) == null ? "" : job.jarPaths.get(j));
+                String strategy = (j < job.jarStrategies.size() && job.jarStrategies.get(j) != null)
+                    ? job.jarStrategies.get(j) : "Bundle";
+                jpEl.setAttribute("strategy", strategy);
+                jarPathsEl.appendChild(jpEl);
             }
             jobEl.appendChild(jarPathsEl);
             appendText(doc, jobEl, "VerilogPath", job.verilogPath);
@@ -173,9 +179,18 @@ public class EdeConfigManager {
                 if (jarPathsEl != null) {
                     NodeList jarList = jarPathsEl.getElementsByTagName("JarPath");
                     for (int j = 0; j < jarList.getLength(); j++) {
-                        String path = jarList.item(j).getTextContent();
+                        org.w3c.dom.Node node = jarList.item(j);
+                        String path = node.getTextContent();
                         if (path != null && !path.trim().isEmpty()) {
                             job.jarPaths.add(path.trim());
+                            String strategy = "Bundle";
+                            if (node instanceof Element) {
+                                String attr = ((Element) node).getAttribute("strategy");
+                                if ("Classpath".equals(attr) || "Bundle".equals(attr)) {
+                                    strategy = attr;
+                                }
+                            }
+                            job.jarStrategies.add(strategy);
                         }
                     }
                 }

@@ -68,6 +68,7 @@ public class EdeJarBuilder {
         public String code;
         public String imports;
         public List<String> jarPaths;
+        public List<String> jarStrategies;
         public String verilogPath;
         public String verilogInputFile;
         public String exePath;
@@ -83,6 +84,7 @@ public class EdeJarBuilder {
             this.jobType = jobType;
             this.jobName = jobName;
             this.jarPaths = new ArrayList<>();
+            this.jarStrategies = new ArrayList<>();
             this.verilogRegisters = new ArrayList<>();
             this.verilogFlags = new ArrayList<>();
             this.verilogMemorySize = -1;
@@ -135,17 +137,20 @@ public class EdeJarBuilder {
             }
         }
 
-        // Pre-count extra JAR entries
+        // Pre-count extra JAR entries (only Bundle-strategy jars contribute output entries)
         int extraCount = 0;
         for (JobData job : jobs) {
-            if (job.jarPaths != null) {
-                for (String jarPath : job.jarPaths) {
-                    try (JarFile extraJar = new JarFile(jarPath)) {
-                        Enumeration<JarEntry> entries = extraJar.entries();
-                        while (entries.hasMoreElements()) {
-                            JarEntry entry = entries.nextElement();
-                            if (!entry.getName().startsWith("META-INF/")) extraCount++;
-                        }
+            if (job.jarPaths == null) continue;
+            for (int ji = 0; ji < job.jarPaths.size(); ji++) {
+                String strategy = (job.jarStrategies != null && ji < job.jarStrategies.size())
+                    ? job.jarStrategies.get(ji) : "Bundle";
+                if (!"Bundle".equals(strategy)) continue;
+                String jarPath = job.jarPaths.get(ji);
+                try (JarFile extraJar = new JarFile(jarPath)) {
+                    Enumeration<JarEntry> entries = extraJar.entries();
+                    while (entries.hasMoreElements()) {
+                        JarEntry entry = entries.nextElement();
+                        if (!entry.getName().startsWith("META-INF/")) extraCount++;
                     }
                 }
             }
@@ -252,6 +257,23 @@ public class EdeJarBuilder {
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
         manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, "EdeMain");
 
+        StringBuilder manifestClassPath = new StringBuilder();
+        for (JobData job : jobs) {
+            if (job.jarPaths == null) continue;
+            for (int i = 0; i < job.jarPaths.size(); i++) {
+                String strategy = (job.jarStrategies != null && i < job.jarStrategies.size())
+                    ? job.jarStrategies.get(i) : "Bundle";
+                if (!"Classpath".equals(strategy)) continue;
+                String jarPath = job.jarPaths.get(i);
+                if (jarPath == null || jarPath.isEmpty()) continue;
+                if (manifestClassPath.length() > 0) manifestClassPath.append(' ');
+                manifestClassPath.append(new File(jarPath).toURI().toString());
+            }
+        }
+        if (manifestClassPath.length() > 0) {
+            manifest.getMainAttributes().put(Attributes.Name.CLASS_PATH, manifestClassPath.toString());
+        }
+
         Set<String> addedEntries = new HashSet<>();
         try (JarOutputStream jos = new JarOutputStream(new FileOutputStream(outputJar), manifest)) {
 
@@ -294,28 +316,31 @@ public class EdeJarBuilder {
             }
 
             for (JobData job : jobs) {
-                if (job.jarPaths != null) {
-                    for (String jarPath : job.jarPaths) {
-                        try (JarFile extraJar = new JarFile(jarPath)) {
-                            Enumeration<JarEntry> entries = extraJar.entries();
-                            while (entries.hasMoreElements()) {
-                                JarEntry entry = entries.nextElement();
-                                String name = entry.getName();
-                                if (name.startsWith("META-INF/")) continue;
-                                if (addedEntries.contains(name)) continue;
-                                addedEntries.add(name);
-                                jos.putNextEntry(new JarEntry(name));
-                                try (InputStream is = extraJar.getInputStream(entry)) {
-                                    byte[] buffer = new byte[4096];
-                                    int len;
-                                    while ((len = is.read(buffer)) > 0) {
-                                        jos.write(buffer, 0, len);
-                                    }
+                if (job.jarPaths == null) continue;
+                for (int ji = 0; ji < job.jarPaths.size(); ji++) {
+                    String strategy = (job.jarStrategies != null && ji < job.jarStrategies.size())
+                        ? job.jarStrategies.get(ji) : "Bundle";
+                    if (!"Bundle".equals(strategy)) continue;
+                    String jarPath = job.jarPaths.get(ji);
+                    try (JarFile extraJar = new JarFile(jarPath)) {
+                        Enumeration<JarEntry> entries = extraJar.entries();
+                        while (entries.hasMoreElements()) {
+                            JarEntry entry = entries.nextElement();
+                            String name = entry.getName();
+                            if (name.startsWith("META-INF/")) continue;
+                            if (addedEntries.contains(name)) continue;
+                            addedEntries.add(name);
+                            jos.putNextEntry(new JarEntry(name));
+                            try (InputStream is = extraJar.getInputStream(entry)) {
+                                byte[] buffer = new byte[4096];
+                                int len;
+                                while ((len = is.read(buffer)) > 0) {
+                                    jos.write(buffer, 0, len);
                                 }
-                                jos.closeEntry();
-                                current[0]++;
-                                report(listener, current[0], total[0], "Writing: " + name);
                             }
+                            jos.closeEntry();
+                            current[0]++;
+                            report(listener, current[0], total[0], "Writing: " + name);
                         }
                     }
                 }

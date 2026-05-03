@@ -242,7 +242,7 @@ public class GuiJobSpecifierList extends JPanel {
             holder[0].setImportsText(cfg.imports);
             holder[0].setText(cfg.code);
             holder[0].setKeywordFilePath(cfg.keywordFile);
-            holder[0].setJarPaths(cfg.jarPaths);
+            holder[0].setJarPaths(cfg.jarPaths, cfg.jarStrategies);
             holder[0].setVerilogPath(cfg.verilogPath);
             holder[0].setVerilogInputFile(cfg.verilogInputFile);
             holder[0].setVerilogMainModule(cfg.verilogMainModule);

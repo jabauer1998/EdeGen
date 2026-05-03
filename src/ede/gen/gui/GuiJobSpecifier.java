@@ -2,6 +2,8 @@ package ede.gen.gui;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import javax.swing.text.*;
 import javax.swing.event.*;
 import java.awt.*;
@@ -31,8 +33,11 @@ public class GuiJobSpecifier extends JPanel {
     private JTextField verilogInputField;
     private JComboBox<String> verilogMainModuleCombo;
     private DefaultComboBoxModel<String> verilogMainModuleModel;
-    private DefaultListModel<String> jarListModel;
-    private JList<String> jarList;
+    public static final String JAR_STRATEGY_BUNDLE = "Bundle";
+    public static final String JAR_STRATEGY_CLASSPATH = "Classpath";
+    private static final String[] JAR_STRATEGIES = {JAR_STRATEGY_BUNDLE, JAR_STRATEGY_CLASSPATH};
+    private DefaultTableModel jarTableModel;
+    private JTable jarTable;
     private JCheckBox syntaxCheckbox;
     private JTextField javaKeywordFileField;
     private JPanel javaKeywordPanel;
@@ -311,12 +316,22 @@ public class GuiJobSpecifier extends JPanel {
 
         JPanel jarPanel = new JPanel(new BorderLayout(4, 4));
         jarPanel.setBorder(BorderFactory.createTitledBorder("Classpath JARs"));
-        jarListModel = new DefaultListModel<>();
-        jarList = new JList<>(jarListModel);
-        jarList.setVisibleRowCount(3);
-        JScrollPane jarScrollPane = new JScrollPane(jarList);
-        jarScrollPane.setPreferredSize(new Dimension(400, 60));
-        jarScrollPane.setMinimumSize(new Dimension(100, 30));
+        jarTableModel = new DefaultTableModel(new Object[]{"Jar Path", "Link Strategy"}, 0) {
+            public boolean isCellEditable(int row, int col) { return col == 1; }
+            public Class<?> getColumnClass(int col) { return String.class; }
+        };
+        jarTable = new JTable(jarTableModel);
+        jarTable.setRowHeight(22);
+        jarTable.getTableHeader().setReorderingAllowed(false);
+        jarTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        TableColumn strategyCol = jarTable.getColumnModel().getColumn(1);
+        JComboBox<String> strategyCombo = new JComboBox<>(JAR_STRATEGIES);
+        strategyCol.setCellEditor(new DefaultCellEditor(strategyCombo));
+        strategyCol.setPreferredWidth(110);
+        strategyCol.setMaxWidth(160);
+        JScrollPane jarScrollPane = new JScrollPane(jarTable);
+        jarScrollPane.setPreferredSize(new Dimension(400, 80));
+        jarScrollPane.setMinimumSize(new Dimension(100, 50));
         JPanel jarButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         JButton addJarBtn = new JButton("Add JAR...");
         addJarBtn.addActionListener(new ActionListener() {
@@ -332,8 +347,8 @@ public class GuiJobSpecifier extends JPanel {
                 if (result == JFileChooser.APPROVE_OPTION) {
                     for (File f : chooser.getSelectedFiles()) {
                         String path = f.getAbsolutePath();
-                        if (!jarListModel.contains(path)) {
-                            jarListModel.addElement(path);
+                        if (!containsJarPath(path)) {
+                            jarTableModel.addRow(new Object[]{path, JAR_STRATEGY_BUNDLE});
                         }
                     }
                 }
@@ -342,9 +357,10 @@ public class GuiJobSpecifier extends JPanel {
         JButton removeJarBtn = new JButton("Remove");
         removeJarBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int idx = jarList.getSelectedIndex();
+                if (jarTable.isEditing()) jarTable.getCellEditor().stopCellEditing();
+                int idx = jarTable.getSelectedRow();
                 if (idx >= 0) {
-                    jarListModel.remove(idx);
+                    jarTableModel.removeRow(idx);
                 }
             }
         });
@@ -774,11 +790,35 @@ public class GuiJobSpecifier extends JPanel {
     }
 
     public List<String> getJarPaths() {
+        if (jarTable.isEditing()) jarTable.getCellEditor().stopCellEditing();
         List<String> paths = new ArrayList<>();
-        for (int i = 0; i < jarListModel.size(); i++) {
-            paths.add(jarListModel.getElementAt(i));
+        for (int i = 0; i < jarTableModel.getRowCount(); i++) {
+            Object v = jarTableModel.getValueAt(i, 0);
+            paths.add(v == null ? "" : v.toString());
         }
         return paths;
+    }
+
+    public List<String> getJarStrategies() {
+        if (jarTable.isEditing()) jarTable.getCellEditor().stopCellEditing();
+        List<String> strategies = new ArrayList<>();
+        for (int i = 0; i < jarTableModel.getRowCount(); i++) {
+            Object v = jarTableModel.getValueAt(i, 1);
+            String s = v == null ? JAR_STRATEGY_BUNDLE : v.toString();
+            if (!JAR_STRATEGY_BUNDLE.equals(s) && !JAR_STRATEGY_CLASSPATH.equals(s)) {
+                s = JAR_STRATEGY_BUNDLE;
+            }
+            strategies.add(s);
+        }
+        return strategies;
+    }
+
+    private boolean containsJarPath(String path) {
+        for (int i = 0; i < jarTableModel.getRowCount(); i++) {
+            Object v = jarTableModel.getValueAt(i, 0);
+            if (v != null && path.equals(v.toString())) return true;
+        }
+        return false;
     }
 
     public void setJobType(String jobType) {
@@ -869,12 +909,23 @@ public class GuiJobSpecifier extends JPanel {
     }
 
     public void setJarPaths(List<String> paths) {
-        jarListModel.clear();
+        setJarPaths(paths, null);
+    }
+
+    public void setJarPaths(List<String> paths, List<String> strategies) {
+        jarTableModel.setRowCount(0);
         if (paths != null) {
-            for (String p : paths) {
-                if (p != null && !p.trim().isEmpty()) {
-                    jarListModel.addElement(p);
+            for (int i = 0; i < paths.size(); i++) {
+                String p = paths.get(i);
+                if (p == null || p.trim().isEmpty()) continue;
+                String s = JAR_STRATEGY_BUNDLE;
+                if (strategies != null && i < strategies.size() && strategies.get(i) != null) {
+                    String candidate = strategies.get(i);
+                    if (JAR_STRATEGY_CLASSPATH.equals(candidate) || JAR_STRATEGY_BUNDLE.equals(candidate)) {
+                        s = candidate;
+                    }
                 }
+                jarTableModel.addRow(new Object[]{p, s});
             }
         }
     }
