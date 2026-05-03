@@ -29,7 +29,8 @@ public class GuiJobSpecifier extends JPanel {
     private JTextField pathField;
     private JTextField exePathField;
     private JTextField verilogInputField;
-    private JTextField verilogMainModuleField;
+    private JComboBox<String> verilogMainModuleCombo;
+    private DefaultComboBoxModel<String> verilogMainModuleModel;
     private DefaultListModel<String> jarListModel;
     private JList<String> jarList;
     private JCheckBox syntaxCheckbox;
@@ -394,6 +395,7 @@ public class GuiJobSpecifier extends JPanel {
                 int result = chooser.showOpenDialog(GuiJobSpecifier.this);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     pathField.setText(chooser.getSelectedFile().getAbsolutePath());
+                    refreshModuleNames();
                 }
             }
         });
@@ -424,10 +426,23 @@ public class GuiJobSpecifier extends JPanel {
         JPanel rootModuleRow = new JPanel(new BorderLayout(4, 0));
         rootModuleRow.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         JLabel rootModuleLabel = new JLabel("Root Module Name: ");
-        verilogMainModuleField = new JTextField();
-        verilogMainModuleField.setToolTipText("Name of the top-level Verilog module");
+        verilogMainModuleModel = new DefaultComboBoxModel<>();
+        verilogMainModuleCombo = new JComboBox<>(verilogMainModuleModel);
+        verilogMainModuleCombo.setToolTipText("Top-level Verilog module (parsed from Schematic Root Path)");
+        JButton refreshModulesBtn = new JButton("Refresh");
+        refreshModulesBtn.setToolTipText("Re-parse Schematic Root Path for module names");
+        refreshModulesBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                refreshModuleNames();
+            }
+        });
         rootModuleRow.add(rootModuleLabel, BorderLayout.WEST);
-        rootModuleRow.add(verilogMainModuleField, BorderLayout.CENTER);
+        rootModuleRow.add(verilogMainModuleCombo, BorderLayout.CENTER);
+        rootModuleRow.add(refreshModulesBtn, BorderLayout.EAST);
+
+        pathField.addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent e) { refreshModuleNames(); }
+        });
 
         JPanel verilogFieldsPanel = new JPanel();
         verilogFieldsPanel.setLayout(new BoxLayout(verilogFieldsPanel, BoxLayout.Y_AXIS));
@@ -746,7 +761,8 @@ public class GuiJobSpecifier extends JPanel {
     }
 
     public String getVerilogMainModule() {
-        return verilogMainModuleField.getText().trim();
+        Object sel = verilogMainModuleCombo.getSelectedItem();
+        return sel == null ? "" : sel.toString().trim();
     }
 
     public String getExePath() {
@@ -793,7 +809,54 @@ public class GuiJobSpecifier extends JPanel {
     }
 
     public void setVerilogMainModule(String name) {
-        verilogMainModuleField.setText(name);
+        refreshModuleNames();
+        if (name != null && !name.isEmpty()) {
+            boolean found = false;
+            for (int i = 0; i < verilogMainModuleModel.getSize(); i++) {
+                if (name.equals(verilogMainModuleModel.getElementAt(i))) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                verilogMainModuleModel.addElement(name);
+            }
+            verilogMainModuleCombo.setSelectedItem(name);
+        }
+    }
+
+    private void refreshModuleNames() {
+        String path = pathField.getText().trim();
+        Object previous = verilogMainModuleCombo.getSelectedItem();
+        if (path.isEmpty()) {
+            verilogMainModuleModel.removeAllElements();
+            return;
+        }
+        java.io.File f = new java.io.File(path);
+        if (!f.isFile()) {
+            verilogMainModuleModel.removeAllElements();
+            if (genPanel != null) {
+                genPanel.addLog("[ERROR] Cannot parse Verilog modules: \"" + path + "\" is not a file.");
+            }
+            return;
+        }
+        try {
+            java.util.List<String> names = ede.gen.utils.EdeJarBuilder.getModuleNamesFromFile(path);
+            verilogMainModuleModel.removeAllElements();
+            for (String n : names) {
+                verilogMainModuleModel.addElement(n);
+            }
+            if (previous != null && names.contains(previous.toString())) {
+                verilogMainModuleCombo.setSelectedItem(previous);
+            } else if (!names.isEmpty()) {
+                verilogMainModuleCombo.setSelectedIndex(0);
+            }
+        } catch (Exception ex) {
+            verilogMainModuleModel.removeAllElements();
+            if (genPanel != null) {
+                genPanel.addLog("[ERROR] Failed to parse Verilog file \"" + path + "\": " + ex.getMessage());
+            }
+        }
     }
 
     public void setExePath(String path) {
