@@ -80,7 +80,15 @@ public class GuiGenFrame extends JFrame {
         configMenu.add(linkItem("Load Config", e -> machine.loadConfig()));
         menuBar.add(configMenu);
 
+        JMenu helpMenu = new JMenu("Help");
+        helpMenu.add(linkItem("Help With EdeGen", e -> showHelpDialog()));
+        menuBar.add(helpMenu);
+
         return menuBar;
+    }
+
+    private void showHelpDialog() {
+        new GuiHelpDialog(this).setVisible(true);
     }
 
     private JMenuItem linkItem(String text, ActionListener action) {
