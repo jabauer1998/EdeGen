@@ -447,8 +447,8 @@ public class GuiJobSpecifier extends JPanel {
         JPanel verilogFieldsPanel = new JPanel();
         verilogFieldsPanel.setLayout(new BoxLayout(verilogFieldsPanel, BoxLayout.Y_AXIS));
         verilogFieldsPanel.add(pathRow);
-        verilogFieldsPanel.add(inputFileRow);
         verilogFieldsPanel.add(rootModuleRow);
+        verilogFieldsPanel.add(inputFileRow);
         verilogPanel.add(verilogFieldsPanel, BorderLayout.NORTH);
 
         exePanel = new JPanel(new BorderLayout());
