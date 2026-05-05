@@ -117,7 +117,7 @@ The EdeStl is broken down into several sub components and sub directories.
 
 1) To get started install git and if you have git clone the repository like so
     ```
-    git clone https://github.com/jabauer1998/EdeStl
+    git clone https://github.com/jabauer1998/EdeGen.git
     ```
 
 2) After that change directory into the parent directory called EdeGen.
@@ -140,14 +140,14 @@ The EdeStl is broken down into several sub components and sub directories.
 
 6) To run the sample demo run the follwing command:
 
-    For windows users:
+    Run as standard application:
     ```
-    ./build/WindowsBuild.ps1 run
+    ./bin/EdeGen.jar
     ```
 
-    For Linux or Mac users run:
+    Run as Java application:
     ```
-    ./build/LinuxBuild.sh run
+    java -jar ./bin/EdeGen.jar
     ```
 
 ### Prerequisites
