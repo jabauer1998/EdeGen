@@ -37,7 +37,7 @@
 <h3 align="center">Emulator Development Environment Standard Library</h3>
 
   <p align="center">
-    The Emulator Development Environment tool or the EdeGen tool for short is designed to utilize the EdeStl library and create an Ede Instance. IF you are not familiar with what an ede instance is follow the link to the <a href=""https://github.com/jabauer1998/EdeStl">EdeStl</a> repo. The user can utilize the tool to specify atrributes of the generated ede like the format of the Registers, Addresses and how many bytes are shown in one row of memory. The EdeGen also allows the user to specify Jobs which serve as translation steps of a program <a href="https://github.com/jabauer1998/EdeGen">Emulator Development Environment Generator Tool</a> repository.
+    The Emulator Development Environment tool or the EdeGen tool for short is designed to utilize the EdeStl library and create an Ede Instance. IF you are not familiar with what an ede instance is follow the link to the <a href=""https://github.com/jabauer1998/EdeStl">EdeStl</a> repo. The user can utilize the tool to specify atrributes of the generated ede like the format of the Registers, Addresses and how many bytes are shown in one row of memory. The EdeGen also allows the user to specify Jobs which serve as translation steps of a program.
     <br />
     <a href="https://github.com/jabauer1998/EdeStl"><strong>Explore the docs »</strong></a>
     <br />
